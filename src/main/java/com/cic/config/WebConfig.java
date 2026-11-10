@@ -1,7 +1,6 @@
 package com.cic.config;
 
 import java.time.Duration;
-import java.util.Locale;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,21 +12,20 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 /**
  * Configuration web commune : choix de la langue (français par défaut, arabe).
- * La langue se change avec le paramètre {@code ?lang=fr|ar} et est mémorisée dans un cookie.
+ * La langue se change avec le paramètre {@code ?lang=fr|ar} et est mémorisée dans un cookie ;
+ * toute autre langue est ramenée au français.
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    static final Locale FRANCAIS = Locale.FRENCH;
-
     @Bean
     public LocaleResolver localeResolver() {
         CookieLocaleResolver resolver = new CookieLocaleResolver("cic_langue");
-        resolver.setDefaultLocale(FRANCAIS);
+        resolver.setDefaultLocale(LanguesLocaleResolver.FRANCAIS);
         resolver.setCookieMaxAge(Duration.ofDays(365));
         resolver.setCookieHttpOnly(true);
         resolver.setCookieSameSite("Lax");
-        return resolver;
+        return new LanguesLocaleResolver(resolver);
     }
 
     @Bean
