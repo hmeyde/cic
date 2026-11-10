@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{accueil.titre-page}">CIC — Équipez-vous, payez avec votre salaire</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+
+    <section class="accroche">
+        <div class="conteneur">
+            <h1 class="accroche__titre" th:text="#{accueil.accroche.titre}">Équipez-vous aujourd'hui, payez avec votre salaire</h1>
+            <p class="accroche__texte" th:text="#{accueil.accroche.texte}">Téléphones et électroménager à crédit pour les salariés.</p>
+            <div class="actions">
+                <a class="bouton bouton--principal" th:href="@{/inscription}" th:text="#{accueil.action.inscription}">Je m'inscris</a>
+                <a class="bouton bouton--secondaire" href="#comment-ca-marche" th:text="#{accueil.action.comment}">Comment ça marche ?</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section conteneur" id="comment-ca-marche" aria-labelledby="titre-etapes">
+        <h2 id="titre-etapes" th:text="#{accueil.etapes.titre}">Comment ça marche ?</h2>
+        <ol class="etapes">
+            <li class="carte etape">
+                <h3 th:text="#{accueil.etape1.titre}">Choisissez</h3>
+                <p th:text="#{accueil.etape1.texte}">Choisissez un produit et simulez vos mensualités.</p>
+            </li>
+            <li class="carte etape">
+                <h3 th:text="#{accueil.etape2.titre}">Faites votre demande</h3>
+                <p th:text="#{accueil.etape2.texte}">Envoyez vos justificatifs depuis votre téléphone.</p>
+            </li>
+            <li class="carte etape">
+                <h3 th:text="#{accueil.etape3.titre}">Payez l'apport</h3>
+                <p th:text="#{accueil.etape3.texte}">Payez l'apport par Masrvi et recevez votre produit.</p>
+            </li>
+            <li class="carte etape">
+                <h3 th:text="#{accueil.etape4.titre}">Remboursez</h3>
+                <p th:text="#{accueil.etape4.texte}">Le reste est prélevé en quelques mensualités à chaque salaire.</p>
+            </li>
+        </ol>
+    </section>
+
+    <section class="section conteneur" aria-labelledby="titre-engagements">
+        <h2 id="titre-engagements" th:text="#{accueil.engagements.titre}">Nos engagements</h2>
+        <ul class="engagements">
+            <li class="carte" th:text="#{accueil.engagement1}">Aucun intérêt : notre marge est fixée et connue avant la signature.</li>
+            <li class="carte" th:text="#{accueil.engagement2}">Aucune pénalité : le prix ne change jamais après la signature.</li>
+            <li class="carte" th:text="#{accueil.engagement3}">Des mensualités adaptées à votre salaire.</li>
+        </ul>
+    </section>
+
+</main>
+</body>
+</html>

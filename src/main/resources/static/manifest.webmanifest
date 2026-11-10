@@ -1,0 +1,15 @@
+{
+  "name": "CIC — Crédit Instantané à la Consommation",
+  "short_name": "CIC",
+  "description": "Téléphones et électroménager à crédit, remboursés sur le salaire, sans intérêt.",
+  "lang": "fr",
+  "dir": "auto",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b6e4f",
+  "icons": [
+    { "src": "/img/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

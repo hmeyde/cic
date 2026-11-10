@@ -3,6 +3,10 @@ spring:
     name: cic
   profiles:
     active: dev        # surchargé par SPRING_PROFILES_ACTIVE en production
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
   jpa:
     open-in-view: false
     properties:
@@ -20,3 +24,7 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+server:
+  mime-mappings:
+    webmanifest: application/manifest+json

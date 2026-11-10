@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="entete" class="entete">
+    <div class="entete__barre conteneur">
+        <a class="marque" th:href="@{/}" th:attr="aria-label=#{layout.retour-accueil}">
+            <img th:src="@{/img/icone.svg}" alt="" width="32" height="32">
+            <span class="marque__nom" th:text="#{app.nom}">CIC</span>
+        </a>
+        <nav class="entete__nav" th:attr="aria-label=#{layout.navigation}">
+            <a th:if="${#locale.language == 'ar'}" class="langue" th:href="@{''(lang='fr')}"
+               lang="fr" hreflang="fr">Français</a>
+            <a th:unless="${#locale.language == 'ar'}" class="langue" th:href="@{''(lang='ar')}"
+               lang="ar" hreflang="ar">العربية</a>
+        </nav>
+    </div>
+</header>
+</body>
+</html>

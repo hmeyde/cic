@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="pied" class="pied">
+    <div class="conteneur">
+        <p class="pied__slogan" th:text="#{pied.slogan}">Achat à crédit sans intérêt, remboursé sur votre salaire.</p>
+        <nav class="pied__liens" th:attr="aria-label=#{pied.navigation}">
+            <a th:href="@{/bo/login}" th:text="#{pied.espace-equipe}">Espace équipe</a>
+        </nav>
+        <p class="pied__mentions">
+            <span th:text="#{app.nom-complet}">CIC</span>
+        </p>
+    </div>
+</footer>
+</body>
+</html>
