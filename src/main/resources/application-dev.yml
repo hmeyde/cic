@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cic
+    username: cic
+    password: cic
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    com.cic: DEBUG
+    org.springframework.security: INFO
+    org.flywaydb: INFO
