@@ -30,3 +30,7 @@ spring-shell.log
 *.env
 application-prod.properties
 application-secret*.properties
+
+
+#
+.prompts/
