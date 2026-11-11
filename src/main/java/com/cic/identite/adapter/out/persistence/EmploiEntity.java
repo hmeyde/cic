@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import com.cic.identite.domain.ModeRemboursement;
 import com.cic.identite.domain.TypeContrat;
 
 /** Le client est référencé par identifiant (clé étrangère en base, sans relation JPA). */
@@ -50,12 +51,16 @@ class EmploiEntity {
     @Column(name = "salaire_domicilie_bmci", nullable = false)
     private boolean salaireDomicilieBmci;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mode_remboursement", nullable = false, length = 20)
+    private ModeRemboursement modeRemboursement;
+
     protected EmploiEntity() {
     }
 
     EmploiEntity(UUID id, UUID clientId, String employeur, TypeContrat typeContrat, LocalDate dateDebut,
             LocalDate dateFin, BigDecimal salaireNet, short jourPaie, boolean salaireVerseSurCompte,
-            boolean salaireDomicilieBmci) {
+            boolean salaireDomicilieBmci, ModeRemboursement modeRemboursement) {
         this.id = id;
         this.clientId = clientId;
         this.employeur = employeur;
@@ -66,6 +71,7 @@ class EmploiEntity {
         this.jourPaie = jourPaie;
         this.salaireVerseSurCompte = salaireVerseSurCompte;
         this.salaireDomicilieBmci = salaireDomicilieBmci;
+        this.modeRemboursement = modeRemboursement;
     }
 
     UUID getId() {
@@ -102,6 +108,10 @@ class EmploiEntity {
 
     boolean isSalaireVerseSurCompte() {
         return salaireVerseSurCompte;
+    }
+
+    ModeRemboursement getModeRemboursement() {
+        return modeRemboursement;
     }
 
     boolean isSalaireDomicilieBmci() {

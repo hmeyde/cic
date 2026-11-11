@@ -13,10 +13,12 @@ import com.cic.commun.domain.Montant;
  * <p>Un client a un seul emploi enregistré (son emploi actuel), référencé par l'identifiant
  * du client. La date de fin est obligatoire pour un CDD et interdite sinon. Le jour de paie
  * (1 à 31) fixe la date des échéances ; un 31 tombe au dernier jour des mois plus courts.
+ * Le mode de remboursement doit être cohérent avec le versement du salaire : une domiciliation
+ * BMCI suppose un salaire domicilié à la BMCI, un virement permanent un salaire versé sur un compte.
  */
 public final class Emploi {
 
-    static final int EMPLOYEUR_LONGUEUR_MAX = 150;
+    public static final int EMPLOYEUR_LONGUEUR_MAX = 150;
 
     private final UUID id;
     private final UUID clientId;
@@ -28,43 +30,47 @@ public final class Emploi {
     private int jourPaie;
     private boolean salaireVerseSurCompte;
     private boolean salaireDomicilieBmci;
+    private ModeRemboursement modeRemboursement;
 
     private Emploi(UUID id, UUID clientId, String employeur, TypeContrat typeContrat, LocalDate dateDebut,
             LocalDate dateFin, Montant salaireNet, int jourPaie, boolean salaireVerseSurCompte,
-            boolean salaireDomicilieBmci) {
+            boolean salaireDomicilieBmci, ModeRemboursement modeRemboursement) {
         this.id = Objects.requireNonNull(id, "id");
         this.clientId = Objects.requireNonNull(clientId, "clientId");
         definir(employeur, typeContrat, dateDebut, dateFin, salaireNet, jourPaie, salaireVerseSurCompte,
-                salaireDomicilieBmci);
+                salaireDomicilieBmci, modeRemboursement);
     }
 
     public static Emploi nouveau(UUID clientId, String employeur, TypeContrat typeContrat, LocalDate dateDebut,
             LocalDate dateFin, Montant salaireNet, int jourPaie, boolean salaireVerseSurCompte,
-            boolean salaireDomicilieBmci) {
+            boolean salaireDomicilieBmci, ModeRemboursement modeRemboursement) {
         return new Emploi(UUID.randomUUID(), clientId, employeur, typeContrat, dateDebut, dateFin, salaireNet,
-                jourPaie, salaireVerseSurCompte, salaireDomicilieBmci);
+                jourPaie, salaireVerseSurCompte, salaireDomicilieBmci, modeRemboursement);
     }
 
     /** Reconstitution depuis le stockage. */
     public static Emploi reconstituer(UUID id, UUID clientId, String employeur, TypeContrat typeContrat,
             LocalDate dateDebut, LocalDate dateFin, Montant salaireNet, int jourPaie,
-            boolean salaireVerseSurCompte, boolean salaireDomicilieBmci) {
+            boolean salaireVerseSurCompte, boolean salaireDomicilieBmci, ModeRemboursement modeRemboursement) {
         return new Emploi(id, clientId, employeur, typeContrat, dateDebut, dateFin, salaireNet, jourPaie,
-                salaireVerseSurCompte, salaireDomicilieBmci);
+                salaireVerseSurCompte, salaireDomicilieBmci, modeRemboursement);
     }
 
     /** Remplace les informations d'emploi (changement d'employeur, de contrat ou de salaire). */
     public void modifier(String employeur, TypeContrat typeContrat, LocalDate dateDebut, LocalDate dateFin,
-            Montant salaireNet, int jourPaie, boolean salaireVerseSurCompte, boolean salaireDomicilieBmci) {
+            Montant salaireNet, int jourPaie, boolean salaireVerseSurCompte, boolean salaireDomicilieBmci,
+            ModeRemboursement modeRemboursement) {
         definir(employeur, typeContrat, dateDebut, dateFin, salaireNet, jourPaie, salaireVerseSurCompte,
-                salaireDomicilieBmci);
+                salaireDomicilieBmci, modeRemboursement);
     }
 
     private void definir(String employeur, TypeContrat typeContrat, LocalDate dateDebut, LocalDate dateFin,
-            Montant salaireNet, int jourPaie, boolean salaireVerseSurCompte, boolean salaireDomicilieBmci) {
+            Montant salaireNet, int jourPaie, boolean salaireVerseSurCompte, boolean salaireDomicilieBmci,
+            ModeRemboursement modeRemboursement) {
         Objects.requireNonNull(typeContrat, "typeContrat");
         Objects.requireNonNull(dateDebut, "dateDebut");
         Objects.requireNonNull(salaireNet, "salaireNet");
+        Objects.requireNonNull(modeRemboursement, "modeRemboursement");
         if (typeContrat == TypeContrat.CDD) {
             if (dateFin == null) {
                 throw new IllegalArgumentException("Un CDD doit avoir une date de fin");
@@ -84,6 +90,12 @@ public final class Emploi {
         if (salaireDomicilieBmci && !salaireVerseSurCompte) {
             throw new IllegalArgumentException("Un salaire domicilié à la BMCI est versé sur un compte");
         }
+        if (modeRemboursement == ModeRemboursement.DOMICILIATION_BMCI && !salaireDomicilieBmci) {
+            throw new IllegalArgumentException("Une domiciliation BMCI suppose un salaire domicilié à la BMCI");
+        }
+        if (modeRemboursement == ModeRemboursement.VIREMENT_PERMANENT && !salaireVerseSurCompte) {
+            throw new IllegalArgumentException("Un virement permanent suppose un salaire versé sur un compte");
+        }
         this.employeur = employeurValide(employeur);
         this.typeContrat = typeContrat;
         this.dateDebut = dateDebut;
@@ -92,6 +104,7 @@ public final class Emploi {
         this.jourPaie = jourPaie;
         this.salaireVerseSurCompte = salaireVerseSurCompte;
         this.salaireDomicilieBmci = salaireDomicilieBmci;
+        this.modeRemboursement = modeRemboursement;
     }
 
     /** Le contrat est en cours à cette date (commencé et, pour un CDD, pas encore terminé). */
@@ -138,6 +151,10 @@ public final class Emploi {
 
     public boolean estSalaireDomicilieBmci() {
         return salaireDomicilieBmci;
+    }
+
+    public ModeRemboursement modeRemboursement() {
+        return modeRemboursement;
     }
 
     private static String employeurValide(String employeur) {

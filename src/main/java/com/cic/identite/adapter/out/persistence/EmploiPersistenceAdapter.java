@@ -24,7 +24,7 @@ class EmploiPersistenceAdapter implements EmploiRepository {
     public void enregistrer(Emploi e) {
         repository.save(new EmploiEntity(e.id(), e.clientId(), e.employeur(), e.typeContrat(), e.dateDebut(),
                 e.dateFin().orElse(null), e.salaireNet().valeur(), (short) e.jourPaie(),
-                e.estSalaireVerseSurCompte(), e.estSalaireDomicilieBmci()));
+                e.estSalaireVerseSurCompte(), e.estSalaireDomicilieBmci(), e.modeRemboursement()));
     }
 
     @Override
@@ -36,6 +36,6 @@ class EmploiPersistenceAdapter implements EmploiRepository {
     private static Emploi versDomaine(EmploiEntity e) {
         return Emploi.reconstituer(e.getId(), e.getClientId(), e.getEmployeur(), e.getTypeContrat(),
                 e.getDateDebut(), e.getDateFin(), Montant.de(e.getSalaireNet()), e.getJourPaie(),
-                e.isSalaireVerseSurCompte(), e.isSalaireDomicilieBmci());
+                e.isSalaireVerseSurCompte(), e.isSalaireDomicilieBmci(), e.getModeRemboursement());
     }
 }
