@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${fournisseurId == null} ? #{bo.fournisseur.creation.titre-page} : #{bo.fournisseur.modification.titre-page}">Fournisseur — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-fournisseur">
+        <p><a th:href="@{/bo/fournisseurs}" th:text="#{bo.fournisseurs.retour}">Retour aux fournisseurs</a></p>
+        <h1 id="titre-fournisseur"
+            th:text="${fournisseurId == null} ? #{bo.fournisseur.creation.titre} : #{bo.fournisseur.modification.titre}">Nouveau fournisseur</h1>
+
+        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}"
+              th:action="${fournisseurId == null} ? @{/bo/fournisseurs} : @{/bo/fournisseurs/{id}(id=${fournisseurId})}">
+            <div class="champ">
+                <label for="nom" th:text="#{bo.fournisseur.nom}">Nom</label>
+                <input id="nom" type="text" th:field="*{nom}" required maxlength="150" autocomplete="off"
+                       th:attr="aria-invalid=${#fields.hasErrors('nom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nom')} ? 'nom-erreur' : null">
+                <p th:if="${#fields.hasErrors('nom')}" id="nom-erreur" class="champ__erreur" th:errors="*{nom}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="remise" th:text="#{bo.fournisseur.remise}">Remise négociée (%)</label>
+                <input id="remise" type="text" th:field="*{remise}" required inputmode="decimal" maxlength="5"
+                       autocomplete="off"
+                       th:attr="aria-invalid=${#fields.hasErrors('remise')} ? 'true' : null,aria-describedby=${#fields.hasErrors('remise')} ? 'remise-aide remise-erreur' : 'remise-aide'">
+                <p id="remise-aide" class="champ__aide texte-doux"
+                   th:text="#{bo.fournisseur.remise.aide(${remiseMin}, ${remiseMax})}">Entre 5 et 10 %.</p>
+                <p th:if="${#fields.hasErrors('remise')}" id="remise-erreur" class="champ__erreur" th:errors="*{remise}">Erreur</p>
+            </div>
+            <div class="champ champ--case" th:if="${fournisseurId != null}">
+                <input id="actif" type="checkbox" th:field="*{actif}">
+                <label for="actif" th:text="#{bo.fournisseur.actif.libelle}">Fournisseur actif</label>
+            </div>
+            <div class="actions-formulaire">
+                <button type="submit" class="bouton bouton--principal" th:text="#{bo.formulaire.enregistrer}">Enregistrer</button>
+                <a class="bouton bouton--contour" th:href="@{/bo/fournisseurs}" th:text="#{bo.formulaire.annuler}">Annuler</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

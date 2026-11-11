@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.fournisseurs.titre-page}">Fournisseurs — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-fournisseurs">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <div class="barre-titre">
+            <h1 id="titre-fournisseurs" th:text="#{bo.fournisseurs.titre}">Fournisseurs</h1>
+            <a class="bouton bouton--principal" th:href="@{/bo/fournisseurs/nouveau}"
+               th:text="#{bo.fournisseurs.nouveau}">Nouveau fournisseur</a>
+        </div>
+
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Fournisseur enregistré.</p>
+
+        <p th:if="${#lists.isEmpty(fournisseurs)}" class="texte-doux" th:text="#{bo.fournisseurs.aucun}">Aucun fournisseur.</p>
+
+        <div th:unless="${#lists.isEmpty(fournisseurs)}" class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                <tr>
+                    <th scope="col" th:text="#{bo.fournisseur.nom}">Nom</th>
+                    <th scope="col" class="nombre" th:text="#{bo.fournisseur.remise}">Remise négociée (%)</th>
+                    <th scope="col" th:text="#{bo.fournisseur.statut}">Statut</th>
+                    <th scope="col"><span class="visuellement-cache" th:text="#{bo.fournisseurs.actions}">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="f : ${fournisseurs}">
+                    <td th:text="${f.nom()}">Mauritel Distribution</td>
+                    <td class="nombre" th:text="${f.remiseNegocieePct().stripTrailingZeros().toPlainString()}">8</td>
+                    <td>
+                        <span class="etiquette etiquette--sans-marge"
+                              th:text="${f.estActif()} ? #{bo.fournisseur.actif} : #{bo.fournisseur.inactif}">Actif</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/bo/fournisseurs/{id}(id=${f.id()})}" th:text="#{bo.fournisseurs.modifier}">Modifier</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

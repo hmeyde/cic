@@ -33,6 +33,12 @@ class FournisseurPersistenceAdapter implements FournisseurRepository {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<Fournisseur> parNom(String nom) {
+        return repository.findByNomSansCasse(nom).map(FournisseurPersistenceAdapter::versDomaine);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Fournisseur> tous() {
         return repository.findAllByOrderByNomAsc().stream().map(FournisseurPersistenceAdapter::versDomaine).toList();
     }

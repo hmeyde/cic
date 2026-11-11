@@ -11,6 +11,9 @@ public interface FournisseurRepository {
 
     Optional<Fournisseur> parId(UUID id);
 
+    /** Fournisseur portant ce nom, sans tenir compte de la casse. */
+    Optional<Fournisseur> parNom(String nom);
+
     /** Tous les fournisseurs, triés par nom. */
     List<Fournisseur> tous();
 }
