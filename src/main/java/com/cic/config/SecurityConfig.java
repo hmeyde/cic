@@ -2,21 +2,29 @@ package com.cic.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
 /**
  * Sécurité web.
  *
+ * <p>Espace client ({@code /client/**}) : connexion par téléphone et code à usage unique, traitée par le
+ * module identite ({@code ConnexionClientController}) ; seules les pages de connexion sont publiques, le
+ * reste exige le rôle CLIENT.
+ *
  * <p>Back-office ({@code /bo/**}) : connexion par identifiant et mot de passe (BCrypt), réservée aux
  * rôles de l'équipe CIC ; la gestion du catalogue ({@code /bo/fournisseurs/**}, {@code /bo/produits/**}) est réservée au rôle ADMIN.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
- * Les autres pages restent publiques en attendant l'espace client (code à usage unique).
- * CSRF actif partout ; en-têtes de sécurité par défaut de Spring Security, plus une politique de référent.
+ *
+ * <p>Les autres pages restent publiques. CSRF actif partout ; en-têtes de sécurité par défaut de
+ * Spring Security, plus une politique de référent.
  */
 @Configuration
 @EnableWebSecurity
@@ -33,6 +41,28 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain espaceClientFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/client", "/client/**")
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/client/connexion", "/client/connexion/**").permitAll()
+                .anyRequest().hasRole("CLIENT")
+            )
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/client/connexion"))
+            )
+            .logout(logout -> logout
+                .logoutUrl("/client/logout")
+                .logoutSuccessUrl("/client/connexion?deconnexion")
+                .permitAll()
+            )
+            .headers(SecurityConfig::entetes);
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
@@ -54,9 +84,11 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/bo/login?deconnexion")
                 .permitAll()
             )
-            .headers(headers -> headers
-                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN))
-            );
+            .headers(SecurityConfig::entetes);
         return http.build();
+    }
+
+    private static void entetes(HeadersConfigurer<HttpSecurity> headers) {
+        headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN));
     }
 }

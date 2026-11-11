@@ -110,11 +110,14 @@ class ParametresTest {
 
     @Test
     void chaque_cle_est_inseree_par_la_migration() throws Exception {
-        String migration;
-        try (var in = getClass().getResourceAsStream("/db/migration/V2__parametre_regles_de_gestion.sql")) {
-            assertThat(in).isNotNull();
-            migration = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        StringBuilder migrations = new StringBuilder();
+        for (String fichier : new String[] {"V2__parametre_regles_de_gestion.sql", "V7__code_connexion_client.sql"}) {
+            try (var in = getClass().getResourceAsStream("/db/migration/" + fichier)) {
+                assertThat(in).as(fichier).isNotNull();
+                migrations.append(new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
         }
+        String migration = migrations.toString();
         for (CleParametre cle : CleParametre.values()) {
             assertThat(migration).contains("('" + cle.cle() + "',");
         }

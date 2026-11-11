@@ -39,7 +39,11 @@ public enum CleParametre {
 
     SCORE_GRILLE_VERSION("score.grille.version", TEXTE),
     SCORE_SEUIL_FAVORABLE("score.seuil.favorable", ENTIER),
-    SCORE_SEUIL_A_EXAMINER("score.seuil.a.examiner", ENTIER);
+    SCORE_SEUIL_A_EXAMINER("score.seuil.a.examiner", ENTIER),
+
+    CONNEXION_CODE_VALIDITE_MINUTES("connexion.code.validite.minutes", ENTIER),
+    CONNEXION_CODE_ESSAIS_MAX("connexion.code.essais.max", ENTIER),
+    CONNEXION_CODE_RENVOI_SECONDES("connexion.code.renvoi.secondes", ENTIER);
 
     private final String cle;
     private final TypeParametre type;

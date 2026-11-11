@@ -7,7 +7,7 @@ import java.util.Map;
 import com.cic.parametrage.domain.CleParametre;
 import com.cic.parametrage.domain.Parametre;
 
-/** Valeurs de départ de CLAUDE.md, identiques à la migration V2. */
+/** Valeurs de départ de CLAUDE.md, identiques aux migrations V2 et V7. */
 public final class ParametresDeDepart {
 
     private static final Map<CleParametre, String> VALEURS = Map.ofEntries(
@@ -34,7 +34,10 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.PERTE_RETARD_JOURS, "180"),
             Map.entry(CleParametre.SCORE_GRILLE_VERSION, "v1"),
             Map.entry(CleParametre.SCORE_SEUIL_FAVORABLE, "70"),
-            Map.entry(CleParametre.SCORE_SEUIL_A_EXAMINER, "50"));
+            Map.entry(CleParametre.SCORE_SEUIL_A_EXAMINER, "50"),
+            Map.entry(CleParametre.CONNEXION_CODE_VALIDITE_MINUTES, "5"),
+            Map.entry(CleParametre.CONNEXION_CODE_ESSAIS_MAX, "5"),
+            Map.entry(CleParametre.CONNEXION_CODE_RENVOI_SECONDES, "60"));
 
     private ParametresDeDepart() {
     }

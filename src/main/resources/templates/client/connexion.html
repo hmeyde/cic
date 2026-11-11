@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.connexion.titre-page}">Connexion — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-connexion">
+        <h1 id="titre-connexion" th:text="#{client.connexion.titre}">Mon espace client</h1>
+        <p class="texte-doux" th:text="#{client.connexion.texte}">Saisissez votre numéro de téléphone : nous vous envoyons un code de connexion par SMS.</p>
+
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert"
+           th:text="#{${erreur}}">Numéro invalide.</p>
+        <p th:if="${param.deconnexion != null}" class="alerte alerte--info" role="status"
+           th:text="#{client.connexion.deconnecte}">Vous êtes déconnecté.</p>
+
+        <form class="formulaire carte" method="post" th:action="@{/client/connexion}">
+            <div class="champ">
+                <label for="telephone" th:text="#{client.connexion.telephone}">Numéro de téléphone</label>
+                <p id="aide-telephone" class="champ__aide texte-doux" th:text="#{client.connexion.telephone.aide}">8 chiffres, par exemple 22 12 34 56.</p>
+                <input id="telephone" name="telephone" type="tel" required maxlength="16"
+                       inputmode="tel" autocomplete="tel-national" aria-describedby="aide-telephone"
+                       th:attr="aria-invalid=${erreur != null} ? 'true' : 'false'" dir="ltr" autofocus>
+            </div>
+            <button type="submit" class="bouton bouton--principal" th:text="#{client.connexion.recevoir-code}">Recevoir mon code</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.code.titre-page}">Code de connexion — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-code">
+        <h1 id="titre-code" th:text="#{client.code.titre}">Saisissez votre code</h1>
+        <p class="texte-doux">
+            <span th:text="#{client.code.texte}">Si ce numéro correspond à un compte CIC, un code à 6 chiffres vient d’être envoyé au</span>
+            <bdi dir="ltr" th:text="${telephoneMasque}">****3456</bdi>.
+        </p>
+
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert"
+           th:text="#{${erreur}(${essaisRestants})}">Code incorrect.</p>
+
+        <form class="formulaire carte" method="post" th:action="@{/client/connexion/code}">
+            <div class="champ">
+                <label for="code" th:text="#{client.code.libelle}">Code reçu par SMS</label>
+                <input id="code" name="code" type="text" required minlength="6" maxlength="6" pattern="[0-9]{6}"
+                       inputmode="numeric" autocomplete="one-time-code" dir="ltr"
+                       th:attr="aria-invalid=${erreur != null} ? 'true' : 'false'" autofocus>
+            </div>
+            <button type="submit" class="bouton bouton--principal" th:text="#{client.code.valider}">Se connecter</button>
+        </form>
+        <p><a th:href="@{/client/connexion}" th:text="#{client.code.autre-numero}">Changer de numéro ou recevoir un nouveau code</a></p>
+    </section>
+</main>
+</body>
+</html>
