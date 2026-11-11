@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.catalogue.titre-page}">Catalogue — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-catalogue">
+        <h1 id="titre-catalogue" th:text="#{client.catalogue.titre}">Catalogue</h1>
+        <p class="texte-doux" th:text="#{client.catalogue.texte}">Choisissez un produit : vous payez un apport, nous vous le remettons, puis vous remboursez le reste par mensualités, sans intérêt ni pénalité.</p>
+
+        <nav class="filtres" th:attr="aria-label=#{client.catalogue.filtrer}">
+            <a class="filtre" th:href="@{/client/catalogue}"
+               th:classappend="${categorieChoisie == ''} ? 'filtre--actif'"
+               th:attr="aria-current=${categorieChoisie == ''} ? 'page'"
+               th:text="#{client.catalogue.tout}">Tout</a>
+            <a th:each="c : ${categories}" class="filtre"
+               th:href="@{/client/catalogue(categorie=${c.name()})}"
+               th:classappend="${categorieChoisie == c.name()} ? 'filtre--actif'"
+               th:attr="aria-current=${categorieChoisie == c.name()} ? 'page'"
+               th:text="#{'bo.produit.categorie.' + ${c.name()}}">Téléphone</a>
+        </nav>
+
+        <p th:if="${#lists.isEmpty(produits)}" class="texte-doux" th:text="#{client.catalogue.aucun}">Aucun produit disponible pour l’instant.</p>
+
+        <ul th:unless="${#lists.isEmpty(produits)}" class="grille-produits">
+            <li th:each="p : ${produits}" class="carte carte-produit">
+                <span class="etiquette etiquette--sans-marge" th:text="#{'bo.produit.categorie.' + ${p.categorie().name()}}">Téléphone</span>
+                <h2 class="carte-produit__titre">
+                    <a th:href="@{/client/catalogue/{id}(id=${p.id()})}" th:text="${p.designation()}">Galaxy A35</a>
+                </h2>
+                <p class="texte-doux carte-produit__marque" th:text="${p.marque()}">Samsung</p>
+                <p class="carte-produit__prix">
+                    <span th:text="#{client.catalogue.prix}">Prix</span>
+                    <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</strong>
+                </p>
+                <p class="texte-doux"
+                   th:text="#{client.catalogue.apercu(${#numbers.formatInteger(p.apportMinimum().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(p.mensualiteIndicative().valeur(), 1, 'WHITESPACE')}, ${p.dureeMaxMois()})}">Apport 8 320 MRU, puis environ 2 080 MRU par mois sur 6 mois</p>
+            </li>
+        </ul>
+
+        <p><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></p>
+    </section>
+</main>
+</body>
+</html>

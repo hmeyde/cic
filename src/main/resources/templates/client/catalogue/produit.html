@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.produit.titre-page(${produit.designation()})}">Produit — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-produit">
+        <p><a th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
+        <span class="etiquette etiquette--sans-marge" th:text="#{'bo.produit.categorie.' + ${produit.categorie().name()}}">Téléphone</span>
+        <h1 id="titre-produit" th:text="${produit.designation()}">Galaxy A35 128 Go</h1>
+        <p class="texte-doux" th:text="${produit.marque()}">Samsung</p>
+
+        <div class="carte">
+            <dl class="conditions">
+                <div>
+                    <dt th:text="#{client.produit.prix}">Prix de vente CIC</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.produit.apport}">Apport minimum à la commande</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.apportMinimum().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.produit.reste}">Reste à rembourser</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.produit.duree}">Durée</dt>
+                    <dd th:text="#{client.produit.duree.valeur(${produit.dureeMinMois()}, ${produit.dureeMaxMois()})}">3 à 6 mois</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.produit.mensualite(${produit.dureeMaxMois()})}">Mensualité indicative sur 6 mois</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.mensualiteIndicative().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                </div>
+            </dl>
+        </div>
+
+        <p class="texte-doux" th:text="#{client.produit.mentions}">Prix fixé à la signature : sans intérêt ni pénalité de retard. Les mensualités sont prélevées le jour de votre paie. Le montant exact dépend de la durée et de l’apport choisis lors de la simulation.</p>
+
+        <p><a class="bouton bouton--contour" th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
+    </section>
+</main>
+</body>
+</html>

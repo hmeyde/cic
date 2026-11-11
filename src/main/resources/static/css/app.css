@@ -266,3 +266,18 @@ html { scroll-behavior: smooth; }
 .liste-pieces { display: grid; gap: .5rem; padding: 0; list-style: none; margin-block: 0 1.5rem; }
 .liste-pieces li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; padding: .75rem; border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); }
 .champ input[type="file"] { min-height: 44px; }
+
+/* Catalogue client */
+.filtres { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem 1.5rem; }
+.filtre { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border: 1px solid var(--couleur-bordure); border-radius: 999px; color: var(--couleur-primaire); text-decoration: none; }
+.filtre--actif { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: #fff; }
+.grille-produits { display: grid; gap: 1rem; padding: 0; margin: 0 0 1.5rem; list-style: none; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+.carte-produit { display: grid; gap: .35rem; align-content: start; }
+.carte-produit p { margin: 0; }
+.carte-produit__titre { margin: .25rem 0 0; font-size: 1.15rem; }
+.carte-produit__prix { display: flex; justify-content: space-between; gap: .5rem; font-size: 1.05rem; }
+.conditions { display: grid; gap: .75rem; margin: 0; }
+.conditions > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; border-block-end: 1px solid var(--couleur-bordure); padding-block-end: .5rem; }
+.conditions > div:last-child { border-block-end: 0; padding-block-end: 0; }
+.conditions dt { color: var(--couleur-texte-doux); }
+.conditions dd { margin: 0; font-weight: 700; }
