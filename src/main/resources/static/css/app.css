@@ -185,7 +185,8 @@ a { color: var(--couleur-primaire); }
 .formulaire { display: grid; gap: 1rem; }
 .champ { display: grid; gap: .35rem; }
 .champ label { font-weight: 600; }
-.champ input {
+.champ input,
+.champ select {
     min-height: 48px;
     padding: .6rem .75rem;
     font: inherit;
@@ -236,6 +237,11 @@ a { color: var(--couleur-primaire); }
 .champ--case input { width: 1.5rem; height: 1.5rem; min-height: 0; accent-color: var(--couleur-primaire); }
 .actions-formulaire { display: flex; flex-wrap: wrap; gap: .75rem; }
 .liens-bo { display: flex; flex-wrap: wrap; gap: .75rem; padding: 0; list-style: none; }
+.actions-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.actions-ligne form { margin: 0; }
+.bouton-lien { min-height: 44px; padding: 0; border: 0; background: none; font: inherit; color: var(--couleur-primaire); text-decoration: underline; cursor: pointer; }
+.champ input[readonly] { background: var(--couleur-fond-doux); }
+.champ select[aria-invalid="true"] { border-color: #b42318; }
 
 /* Tablette et plus */
 @media (min-width: 40rem) {

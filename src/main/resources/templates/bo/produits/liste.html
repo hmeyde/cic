@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.produits.titre-page}">Produits — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-produits">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <div class="barre-titre">
+            <h1 id="titre-produits" th:text="#{bo.produits.titre}">Produits</h1>
+            <a class="bouton bouton--principal" th:href="@{/bo/produits/nouveau}"
+               th:text="#{bo.produits.nouveau}">Nouveau produit</a>
+        </div>
+
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Produit enregistré.</p>
+
+        <p th:if="${#lists.isEmpty(produits)}" class="texte-doux" th:text="#{bo.produits.aucun}">Aucun produit.</p>
+
+        <div th:unless="${#lists.isEmpty(produits)}" class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                <tr>
+                    <th scope="col" th:text="#{bo.produit.reference}">Référence</th>
+                    <th scope="col" th:text="#{bo.produit.designation}">Désignation</th>
+                    <th scope="col" th:text="#{bo.produit.marque}">Marque</th>
+                    <th scope="col" th:text="#{bo.produit.categorie}">Catégorie</th>
+                    <th scope="col" th:text="#{bo.produit.fournisseur}">Fournisseur</th>
+                    <th scope="col" class="nombre" th:text="#{bo.produit.prix-public}">Prix public (MRU)</th>
+                    <th scope="col" th:text="#{bo.produit.statut}">Statut</th>
+                    <th scope="col"><span class="visuellement-cache" th:text="#{bo.produits.actions}">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${produits}">
+                    <td th:text="${p.reference()}">TEL-001</td>
+                    <td th:text="${p.designation()}">Galaxy A15</td>
+                    <td th:text="${p.marque()}">Samsung</td>
+                    <td th:text="#{'bo.produit.categorie.' + ${p.categorie().name()}}">Téléphone</td>
+                    <td th:text="${nomsFournisseurs.get(p.fournisseurId())}">Mauritel Distribution</td>
+                    <td class="nombre" th:text="${#numbers.formatInteger(p.prixPublic().valeur(), 1, 'WHITESPACE')}">20 000</td>
+                    <td>
+                        <span class="etiquette etiquette--sans-marge"
+                              th:text="${p.estDisponible()} ? #{bo.produit.disponible} : #{bo.produit.indisponible}">Disponible</span>
+                    </td>
+                    <td class="actions-ligne">
+                        <a th:href="@{/bo/produits/{id}(id=${p.id()})}" th:text="#{bo.produits.modifier}">Modifier</a>
+                        <form method="post" th:action="@{/bo/produits/{id}/disponibilite(id=${p.id()})}">
+                            <input type="hidden" name="disponible" th:value="${!p.estDisponible()}">
+                            <button type="submit" class="bouton-lien"
+                                    th:text="${p.estDisponible()} ? #{bo.produits.rendre.indisponible} : #{bo.produits.rendre.disponible}">Rendre indisponible</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

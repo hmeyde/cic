@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${produitId == null} ? #{bo.produit.creation.titre-page} : #{bo.produit.modification.titre-page}">Produit — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-produit">
+        <p><a th:href="@{/bo/produits}" th:text="#{bo.produits.retour}">Retour aux produits</a></p>
+        <h1 id="titre-produit"
+            th:text="${produitId == null} ? #{bo.produit.creation.titre} : #{bo.produit.modification.titre}">Nouveau produit</h1>
+
+        <p th:if="${produitId == null and #lists.isEmpty(fournisseurs)}" class="alerte alerte--erreur" role="alert">
+            <span th:text="#{bo.produit.aucun.fournisseur}">Aucun fournisseur actif.</span>
+            <a th:href="@{/bo/fournisseurs/nouveau}" th:text="#{bo.fournisseurs.nouveau}">Nouveau fournisseur</a>
+        </p>
+
+        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}"
+              th:action="${produitId == null} ? @{/bo/produits} : @{/bo/produits/{id}(id=${produitId})}">
+            <div class="champ">
+                <label for="reference" th:text="#{bo.produit.reference}">Référence</label>
+                <input id="reference" type="text" th:field="*{reference}" required maxlength="50" autocomplete="off"
+                       th:readonly="${produitId != null}"
+                       th:attr="aria-invalid=${#fields.hasErrors('reference')} ? 'true' : null,aria-describedby=${#fields.hasErrors('reference')} ? 'reference-aide reference-erreur' : 'reference-aide'">
+                <p id="reference-aide" class="champ__aide texte-doux" th:text="#{bo.produit.reference.aide}">Unique ; elle ne pourra plus être modifiée.</p>
+                <p th:if="${#fields.hasErrors('reference')}" id="reference-erreur" class="champ__erreur" th:errors="*{reference}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="designation" th:text="#{bo.produit.designation}">Désignation</label>
+                <input id="designation" type="text" th:field="*{designation}" required maxlength="200" autocomplete="off"
+                       th:attr="aria-invalid=${#fields.hasErrors('designation')} ? 'true' : null,aria-describedby=${#fields.hasErrors('designation')} ? 'designation-erreur' : null">
+                <p th:if="${#fields.hasErrors('designation')}" id="designation-erreur" class="champ__erreur" th:errors="*{designation}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="marque" th:text="#{bo.produit.marque}">Marque</label>
+                <input id="marque" type="text" th:field="*{marque}" required maxlength="100" autocomplete="off"
+                       th:attr="aria-invalid=${#fields.hasErrors('marque')} ? 'true' : null,aria-describedby=${#fields.hasErrors('marque')} ? 'marque-erreur' : null">
+                <p th:if="${#fields.hasErrors('marque')}" id="marque-erreur" class="champ__erreur" th:errors="*{marque}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="categorie" th:text="#{bo.produit.categorie}">Catégorie</label>
+                <select id="categorie" th:field="*{categorie}" required
+                        th:attr="aria-invalid=${#fields.hasErrors('categorie')} ? 'true' : null,aria-describedby=${#fields.hasErrors('categorie')} ? 'categorie-erreur' : null">
+                    <option value="" th:text="#{bo.formulaire.choisir}">Choisir…</option>
+                    <option th:each="c : ${categories}" th:value="${c.name()}"
+                            th:text="#{'bo.produit.categorie.' + ${c.name()}}">Téléphone</option>
+                </select>
+                <p th:if="${#fields.hasErrors('categorie')}" id="categorie-erreur" class="champ__erreur" th:errors="*{categorie}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="fournisseurId" th:text="#{bo.produit.fournisseur}">Fournisseur</label>
+                <select id="fournisseurId" th:field="*{fournisseurId}" required
+                        th:attr="aria-invalid=${#fields.hasErrors('fournisseurId')} ? 'true' : null,aria-describedby=${#fields.hasErrors('fournisseurId')} ? 'fournisseur-erreur' : null">
+                    <option value="" th:text="#{bo.formulaire.choisir}">Choisir…</option>
+                    <option th:each="f : ${fournisseurs}" th:value="${f.id()}"
+                            th:text="${f.estActif()} ? ${f.nom()} : ${f.nom() + ' (' + #messages.msg('bo.fournisseur.inactif') + ')'}">Mauritel Distribution</option>
+                </select>
+                <p th:if="${#fields.hasErrors('fournisseurId')}" id="fournisseur-erreur" class="champ__erreur" th:errors="*{fournisseurId}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="prixPublic" th:text="#{bo.produit.prix-public}">Prix public (MRU)</label>
+                <input id="prixPublic" type="text" th:field="*{prixPublic}" required inputmode="numeric" maxlength="20"
+                       autocomplete="off"
+                       th:attr="aria-invalid=${#fields.hasErrors('prixPublic')} ? 'true' : null,aria-describedby=${#fields.hasErrors('prixPublic')} ? 'prix-aide prix-erreur' : 'prix-aide'">
+                <p id="prix-aide" class="champ__aide texte-doux" th:text="#{bo.produit.prix-public.aide}">En ouguiyas entières.</p>
+                <p th:if="${#fields.hasErrors('prixPublic')}" id="prix-erreur" class="champ__erreur" th:errors="*{prixPublic}">Erreur</p>
+            </div>
+            <div class="champ champ--case" th:if="${produitId != null}">
+                <input id="disponible" type="checkbox" th:field="*{disponible}">
+                <label for="disponible" th:text="#{bo.produit.disponible.libelle}">Produit disponible</label>
+            </div>
+            <div class="actions-formulaire">
+                <button type="submit" class="bouton bouton--principal" th:text="#{bo.formulaire.enregistrer}">Enregistrer</button>
+                <a class="bouton bouton--contour" th:href="@{/bo/produits}" th:text="#{bo.formulaire.annuler}">Annuler</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

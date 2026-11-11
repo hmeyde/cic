@@ -17,6 +17,7 @@
             <h2 id="titre-menu-bo" th:text="#{bo.menu.titre}">Gestion</h2>
             <ul class="liens-bo">
                 <li><a class="bouton bouton--contour" th:href="@{/bo/fournisseurs}" th:text="#{bo.fournisseurs.titre}">Fournisseurs</a></li>
+                <li><a class="bouton bouton--contour" th:href="@{/bo/produits}" th:text="#{bo.produits.titre}">Produits</a></li>
             </ul>
         </nav>
         <form method="post" th:action="@{/bo/logout}">
