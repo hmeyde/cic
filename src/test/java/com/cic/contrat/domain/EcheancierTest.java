@@ -1,6 +1,7 @@
 package com.cic.contrat.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.cic.commun.domain.ErreurMetier;
+import com.cic.commun.domain.Fraction;
 import com.cic.commun.domain.Montant;
 
 class EcheancierTest {
@@ -106,11 +109,102 @@ class EcheancierTest {
     }
 
     @Test
-    void cdd_refuse_si_la_derniere_echeance_ne_tombe_pas_avant_la_fin_du_contrat() {
+    void cdd_refuse_si_la_derniere_echeance_tombe_le_jour_de_fin_du_contrat() {
         assertThatThrownBy(() -> Echeancier.etablir(Montant.de(12_480), 6, DUREE, DEPART, 25,
                 Optional.of(LocalDate.of(2027, 4, 25))))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOfSatisfying(FinContratDepasseeException.class, ex -> {
+                    assertThat(ex).isInstanceOf(ErreurMetier.class);
+                    assertThat(ex.code()).isEqualTo(FinContratDepasseeException.CODE);
+                    assertThat(ex.derniereEcheance()).isEqualTo(LocalDate.of(2027, 4, 25));
+                    assertThat(ex.finContrat()).isEqualTo(LocalDate.of(2027, 4, 25));
+                })
                 .hasMessageContaining("fin du contrat");
+    }
+
+    @Test
+    void cdd_refuse_si_le_contrat_finit_avant_la_derniere_echeance() {
+        assertThatThrownBy(() -> Echeancier.etablir(Montant.de(12_480), 6, DUREE, DEPART, 25,
+                Optional.of(LocalDate.of(2027, 2, 1))))
+                .isInstanceOf(FinContratDepasseeException.class);
+    }
+
+    @Test
+    void cdd_une_duree_plus_courte_passe_avant_la_fin_du_contrat() {
+        Optional<LocalDate> fin = Optional.of(LocalDate.of(2027, 3, 1));
+
+        assertThatThrownBy(() -> Echeancier.etablir(Montant.de(12_480), 6, DUREE, DEPART, 25, fin))
+                .isInstanceOf(FinContratDepasseeException.class);
+        Echeancier e = Echeancier.etablir(Montant.de(12_480), 3, DUREE, DEPART, 25, fin);
+        assertThat(e.derniere().date()).isEqualTo(LocalDate.of(2027, 1, 25));
+    }
+
+    // Contrôle d'endettement : mensualités CIC ≤ 1/3 du salaire net
+
+    private static final Fraction TIERS = new Fraction(1, 3);
+
+    @Test
+    void endettement_accepte_une_mensualite_egale_au_tiers_du_salaire() {
+        // 2 080 × 3 = 6 240 : exactement un tiers
+        Echeancier e = etablir(12_480, 6);
+
+        assertThatCode(() -> e.verifierEndettement(Montant.de(6_240), Montant.ZERO, TIERS))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void endettement_refuse_une_mensualite_superieure_au_tiers_du_salaire() {
+        Echeancier e = etablir(12_480, 6);
+
+        assertThatThrownBy(() -> e.verifierEndettement(Montant.de(6_239), Montant.ZERO, TIERS))
+                .isInstanceOfSatisfying(EndettementDepasseException.class, ex -> {
+                    assertThat(ex).isInstanceOf(ErreurMetier.class);
+                    assertThat(ex.code()).isEqualTo(EndettementDepasseException.CODE);
+                    assertThat(ex.totalMensualites()).isEqualTo(Montant.de(2_080));
+                    assertThat(ex.salaireNet()).isEqualTo(Montant.de(6_239));
+                    assertThat(ex.partMax()).isEqualTo(TIERS);
+                });
+    }
+
+    @Test
+    void endettement_compte_les_mensualites_cic_deja_en_cours() {
+        Echeancier e = etablir(12_480, 6);
+
+        // 1 000 + 2 080 = 3 080 ; 3 080 × 3 = 9 240
+        assertThatCode(() -> e.verifierEndettement(Montant.de(9_240), Montant.de(1_000), TIERS))
+                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> e.verifierEndettement(Montant.de(9_239), Montant.de(1_000), TIERS))
+                .isInstanceOfSatisfying(EndettementDepasseException.class,
+                        ex -> assertThat(ex.totalMensualites()).isEqualTo(Montant.de(3_080)));
+    }
+
+    @Test
+    void endettement_retient_la_mensualite_la_plus_elevee() {
+        // 12 482 / 6 = 2 080,33 → 2 080 ; la dernière absorbe l'écart : 2 082
+        Echeancier e = etablir(12_482, 6);
+        assertThat(e.mensualite()).isEqualTo(Montant.de(2_080));
+        assertThat(e.mensualiteMaximale()).isEqualTo(Montant.de(2_082));
+
+        assertThatCode(() -> e.verifierEndettement(Montant.de(6_246), Montant.ZERO, TIERS))
+                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> e.verifierEndettement(Montant.de(6_245), Montant.ZERO, TIERS))
+                .isInstanceOf(EndettementDepasseException.class);
+    }
+
+    @Test
+    void endettement_compare_au_tiers_exact_et_non_a_33_pourcent() {
+        // 33 % de 6 240 = 2 059,2 < 2 080 ; le tiers exact admet 2 080
+        Echeancier e = etablir(12_480, 6);
+
+        assertThatCode(() -> e.verifierEndettement(Montant.de(6_240), Montant.ZERO, TIERS))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void endettement_refuse_un_salaire_nul() {
+        Echeancier e = etablir(12_480, 6);
+
+        assertThatThrownBy(() -> e.verifierEndettement(Montant.ZERO, Montant.ZERO, TIERS))
+                .isInstanceOf(EndettementDepasseException.class);
     }
 
     @ParameterizedTest

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.cic.commun.domain.Fraction;
 import com.cic.commun.domain.Montant;
 
 /**
@@ -41,9 +42,9 @@ public record Echeancier(List<EcheancePrevue> echeances) {
      * @param dateDepart      date à partir de laquelle court l'échéancier
      * @param jourPaie        jour du mois où le salaire est versé (1 à 31)
      * @param finContrat      date de fin du contrat de travail (CDD) ; vide pour un CDI ou un fonctionnaire
-     * @throws IllegalArgumentException si la durée sort des bornes, si le jour de paie est invalide,
-     *         si le reste est trop petit pour être réparti ou si la dernière échéance ne tombe
-     *         pas avant la fin du CDD
+     * @throws IllegalArgumentException si la durée sort des bornes, si le jour de paie est invalide
+     *         ou si le reste est trop petit pour être réparti
+     * @throws FinContratDepasseeException si la dernière échéance ne tombe pas avant la fin du CDD
      */
     public static Echeancier etablir(Montant resteAFinancer, int nombreMois, DureeAutorisee duree,
             LocalDate dateDepart, int jourPaie, Optional<LocalDate> finContrat) {
@@ -80,11 +81,35 @@ public record Echeancier(List<EcheancePrevue> echeances) {
         LocalDate derniere = echeances.getLast().date();
         finContrat.ifPresent(fin -> {
             if (!derniere.isBefore(fin)) {
-                throw new IllegalArgumentException("La dernière échéance (" + derniere
-                        + ") doit tomber avant la fin du contrat de travail (" + fin + ")");
+                throw new FinContratDepasseeException(derniere, fin);
             }
         });
         return new Echeancier(echeances);
+    }
+
+    /**
+     * Contrôle d'endettement : la mensualité la plus élevée de cet échéancier, ajoutée aux
+     * mensualités CIC déjà dues par le client, ne doit pas dépasser {@code partMax} de son
+     * salaire net. Comparaison exacte, sans arrondi (1/3 n'est pas 33 %).
+     *
+     * @param salaireNet            salaire net mensuel du client
+     * @param mensualitesCicEnCours total des mensualités CIC qu'il rembourse déjà (zéro sinon)
+     * @param partMax               part maximale du salaire ({@code endettement.max.fraction})
+     * @throws EndettementDepasseException si le plafond est dépassé
+     */
+    public void verifierEndettement(Montant salaireNet, Montant mensualitesCicEnCours, Fraction partMax) {
+        Objects.requireNonNull(salaireNet, "salaireNet");
+        Objects.requireNonNull(mensualitesCicEnCours, "mensualitesCicEnCours");
+        Objects.requireNonNull(partMax, "partMax");
+        Montant total = mensualitesCicEnCours.plus(mensualiteMaximale());
+        if (!partMax.admet(total, salaireNet)) {
+            throw new EndettementDepasseException(total, salaireNet, partMax);
+        }
+    }
+
+    /** Mensualité la plus élevée : la dernière peut dépasser les autres quand elle absorbe l'écart. */
+    public Montant mensualiteMaximale() {
+        return echeances.stream().map(EcheancePrevue::montant).max(Montant::compareTo).orElseThrow();
     }
 
     private static LocalDate jourDePaie(YearMonth mois, int jourPaie) {
