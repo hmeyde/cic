@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.justificatifs.titre-page}">Justificatifs — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-justificatifs">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <h1 id="titre-justificatifs" th:text="#{bo.justificatifs.titre}">Justificatifs reçus</h1>
+        <p class="texte-doux" th:text="#{bo.justificatifs.texte(${limite})}">Les 100 derniers justificatifs envoyés par les clients.</p>
+
+        <p th:if="${#lists.isEmpty(documents)}" class="texte-doux" th:text="#{bo.justificatifs.aucun}">Aucun justificatif reçu.</p>
+        <div th:unless="${#lists.isEmpty(documents)}" class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                <tr>
+                    <th scope="col" th:text="#{bo.justificatifs.client}">Client</th>
+                    <th scope="col" th:text="#{client.justificatifs.type}">Type</th>
+                    <th scope="col" th:text="#{bo.justificatifs.date}">Reçu le</th>
+                    <th scope="col" th:text="#{client.justificatifs.format}">Format</th>
+                    <th scope="col" class="nombre" th:text="#{client.justificatifs.taille}">Taille</th>
+                    <th scope="col"><span class="visuellement-cache" th:text="#{client.justificatifs.actions}">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="l : ${documents}">
+                    <td th:text="${l.client()}">Sidi Ould Ahmed</td>
+                    <td th:text="#{'client.justificatifs.type.' + ${l.document().type().name()}}">Pièce d’identité</td>
+                    <td dir="ltr" th:text="${l.document().recuLe()}">11/11/2026 10:00</td>
+                    <td th:text="${l.document().format()}">PDF</td>
+                    <td class="nombre" th:text="#{client.justificatifs.taille.ko(${l.document().tailleKo()})}">120 Ko</td>
+                    <td><a th:href="@{/bo/justificatifs/{id}(id=${l.document().id()})}" target="_blank" rel="noopener"
+                           th:text="#{client.justificatifs.voir}">Voir</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

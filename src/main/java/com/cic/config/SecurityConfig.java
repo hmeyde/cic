@@ -22,6 +22,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  *
  * <p>Back-office ({@code /bo/**}) : connexion par identifiant et mot de passe (BCrypt), réservée aux
  * rôles de l'équipe CIC ; la gestion du catalogue ({@code /bo/fournisseurs/**}, {@code /bo/produits/**}) est réservée au rôle ADMIN.
+ * Les justificatifs des clients ({@code /bo/justificatifs/**}) sont réservés aux rôles ANALYSTE et ADMIN.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
  * <p>Les autres pages restent publiques. CSRF actif partout ; en-têtes de sécurité par défaut de
@@ -69,6 +70,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/bo/login").permitAll()
                 .requestMatchers("/bo/fournisseurs", "/bo/fournisseurs/**", "/bo/produits", "/bo/produits/**").hasRole("ADMIN")
+                .requestMatchers("/bo/justificatifs", "/bo/justificatifs/**").hasAnyRole("ANALYSTE", "ADMIN")
                 .requestMatchers("/bo", "/bo/**").hasAnyRole(ROLES_BACK_OFFICE)
                 .anyRequest().permitAll()
             )

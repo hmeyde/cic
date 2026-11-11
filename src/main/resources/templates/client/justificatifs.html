@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.justificatifs.titre-page}">Mes justificatifs — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-justificatifs">
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Justificatif reçu.</p>
+        <h1 id="titre-justificatifs" th:text="#{client.justificatifs.titre}">Mes justificatifs</h1>
+        <p class="texte-doux" th:text="#{client.justificatifs.texte}">Envoyez les pièces demandées. Elles ne sont visibles que par vous et par l’équipe CIC.</p>
+
+        <h2 th:text="#{client.justificatifs.attendus}">Pièces attendues</h2>
+        <ul class="liste-pieces">
+            <li th:each="t : ${types}">
+                <span th:text="#{'client.justificatifs.type.' + ${t.name()}}">Pièce d’identité</span>
+                <span class="etiquette"
+                      th:text="${typesRecus.contains(t)} ? #{client.justificatifs.recu} : #{client.justificatifs.a-envoyer}">À envoyer</span>
+            </li>
+        </ul>
+
+        <h2 id="titre-envoi" th:text="#{client.justificatifs.envoyer-titre}">Envoyer un justificatif</h2>
+        <form class="formulaire carte" method="post" enctype="multipart/form-data" novalidate
+              th:action="@{/client/justificatifs}" aria-labelledby="titre-envoi">
+            <p th:if="${erreur != null}" id="envoi-erreur" class="alerte alerte--erreur" role="alert"
+               th:text="#{${erreur}(${tailleMaxMo}, ${maxParType})}">Erreur</p>
+            <div class="champ">
+                <label for="type" th:text="#{client.justificatifs.type}">Type de justificatif</label>
+                <select id="type" name="type" required>
+                    <option value="" th:text="#{client.emploi.choisir}">Choisir…</option>
+                    <option th:each="t : ${types}" th:value="${t.name()}" th:selected="${t.name() == typeChoisi}"
+                            th:text="#{'client.justificatifs.type.' + ${t.name()}}">Pièce d’identité</option>
+                </select>
+            </div>
+            <div class="champ">
+                <label for="fichier" th:text="#{client.justificatifs.fichier}">Fichier</label>
+                <p id="fichier-aide" class="champ__aide texte-doux"
+                   th:text="#{client.justificatifs.fichier.aide(${tailleMaxMo})}">PDF, JPEG ou PNG, 5 Mo au plus. Une photo nette prise avec votre téléphone convient.</p>
+                <input id="fichier" name="fichier" type="file" required aria-describedby="fichier-aide"
+                       accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+            </div>
+            <div class="actions-formulaire">
+                <button type="submit" class="bouton bouton--principal" th:text="#{client.justificatifs.envoyer}">Envoyer</button>
+            </div>
+        </form>
+
+        <h2 th:text="#{client.justificatifs.recus}">Justificatifs envoyés</h2>
+        <p th:if="${#lists.isEmpty(documents)}" class="texte-doux" th:text="#{client.justificatifs.aucun}">Aucun justificatif envoyé pour l’instant.</p>
+        <div th:unless="${#lists.isEmpty(documents)}" class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                <tr>
+                    <th scope="col" th:text="#{client.justificatifs.type}">Type</th>
+                    <th scope="col" th:text="#{client.justificatifs.date}">Envoyé le</th>
+                    <th scope="col" th:text="#{client.justificatifs.format}">Format</th>
+                    <th scope="col" class="nombre" th:text="#{client.justificatifs.taille}">Taille</th>
+                    <th scope="col"><span class="visuellement-cache" th:text="#{client.justificatifs.actions}">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d : ${documents}">
+                    <td th:text="#{'client.justificatifs.type.' + ${d.type().name()}}">Pièce d’identité</td>
+                    <td dir="ltr" th:text="${d.recuLe()}">11/11/2026 10:00</td>
+                    <td th:text="${d.format()}">PDF</td>
+                    <td class="nombre" th:text="#{client.justificatifs.taille.ko(${d.tailleKo()})}">120 Ko</td>
+                    <td><a th:href="@{/client/justificatifs/{id}(id=${d.id()})}" target="_blank" rel="noopener"
+                           th:text="#{client.justificatifs.voir}">Voir</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></p>
+    </section>
+</main>
+</body>
+</html>

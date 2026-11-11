@@ -15,6 +15,12 @@ spring:
           time_zone: UTC
   flyway:
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      # Au-delà de 5 Mo, le justificatif est refusé par l'application avec un message clair ;
+      # la limite technique, plus large, protège seulement le serveur.
+      max-file-size: 10MB
+      max-request-size: 11MB
 
 management:
   endpoints:
@@ -30,5 +36,8 @@ server:
     webmanifest: application/manifest+json
 
 cic:
+  documents:
+    # Justificatifs : répertoire hors de l'application et de ses ressources statiques.
+    repertoire: ${CIC_DOCUMENTS_REPERTOIRE:${user.home}/.cic/justificatifs}
   parametres:
     rechargement: PT5M   # relecture périodique de la table parametre
