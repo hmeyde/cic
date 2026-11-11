@@ -104,3 +104,4 @@ Séparation des tâches : la personne qui décide d'un dossier ne valide pas le 
 - `docker compose up -d` : PostgreSQL local
 - `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`
 - `./mvnw test`
+- Dans le conteneur Claude, PostgreSQL est déjà disponible sur `db:5432` (variables `SPRING_DATASOURCE_*`) : ne pas lancer docker compose, vérifier le démarrage avec `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`.
