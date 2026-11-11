@@ -7,6 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-espace">
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre compte est créé.</p>
         <h1 id="titre-espace" th:text="#{client.accueil.titre(${prenom})}">Bonjour</h1>
         <p class="texte-doux" th:text="#{client.accueil.texte}">Vous êtes connecté à votre espace client.</p>
         <form method="post" th:action="@{/client/logout}">

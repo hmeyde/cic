@@ -1,7 +1,6 @@
 package com.cic.identite.adapter.out.persistence;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,8 +12,8 @@ import jakarta.persistence.Table;
 class CodeConnexionEntity {
 
     @Id
-    @Column(name = "client_id")
-    private UUID clientId;
+    @Column(name = "telephone", length = 8)
+    private String telephone;
 
     @Column(name = "code_hash", nullable = false, length = 100)
     private String codeHash;
@@ -37,9 +36,9 @@ class CodeConnexionEntity {
     protected CodeConnexionEntity() {
     }
 
-    CodeConnexionEntity(UUID clientId, String codeHash, Instant emisLe, Instant expireLe, short essaisMax,
+    CodeConnexionEntity(String telephone, String codeHash, Instant emisLe, Instant expireLe, short essaisMax,
             short essais, boolean utilise) {
-        this.clientId = clientId;
+        this.telephone = telephone;
         this.codeHash = codeHash;
         this.emisLe = emisLe;
         this.expireLe = expireLe;
@@ -48,8 +47,8 @@ class CodeConnexionEntity {
         this.utilise = utilise;
     }
 
-    UUID getClientId() {
-        return clientId;
+    String getTelephone() {
+        return telephone;
     }
 
     String getCodeHash() {

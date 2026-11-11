@@ -84,7 +84,7 @@ class ConnexionClientServiceTest {
             assertThat(m.telephone()).isEqualTo("22123456");
             assertThat(m.texte()).contains("123456").contains("5 minutes");
         });
-        assertThat(codes.parClient(client.id())).get()
+        assertThat(codes.parTelephone("22123456")).get()
                 .satisfies(c -> assertThat(c.codeHash()).startsWith("$2a$").doesNotContain("123456"));
 
         ResultatConnexion resultat = service.verifierCode(telephone, "123 456");
@@ -102,11 +102,28 @@ class ConnexionClientServiceTest {
     }
 
     @Test
-    void un_numero_inconnu_ne_recoit_rien_et_ne_se_connecte_pas() {
+    void un_numero_sans_compte_recoit_un_code_qui_prouve_le_numero_sans_identifier_de_client() {
         service.demanderCode("33000000", FR);
 
-        assertThat(envoyes).isEmpty();
-        assertThat(service.verifierCode("33000000", "123456").estValide()).isFalse();
+        assertThat(envoyes).singleElement().satisfies(m -> assertThat(m.telephone()).isEqualTo("33000000"));
+        assertThat(service.verifierCode("33000000", "000000").estNouveauClient()).isFalse();
+        ResultatConnexion resultat = service.verifierCode("33000000", "123456");
+
+        assertThat(resultat.estValide()).isTrue();
+        assertThat(resultat.estNouveauClient()).isTrue();
+        assertThat(resultat.clientId()).isEmpty();
+    }
+
+    @Test
+    void un_client_existant_n_est_pas_un_nouveau_client() {
+        service.demanderCode("22123456", FR);
+
+        assertThat(service.verifierCode("22123456", "123456").estNouveauClient()).isFalse();
+    }
+
+    @Test
+    void sans_code_demande_aucune_connexion() {
+        assertThat(service.verifierCode("33000000", "123456").verification()).isEqualTo(Verification.EXPIRE);
     }
 
     @Test

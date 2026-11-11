@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.compte.titre-page}">Créer mon compte — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-compte">
+        <h1 id="titre-compte" th:text="#{client.compte.titre}">Créer mon compte</h1>
+        <p class="texte-doux">
+            <span th:text="#{client.compte.texte}">Votre numéro est confirmé. Il sera celui de votre compte :</span>
+            <bdi dir="ltr" th:text="${telephoneMasque}">****3456</bdi>.
+        </p>
+
+        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}" th:action="@{/client/connexion/compte}">
+            <div class="champ">
+                <label for="nni" th:text="#{client.compte.nni}">NNI (numéro national d’identification)</label>
+                <p id="nni-aide" class="champ__aide texte-doux" th:text="#{client.compte.nni.aide}">10 chiffres, tels qu’ils figurent sur votre carte d’identité.</p>
+                <input id="nni" type="text" th:field="*{nni}" required maxlength="14" inputmode="numeric"
+                       autocomplete="off" dir="ltr"
+                       th:attr="aria-invalid=${#fields.hasErrors('nni')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nni')} ? 'nni-aide nni-erreur' : 'nni-aide'">
+                <p th:if="${#fields.hasErrors('nni')}" id="nni-erreur" class="champ__erreur" th:errors="*{nni}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="nom" th:text="#{client.compte.nom}">Nom</label>
+                <input id="nom" type="text" th:field="*{nom}" required maxlength="100" autocomplete="family-name"
+                       th:attr="aria-invalid=${#fields.hasErrors('nom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nom')} ? 'nom-erreur' : null">
+                <p th:if="${#fields.hasErrors('nom')}" id="nom-erreur" class="champ__erreur" th:errors="*{nom}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="prenom" th:text="#{client.compte.prenom}">Prénom</label>
+                <input id="prenom" type="text" th:field="*{prenom}" required maxlength="100" autocomplete="given-name"
+                       th:attr="aria-invalid=${#fields.hasErrors('prenom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('prenom')} ? 'prenom-erreur' : null">
+                <p th:if="${#fields.hasErrors('prenom')}" id="prenom-erreur" class="champ__erreur" th:errors="*{prenom}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="dateNaissance" th:text="#{client.compte.date-naissance}">Date de naissance</label>
+                <input id="dateNaissance" type="date" th:field="*{dateNaissance}" required th:max="${dateMax}"
+                       autocomplete="bday" dir="ltr"
+                       th:attr="aria-invalid=${#fields.hasErrors('dateNaissance')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateNaissance')} ? 'dateNaissance-erreur' : null">
+                <p th:if="${#fields.hasErrors('dateNaissance')}" id="dateNaissance-erreur" class="champ__erreur" th:errors="*{dateNaissance}">Erreur</p>
+            </div>
+            <div class="champ champ--case">
+                <input id="consentement" type="checkbox" th:field="*{consentement}" required
+                       th:attr="aria-invalid=${#fields.hasErrors('consentement')} ? 'true' : null,aria-describedby=${#fields.hasErrors('consentement')} ? 'consentement-erreur' : null">
+                <label for="consentement" th:text="#{client.compte.consentement}">J’accepte que CIC utilise mes données pour étudier mes demandes de crédit et gérer mes remboursements.</label>
+            </div>
+            <p th:if="${#fields.hasErrors('consentement')}" id="consentement-erreur" class="champ__erreur" th:errors="*{consentement}">Erreur</p>
+            <p class="champ__aide texte-doux" th:text="#{client.compte.consentement.aide}">Sans ce consentement, CIC ne peut pas étudier votre demande. Vos justificatifs ne sont visibles que par vous et par l’équipe CIC.</p>
+            <button type="submit" class="bouton bouton--principal" th:text="#{client.compte.creer}">Créer mon compte</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

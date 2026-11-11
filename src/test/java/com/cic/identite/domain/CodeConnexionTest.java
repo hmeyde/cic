@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
 import java.util.function.BiPredicate;
 
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ class CodeConnexionTest {
     private static final BiPredicate<String, String> EGAL = String::equals;
 
     private static CodeConnexion code() {
-        return CodeConnexion.emettre(UUID.randomUUID(), "123456", EMISSION, Duration.ofMinutes(5), 5);
+        return CodeConnexion.emettre("22123456", "123456", EMISSION, Duration.ofMinutes(5), 5);
     }
 
     @Test
@@ -67,7 +66,7 @@ class CodeConnexionTest {
 
     @Test
     void des_valeurs_incoherentes_sont_refusees() {
-        UUID id = UUID.randomUUID();
+        String id = "22123456";
         assertThatThrownBy(() -> CodeConnexion.emettre(id, "h", EMISSION, Duration.ZERO, 5))
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> CodeConnexion.emettre(id, "h", EMISSION, Duration.ofMinutes(5), 0))

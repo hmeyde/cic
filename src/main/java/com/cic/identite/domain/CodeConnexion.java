@@ -3,19 +3,20 @@ package com.cic.identite.domain;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.BiPredicate;
 
 /**
- * Code de connexion à usage unique envoyé au téléphone d'un client.
+ * Code de connexion à usage unique envoyé à un téléphone.
  *
- * <p>Un client a au plus un code en cours : en émettre un nouveau remplace le précédent.
+ * <p>Le code est rattaché au téléphone et non au client : un nouveau client reçoit aussi un code, qui
+ * prouve que le numéro est à lui avant la création de son compte.
+ * Un téléphone a au plus un code en cours : en émettre un nouveau remplace le précédent.
  * Le code n'est connu qu'au moment de l'envoi ; seul son hachage est conservé.
  * Il est valable pendant une durée limitée, pour un nombre limité d'essais, et une seule fois.
  */
 public final class CodeConnexion {
 
-    private final UUID clientId;
+    private final String telephone;
     private final String codeHash;
     private final Instant emisLe;
     private final Instant expireLe;
@@ -23,9 +24,9 @@ public final class CodeConnexion {
     private int essais;
     private boolean utilise;
 
-    private CodeConnexion(UUID clientId, String codeHash, Instant emisLe, Instant expireLe, int essaisMax,
+    private CodeConnexion(String telephone, String codeHash, Instant emisLe, Instant expireLe, int essaisMax,
             int essais, boolean utilise) {
-        this.clientId = Objects.requireNonNull(clientId, "clientId");
+        this.telephone = Objects.requireNonNull(telephone, "telephone");
         this.codeHash = Objects.requireNonNull(codeHash, "codeHash");
         this.emisLe = Objects.requireNonNull(emisLe, "emisLe");
         this.expireLe = Objects.requireNonNull(expireLe, "expireLe");
@@ -41,16 +42,16 @@ public final class CodeConnexion {
     }
 
     /** Nouveau code émis à {@code maintenant}, valable pendant {@code validite} et {@code essaisMax} essais. */
-    public static CodeConnexion emettre(UUID clientId, String codeHash, Instant maintenant, Duration validite,
+    public static CodeConnexion emettre(String telephone, String codeHash, Instant maintenant, Duration validite,
             int essaisMax) {
         Objects.requireNonNull(validite, "validite");
-        return new CodeConnexion(clientId, codeHash, maintenant, maintenant.plus(validite), essaisMax, 0, false);
+        return new CodeConnexion(telephone, codeHash, maintenant, maintenant.plus(validite), essaisMax, 0, false);
     }
 
     /** Reconstitution depuis le stockage. */
-    public static CodeConnexion reconstituer(UUID clientId, String codeHash, Instant emisLe, Instant expireLe,
+    public static CodeConnexion reconstituer(String telephone, String codeHash, Instant emisLe, Instant expireLe,
             int essaisMax, int essais, boolean utilise) {
-        return new CodeConnexion(clientId, codeHash, emisLe, expireLe, essaisMax, essais, utilise);
+        return new CodeConnexion(telephone, codeHash, emisLe, expireLe, essaisMax, essais, utilise);
     }
 
     /**
@@ -90,8 +91,8 @@ public final class CodeConnexion {
         return essaisMax - essais;
     }
 
-    public UUID clientId() {
-        return clientId;
+    public String telephone() {
+        return telephone;
     }
 
     public String codeHash() {
@@ -127,10 +128,10 @@ public final class CodeConnexion {
         DEJA_UTILISE
     }
 
-    /** Sans le hachage du code. */
+    /** Sans le hachage du code ni le téléphone (donnée personnelle). */
     @Override
     public String toString() {
-        return "CodeConnexion[client=" + clientId + ", expireLe=" + expireLe + ", essais=" + essais + "/" + essaisMax
+        return "CodeConnexion[expireLe=" + expireLe + ", essais=" + essais + "/" + essaisMax
                 + ", utilise=" + utilise + "]";
     }
 }

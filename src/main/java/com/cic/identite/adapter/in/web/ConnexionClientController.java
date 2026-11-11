@@ -1,16 +1,7 @@
 package com.cic.identite.adapter.in.web;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,21 +21,23 @@ import jakarta.servlet.http.HttpSession;
  * Connexion du client en deux étapes : saisie du téléphone (envoi du code), puis saisie du code.
  *
  * <p>Le téléphone est gardé en session entre les deux étapes, jamais dans l'URL. Un code valide ouvre
- * une session authentifiée avec le rôle CLIENT ; le principal est l'identifiant du client (UUID),
- * pas son téléphone. L'identifiant de session est renouvelé à la connexion (fixation de session).
+ * une session authentifiée avec le rôle CLIENT ({@link SessionClient}) si un compte existe pour ce
+ * téléphone ; sinon le téléphone, désormais prouvé, est gardé en session et le nouveau client est
+ * envoyé vers la création de son compte ({@link CreationCompteClientController}).
  */
 @Controller
 class ConnexionClientController {
 
-    static final String ROLE_CLIENT = "ROLE_CLIENT";
     static final String SESSION_TELEPHONE = ConnexionClientController.class.getName() + ".telephone";
+    /** Téléphone dont la possession a été prouvée par un code valide, sans compte associé. */
+    static final String SESSION_TELEPHONE_VERIFIE = ConnexionClientController.class.getName() + ".telephoneVerifie";
 
     private final ConnexionClientService connexion;
-    private final SecurityContextRepository contextes = new HttpSessionSecurityContextRepository();
-    private final SecurityContextHolderStrategy strategie = SecurityContextHolder.getContextHolderStrategy();
+    private final SessionClient sessionClient;
 
-    ConnexionClientController(ConnexionClientService connexion) {
+    ConnexionClientController(ConnexionClientService connexion, SessionClient sessionClient) {
         this.connexion = connexion;
+        this.sessionClient = sessionClient;
     }
 
     @GetMapping("/client/connexion")
@@ -57,6 +50,7 @@ class ConnexionClientController {
             Model model) {
         try {
             String normalise = connexion.demanderCode(telephone, langue);
+            session.removeAttribute(SESSION_TELEPHONE_VERIFIE);
             session.setAttribute(SESSION_TELEPHONE, normalise);
             return "redirect:/client/connexion/code";
         } catch (TelephoneInvalideException e) {
@@ -83,9 +77,16 @@ class ConnexionClientController {
             return "redirect:/client/connexion";
         }
         ResultatConnexion resultat = connexion.verifierCode(telephone, code);
+        if (resultat.estNouveauClient()) {
+            session.removeAttribute(SESSION_TELEPHONE);
+            // Le téléphone vient d'être prouvé : nouvel identifiant de session avant d'en garder la trace.
+            request.changeSessionId();
+            session.setAttribute(SESSION_TELEPHONE_VERIFIE, telephone);
+            return "redirect:" + CreationCompteClientController.CHEMIN;
+        }
         if (resultat.estValide()) {
             session.removeAttribute(SESSION_TELEPHONE);
-            ouvrirSession(resultat.clientId().orElseThrow(), request, response);
+            sessionClient.ouvrir(resultat.clientId().orElseThrow(), request, response);
             return "redirect:/client/";
         }
         switch (resultat.verification()) {
@@ -102,16 +103,6 @@ class ConnexionClientController {
                 return "redirect:/client/connexion";
             }
         }
-    }
-
-    private void ouvrirSession(UUID clientId, HttpServletRequest request, HttpServletResponse response) {
-        request.changeSessionId();
-        var authentification = UsernamePasswordAuthenticationToken.authenticated(clientId.toString(), null,
-                List.of(new SimpleGrantedAuthority(ROLE_CLIENT)));
-        SecurityContext contexte = strategie.createEmptyContext();
-        contexte.setAuthentication(authentification);
-        strategie.setContext(contexte);
-        contextes.saveContext(contexte, request, response);
     }
 
     /** Seule forme du téléphone affichée : {@code ****3456}. */
