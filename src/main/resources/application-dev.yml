@@ -14,3 +14,9 @@ logging:
     com.cic: DEBUG
     org.springframework.security: INFO
     org.flywaydb: INFO
+
+cic:
+  back-office:
+    admin-dev:              # compte créé au démarrage en dev s'il n'existe pas (CompteAdminDev)
+      identifiant: ${CIC_BO_ADMIN_IDENTIFIANT:admin}
+      mot-de-passe: ${CIC_BO_ADMIN_MOT_DE_PASSE:admin-dev}

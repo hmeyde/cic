@@ -4,33 +4,56 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
 /**
- * Configuration de sécurité temporaire.
- * Tout est public sauf /bo/** (back-office) qui requiert une authentification.
- * À remplacer par la configuration définitive une fois les modules identite et rôles en place.
+ * Sécurité web.
+ *
+ * <p>Back-office ({@code /bo/**}) : connexion par identifiant et mot de passe (BCrypt), réservée aux
+ * rôles de l'équipe CIC. Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
+ * Les autres pages restent publiques en attendant l'espace client (code à usage unique).
+ * CSRF actif partout ; en-têtes de sécurité par défaut de Spring Security, plus une politique de référent.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /** Coût BCrypt : environ 250 ms par vérification sur un serveur courant. */
+    private static final int COUT_BCRYPT = 12;
+
+    static final String[] ROLES_BACK_OFFICE = {"ANALYSTE", "RECOUVREMENT", "ADMIN", "ASSOCIE"};
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(COUT_BCRYPT);
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/bo/**").authenticated()
+                .requestMatchers("/bo/login").permitAll()
+                .requestMatchers("/bo", "/bo/**").hasAnyRole(ROLES_BACK_OFFICE)
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
                 .loginPage("/bo/login")
-                .defaultSuccessUrl("/bo/", true)
+                .usernameParameter("identifiant")
+                .passwordParameter("motDePasse")
+                .defaultSuccessUrl("/bo/")
+                .failureUrl("/bo/login?erreur")
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/bo/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/bo/login?deconnexion")
                 .permitAll()
+            )
+            .headers(headers -> headers
+                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN))
             );
         return http.build();
     }

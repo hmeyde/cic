@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.accueil.titre-page}">Back-office — CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-bo">
+        <h1 id="titre-bo" th:text="#{bo.accueil.titre}">Back-office</h1>
+        <p>
+            <span th:text="#{bo.accueil.connecte(${identifiant})}">Connecté en tant que admin</span>
+            <span th:if="${!#strings.isEmpty(role)}" class="etiquette"
+                  th:text="#{'bo.role.' + ${role}}">Administrateur</span>
+        </p>
+        <form method="post" th:action="@{/bo/logout}">
+            <button type="submit" class="bouton bouton--contour" th:text="#{bo.accueil.deconnexion}">Se déconnecter</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.connexion.titre-page}">Connexion — Espace équipe CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-connexion">
+        <h1 id="titre-connexion" th:text="#{bo.connexion.titre}">Espace équipe</h1>
+        <p class="texte-doux" th:text="#{bo.connexion.texte}">Connectez-vous avec votre identifiant et votre mot de passe.</p>
+
+        <p th:if="${param.erreur != null}" class="alerte alerte--erreur" role="alert"
+           th:text="#{bo.connexion.erreur}">Identifiant ou mot de passe incorrect.</p>
+        <p th:if="${param.deconnexion != null}" class="alerte alerte--info" role="status"
+           th:text="#{bo.connexion.deconnecte}">Vous êtes déconnecté.</p>
+
+        <form class="formulaire carte" method="post" th:action="@{/bo/login}">
+            <div class="champ">
+                <label for="identifiant" th:text="#{bo.connexion.identifiant}">Identifiant</label>
+                <input id="identifiant" name="identifiant" type="text" required maxlength="50"
+                       autocomplete="username" autocapitalize="none" spellcheck="false" autofocus>
+            </div>
+            <div class="champ">
+                <label for="motDePasse" th:text="#{bo.connexion.mot-de-passe}">Mot de passe</label>
+                <input id="motDePasse" name="motDePasse" type="password" required maxlength="72"
+                       autocomplete="current-password">
+            </div>
+            <button type="submit" class="bouton bouton--principal" th:text="#{bo.connexion.valider}">Se connecter</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

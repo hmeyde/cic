@@ -179,6 +179,36 @@ a { color: var(--couleur-primaire); }
 .pied__liens a { display: inline-flex; align-items: center; min-height: 44px; }
 .pied__mentions { margin: 0; color: #a9b5b1; font-size: .85rem; }
 
+/* Formulaires et alertes */
+.conteneur--etroit { max-width: 28rem; }
+.texte-doux { color: var(--couleur-texte-doux); }
+.formulaire { display: grid; gap: 1rem; }
+.champ { display: grid; gap: .35rem; }
+.champ label { font-weight: 600; }
+.champ input {
+    min-height: 48px;
+    padding: .6rem .75rem;
+    font: inherit;
+    border: 1px solid var(--couleur-bordure);
+    border-radius: var(--rayon);
+    background: var(--couleur-fond);
+    color: var(--couleur-texte);
+}
+.alerte { padding: .75rem 1rem; border-radius: var(--rayon); border-inline-start: 4px solid; }
+.alerte--erreur { background: #fdecec; border-color: #b42318; color: #7a1a12; }
+.alerte--info { background: var(--couleur-fond-doux); border-color: var(--couleur-primaire); }
+.bouton--contour { border-color: var(--couleur-primaire); color: var(--couleur-primaire); background: transparent; }
+.bouton--contour:hover { background: var(--couleur-fond-doux); }
+.etiquette {
+    display: inline-block;
+    margin-inline-start: .5rem;
+    padding: .1rem .6rem;
+    border-radius: 999px;
+    background: var(--couleur-fond-doux);
+    border: 1px solid var(--couleur-bordure);
+    font-size: .85rem;
+}
+
 /* Tablette et plus */
 @media (min-width: 40rem) {
     .accroche { padding-block: 4rem; }
