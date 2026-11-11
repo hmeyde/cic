@@ -28,3 +28,7 @@ management:
 server:
   mime-mappings:
     webmanifest: application/manifest+json
+
+cic:
+  parametres:
+    rechargement: PT5M   # relecture périodique de la table parametre
