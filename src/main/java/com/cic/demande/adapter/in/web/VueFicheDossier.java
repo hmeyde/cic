@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import com.cic.audit.domain.EntreeJournal;
 import com.cic.audit.domain.TypeActeur;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.domain.StatutAutorisation;
+import com.cic.contrat.domain.TypeAutorisation;
 import com.cic.demande.application.FicheDossier;
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.ResultatCondition;
@@ -39,11 +41,13 @@ import com.cic.identite.domain.TypeDocument;
  * @param decisionPossible le dossier attend la décision de l'analyste (EN_ANALYSE)
  * @param decision         décision déjà prise ; vide sinon
  * @param journal          journal d'audit du dossier, du plus ancien au plus récent
+ * @param autorisation     autorisation de prélèvement ; vide tant que le dossier n'a pas de contrat
  */
 record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String statutChangeLe, Conditions conditions,
         Optional<VueClient> client, Optional<VueEmploi> emploi, List<VueJustificatif> justificatifs,
         List<TypeDocument> typesManquants, VueScore score, boolean decisionPossible,
-        Optional<VueDecision> decision, List<VueEntreeJournal> journal) {
+        Optional<VueDecision> decision, List<VueEntreeJournal> journal,
+        Optional<VueAutorisation> autorisation) {
 
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter DATE_HEURE = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -80,6 +84,9 @@ record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String s
             Optional<String> avant, Optional<String> apres, Optional<String> detail) {
     }
 
+    record VueAutorisation(UUID id, TypeAutorisation type, StatutAutorisation statut) {
+    }
+
     record VueScore(String versionGrille, int note, boolean eligible, String recommandation,
             String recommandationNote, List<ResultatCondition> conditions, List<ResultatCritere> criteres) {
     }
@@ -112,7 +119,8 @@ record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String s
                 justificatifs, manquants, score, d.statut().attendDecision(),
                 d.decision().map(dec -> new VueDecision(dec.analyste(),
                         DATE_HEURE.format(dec.le().atZone(clock.getZone())), dec.motif())),
-                fiche.journal().stream().map(e -> entree(e, clock)).toList());
+                fiche.journal().stream().map(e -> entree(e, clock)).toList(),
+                fiche.autorisation().map(a -> new VueAutorisation(a.id(), a.type(), a.statut())));
     }
 
     private static VueClient client(Client c, LocalDate aujourdhui, Clock clock) {

@@ -9,6 +9,9 @@ public interface ContratRepository {
     /** Insère un nouveau contrat avec ses échéances. */
     void enregistrer(Contrat contrat);
 
+    /** Contrat avec ses échéances. */
+    Optional<Contrat> parId(UUID id);
+
     /** Contrat d'un dossier ; au plus un par dossier. */
     Optional<Contrat> parDemande(UUID demandeId);
 

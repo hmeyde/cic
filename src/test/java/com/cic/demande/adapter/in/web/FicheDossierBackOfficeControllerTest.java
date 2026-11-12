@@ -18,6 +18,10 @@ import com.cic.audit.application.JournalAuditService;
 import com.cic.audit.application.JournalEnMemoire;
 import com.cic.audit.domain.TypeActeur;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.AutorisationsEnMemoire;
+import com.cic.contrat.application.ContratsEnMemoire;
+import com.cic.contrat.application.StockageSignesEnMemoire;
+import com.cic.contrat.application.SuiviAutorisationService;
 import com.cic.demande.application.DecisionService;
 import com.cic.demande.application.DecisionsDeTest;
 import com.cic.demande.application.DemandesEnMemoire;
@@ -59,7 +63,10 @@ class FicheDossierBackOfficeControllerTest {
             new FicheDossierService(demandes, new ClientService(clients),
                     new EmploiClientService(clients, emplois, clock),
                     new DocumentService(clients, documents, new StockageEnMemoire(), clock),
-                    new JournalAuditService(journal)),
+                    new JournalAuditService(journal),
+                    new SuiviAutorisationService(new AutorisationsEnMemoire(), new ContratsEnMemoire(),
+                            new ClientService(clients), new StockageSignesEnMemoire(), new JournalAuditService(journal),
+                            evenement -> { }, clock)),
             clock);
 
     private VueFicheDossier ouvrir(UUID id) {

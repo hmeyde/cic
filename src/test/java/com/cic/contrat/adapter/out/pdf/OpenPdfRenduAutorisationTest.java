@@ -121,7 +121,7 @@ class OpenPdfRenduAutorisationTest {
         Contrat contrat = exemple();
         AutorisationPrelevement retenue = AutorisationPrelevement.reconstituer(UUID.randomUUID(), contrat.id(),
                 contrat.demandeId(), contrat.clientId(), TypeAutorisation.RETENUE_EMPLOYEUR,
-                StatutAutorisation.A_SIGNER, ETABLI_LE);
+                StatutAutorisation.A_SIGNER, ETABLI_LE, ETABLI_LE, null);
 
         assertThatThrownBy(() -> rendu.rendre(contenu(contrat, retenue, Optional.empty())))
                 .isInstanceOf(IllegalArgumentException.class);

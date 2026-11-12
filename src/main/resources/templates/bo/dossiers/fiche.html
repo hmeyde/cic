@@ -126,6 +126,17 @@
             </div>
         </section>
 
+        <!-- Autorisation de prélèvement -->
+        <section th:if="${fiche.autorisation().isPresent()}" th:with="aut=${fiche.autorisation().get()}"
+                 class="fiche-bloc" aria-labelledby="titre-autorisation-dossier">
+            <h2 id="titre-autorisation-dossier" th:text="#{bo.autorisation.titre-court}">Autorisation de prélèvement</h2>
+            <p>
+                <span th:text="#{'bo.autorisation.type.' + ${aut.type().name()}}">Virement permanent</span>
+                <span class="etiquette" th:text="#{'bo.autorisation.statut.' + ${aut.statut().name()}}">À signer</span>
+                <a th:href="@{/bo/autorisations/{id}(id=${aut.id()})}" th:text="#{bo.autorisation.suivre}">Suivre l’autorisation</a>
+            </p>
+        </section>
+
         <!-- Conditions de la demande -->
         <section class="fiche-bloc" aria-labelledby="titre-conditions">
             <h2 id="titre-conditions" th:text="#{bo.fiche.conditions}">Conditions demandées</h2>

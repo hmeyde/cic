@@ -22,6 +22,11 @@ public class ContratsEnMemoire implements ContratRepository {
     }
 
     @Override
+    public Optional<Contrat> parId(UUID id) {
+        return parDemande.values().stream().filter(c -> c.id().equals(id)).findFirst();
+    }
+
+    @Override
     public Optional<Contrat> parDemande(UUID demandeId) {
         return Optional.ofNullable(parDemande.get(demandeId));
     }

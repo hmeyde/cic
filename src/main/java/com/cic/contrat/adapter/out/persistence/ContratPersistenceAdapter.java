@@ -42,6 +42,12 @@ class ContratPersistenceAdapter implements ContratRepository {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<Contrat> parId(UUID id) {
+        return contrats.findWithEcheancesById(id).map(ContratPersistenceAdapter::versDomaine);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<Contrat> parDemande(UUID demandeId) {
         return contrats.findByDemandeId(demandeId).map(ContratPersistenceAdapter::versDomaine);
     }

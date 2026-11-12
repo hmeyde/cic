@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import com.cic.commun.domain.Montant;
+import com.cic.identite.domain.FormatDocument;
 
 class AutorisationPrelevementTest {
 
@@ -48,5 +49,102 @@ class AutorisationPrelevementTest {
         assertThatThrownBy(() -> new ContenuAutorisation(autreContrat, c, acheteur, cic, Optional.empty(),
                 LocalDate.of(2026, 11, 13), LocalDate.of(2026, 11, 20)))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private static DocumentSigne document(Instant le) {
+        return DocumentSigne.nouveau(FormatDocument.PDF, 1_000, le, "analyste");
+    }
+
+    @Test
+    void l_analyste_fait_passer_l_autorisation_a_acceptee_apres_signature_et_transmission() {
+        AutorisationPrelevement a = AutorisationPrelevement.emettre(contrat(), LE);
+        Instant signeeLe = LE.plusSeconds(3_600);
+        Instant transmiseLe = signeeLe.plusSeconds(3_600);
+        Instant accepteeLe = transmiseLe.plusSeconds(86_400);
+
+        assertThat(a.deposerDocumentSigne(document(signeeLe)))
+                .contains(new ChangementStatutAutorisation(StatutAutorisation.A_SIGNER, StatutAutorisation.SIGNEE));
+        assertThat(a.transmettre(transmiseLe))
+                .isEqualTo(new ChangementStatutAutorisation(StatutAutorisation.SIGNEE, StatutAutorisation.TRANSMISE));
+        assertThat(a.accepter(accepteeLe)).isEqualTo(
+                new ChangementStatutAutorisation(StatutAutorisation.TRANSMISE, StatutAutorisation.ACCEPTEE));
+
+        assertThat(a.statut()).isEqualTo(StatutAutorisation.ACCEPTEE);
+        assertThat(a.statutChangeLe()).isEqualTo(accepteeLe);
+        assertThat(a.documentSigne()).isPresent();
+    }
+
+    @Test
+    void une_autorisation_non_signee_ne_peut_etre_ni_transmise_ni_acceptee() {
+        AutorisationPrelevement a = AutorisationPrelevement.emettre(contrat(), LE);
+
+        assertThatThrownBy(() -> a.transmettre(LE)).isInstanceOf(TransitionAutorisationInterditeException.class);
+        assertThatThrownBy(() -> a.accepter(LE)).isInstanceOf(TransitionAutorisationInterditeException.class)
+                .extracting(e -> ((TransitionAutorisationInterditeException) e).code())
+                .isEqualTo(TransitionAutorisationInterditeException.CODE);
+        assertThatThrownBy(() -> a.revoquer(LE)).isInstanceOf(TransitionAutorisationInterditeException.class);
+        assertThat(a.statut()).isEqualTo(StatutAutorisation.A_SIGNER);
+        assertThat(a.statutChangeLe()).isEqualTo(LE);
+    }
+
+    @Test
+    void une_autorisation_signee_ne_peut_pas_etre_acceptee_sans_transmission() {
+        AutorisationPrelevement a = AutorisationPrelevement.emettre(contrat(), LE);
+        a.deposerDocumentSigne(document(LE));
+
+        assertThatThrownBy(() -> a.accepter(LE)).isInstanceOf(TransitionAutorisationInterditeException.class);
+        assertThat(a.statut()).isEqualTo(StatutAutorisation.SIGNEE);
+    }
+
+    @Test
+    void le_document_d_une_autorisation_signee_peut_etre_remplace_sans_changer_de_statut() {
+        AutorisationPrelevement a = AutorisationPrelevement.emettre(contrat(), LE);
+        a.deposerDocumentSigne(document(LE));
+        DocumentSigne nouveau = document(LE.plusSeconds(60));
+
+        assertThat(a.deposerDocumentSigne(nouveau)).isEmpty();
+
+        assertThat(a.statut()).isEqualTo(StatutAutorisation.SIGNEE);
+        assertThat(a.documentSigne()).contains(nouveau);
+    }
+
+    @Test
+    void le_document_ne_change_plus_apres_la_transmission() {
+        AutorisationPrelevement a = AutorisationPrelevement.emettre(contrat(), LE);
+        DocumentSigne premier = document(LE);
+        a.deposerDocumentSigne(premier);
+        a.transmettre(LE);
+
+        assertThatThrownBy(() -> a.deposerDocumentSigne(document(LE)))
+                .isInstanceOf(DepotDocumentSigneImpossibleException.class);
+        assertThat(a.documentSigne()).contains(premier);
+    }
+
+    @Test
+    void une_autorisation_revoquee_n_evolue_plus() {
+        AutorisationPrelevement a = AutorisationPrelevement.emettre(contrat(), LE);
+        a.deposerDocumentSigne(document(LE));
+        a.transmettre(LE);
+        a.accepter(LE);
+        a.activer(LE);
+
+        a.revoquer(LE);
+
+        assertThat(a.statut()).isEqualTo(StatutAutorisation.REVOQUEE);
+        assertThatThrownBy(() -> a.activer(LE)).isInstanceOf(TransitionAutorisationInterditeException.class);
+        assertThatThrownBy(() -> a.deposerDocumentSigne(document(LE)))
+                .isInstanceOf(DepotDocumentSigneImpossibleException.class);
+    }
+
+    @Test
+    void le_document_signe_existe_si_et_seulement_si_l_autorisation_n_est_plus_a_signer() {
+        Contrat c = contrat();
+
+        assertThatThrownBy(() -> AutorisationPrelevement.reconstituer(UUID.randomUUID(), c.id(), c.demandeId(),
+                c.clientId(), TypeAutorisation.VIREMENT_PERMANENT, StatutAutorisation.SIGNEE, LE, LE, null))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> AutorisationPrelevement.reconstituer(UUID.randomUUID(), c.id(), c.demandeId(),
+                c.clientId(), TypeAutorisation.VIREMENT_PERMANENT, StatutAutorisation.A_SIGNER, LE, LE,
+                document(LE))).isInstanceOf(IllegalArgumentException.class);
     }
 }

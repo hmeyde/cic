@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.autorisation.titre-page}">Autorisation de prélèvement — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-autorisation" th:with="a=${autorisation}">
+        <p>
+            <a th:href="@{/bo/autorisations}" th:text="#{bo.autorisation.retour}">Retour aux autorisations</a>
+            ·
+            <a th:href="@{/bo/dossiers/{id}(id=${a.demandeId()})}" th:text="#{bo.autorisation.voir-dossier}">Voir le dossier</a>
+        </p>
+        <h1 id="titre-autorisation" th:text="#{bo.autorisation.titre(${a.numeroContrat()})}">Autorisation de prélèvement — CIC-2026-000001</h1>
+        <p>
+            <span class="etiquette etiquette--sans-marge" th:text="#{'bo.autorisation.statut.' + ${a.statut().name()}}">À signer</span>
+            <span class="texte-doux" dir="auto" th:text="#{bo.autorisation.emise(${a.emiseLe()}, ${a.statutChangeLe()})}">Émise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
+        </p>
+
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Autorisation acceptée.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}(${tailleMaxMo}, ${longueurMotifMax})}">Cette opération n’est pas possible.</p>
+
+        <section class="fiche-bloc" aria-labelledby="titre-autorisation-resume">
+            <h2 id="titre-autorisation-resume" class="visuellement-cache" th:text="#{bo.autorisation.resume}">Résumé</h2>
+            <dl class="conditions">
+                <div>
+                    <dt th:text="#{bo.autorisation.type}">Type</dt>
+                    <dd th:text="#{'bo.autorisation.type.' + ${a.type().name()}}">Virement permanent</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.dossiers.client}">Client</dt>
+                    <dd dir="auto" th:text="${a.client().orElse('—')}">Mohamed Ould Ahmed</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.dossiers.produit}">Produit</dt>
+                    <dd dir="auto" th:text="${a.designation()}">Galaxy A35</dd>
+                </div>
+            </dl>
+            <p><a th:href="@{/bo/autorisations/{id}/autorisation.pdf(id=${a.id()})}" target="_blank" rel="noopener"
+                  th:text="#{bo.autorisation.imprimer}">Imprimer l’autorisation à faire signer (PDF)</a></p>
+        </section>
+
+        <!-- Document signé -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-document-signe">
+            <h2 id="titre-document-signe" th:text="#{bo.autorisation.document}">Document signé</h2>
+            <p th:if="${a.documentSigne().isEmpty()}" class="texte-doux" th:text="#{bo.autorisation.document.aucun}">Le client n’a pas encore remis son autorisation signée.</p>
+            <p th:if="${a.documentSigne().isPresent()}" th:with="d=${a.documentSigne().get()}">
+                <span th:text="#{bo.autorisation.document.recu(${d.deposeLe()}, ${d.deposePar()}, ${d.format()}, ${d.tailleKo()})}">Déposé le 12/11/2026 10:00 par analyste — PDF, 120 Ko.</span>
+                <a th:href="@{/bo/autorisations/{id}/document-signe(id=${a.id()})}" target="_blank" rel="noopener"
+                   th:text="#{client.justificatifs.voir}">Voir</a>
+            </p>
+            <form th:if="${a.depotPossible()}" class="formulaire" method="post" enctype="multipart/form-data"
+                  th:action="@{/bo/autorisations/{id}/document-signe(id=${a.id()})}">
+                <div class="champ">
+                    <label for="fichier" th:text="${a.documentSigne().isPresent()} ? #{bo.autorisation.document.remplacer} : #{bo.autorisation.document.deposer}">Déposer l’autorisation signée</label>
+                    <p id="fichier-aide" class="champ__aide texte-doux" th:text="#{bo.autorisation.document.aide(${tailleMaxMo})}">PDF, JPEG ou PNG, 5 Mo au plus.</p>
+                    <input id="fichier" name="fichier" type="file" required aria-describedby="fichier-aide"
+                           accept="application/pdf,image/jpeg,image/png">
+                </div>
+                <button type="submit" class="bouton bouton--principal" th:text="#{bo.autorisation.document.envoyer}">Déposer</button>
+            </form>
+        </section>
+
+        <!-- Suivi -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-suivi-autorisation">
+            <h2 id="titre-suivi-autorisation" th:text="#{bo.autorisation.suivi}">Suivi</h2>
+            <p th:if="${a.statut().name() == 'A_SIGNER'}" class="texte-doux" th:text="#{bo.autorisation.suivi.a-signer}">Déposez d’abord l’autorisation signée par le client.</p>
+            <p th:if="${a.statut().name() == 'REVOQUEE'}" class="texte-doux" th:text="#{bo.autorisation.suivi.revoquee}">Autorisation révoquée : plus aucune action possible.</p>
+            <div class="formulaire">
+                <form th:if="${a.transmissionPossible()}" method="post" th:action="@{/bo/autorisations/{id}/transmission(id=${a.id()})}">
+                    <button type="submit" class="bouton bouton--principal" th:text="#{bo.autorisation.transmettre}">Marquer transmise à la banque</button>
+                </form>
+                <form th:if="${a.acceptationPossible()}" method="post" th:action="@{/bo/autorisations/{id}/acceptation(id=${a.id()})}">
+                    <button type="submit" class="bouton bouton--principal" th:text="#{bo.autorisation.accepter}">Marquer acceptée par la banque</button>
+                </form>
+                <form th:if="${a.activationPossible()}" method="post" th:action="@{/bo/autorisations/{id}/activation(id=${a.id()})}">
+                    <button type="submit" class="bouton bouton--principal" th:text="#{bo.autorisation.activer}">Marquer active (premier prélèvement fait)</button>
+                </form>
+                <form th:if="${a.revocationPossible()}" method="post" class="formulaire" th:action="@{/bo/autorisations/{id}/revocation(id=${a.id()})}">
+                    <div class="champ">
+                        <label for="motif" th:text="#{bo.autorisation.revocation.motif}">Motif de la révocation</label>
+                        <textarea id="motif" name="motif" rows="2" required th:maxlength="${longueurMotifMax}"
+                                  aria-describedby="motif-aide"></textarea>
+                        <p id="motif-aide" class="champ__aide texte-doux" th:text="#{bo.autorisation.revocation.aide(${longueurMotifMax})}">Obligatoire, 300 caractères au plus.</p>
+                    </div>
+                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.autorisation.revoquer}">Révoquer l’autorisation</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Journal -->
+        <section class="fiche-bloc" aria-labelledby="titre-journal-autorisation">
+            <h2 id="titre-journal-autorisation" th:text="#{bo.autorisation.journal}">Journal de l’autorisation</h2>
+            <p th:if="${#lists.isEmpty(a.journal())}" class="texte-doux" th:text="#{bo.journal.aucun}">Aucune entrée.</p>
+            <div th:unless="${#lists.isEmpty(a.journal())}" class="tableau-defilant">
+                <table class="tableau">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.journal.le}">Date</th>
+                        <th scope="col" th:text="#{bo.journal.action}">Action</th>
+                        <th scope="col" th:text="#{bo.journal.statut}">Statut</th>
+                        <th scope="col" th:text="#{bo.journal.acteur}">Par</th>
+                        <th scope="col" th:text="#{bo.journal.detail}">Détail</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${a.journal()}">
+                        <td dir="ltr" th:text="${e.le()}">12/11/2026 10:00</td>
+                        <td th:text="#{'bo.autorisation.journal.action.' + ${e.action()}}">Acceptation par la banque</td>
+                        <td>
+                            <span th:if="${e.avant().isPresent()}" th:text="#{'bo.autorisation.statut.' + ${e.avant().get()}} + ' → '">Transmise →</span>
+                            <span th:if="${e.apres().isPresent()}" th:text="#{'bo.autorisation.statut.' + ${e.apres().get()}}">Acceptée</span>
+                        </td>
+                        <td>
+                            <span th:text="#{'bo.journal.acteur.' + ${e.typeActeur().name()}}">Back-office</span>
+                            <span th:if="${e.acteur().isPresent()}" dir="ltr" th:text="${e.acteur().get()}">analyste</span>
+                        </td>
+                        <td dir="auto" th:text="${e.detail().orElse('')}">Compte clôturé</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

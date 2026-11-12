@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.cic.audit.domain.EntreeJournal;
+import com.cic.contrat.domain.AutorisationPrelevement;
 import com.cic.demande.domain.Demande;
 import com.cic.identite.domain.Client;
 import com.cic.identite.domain.Document;
@@ -18,9 +19,11 @@ import com.cic.identite.domain.Emploi;
  * @param emploi        emploi actuel du client (celui déclaré aujourd'hui) ; vide s'il n'en a plus
  * @param justificatifs justificatifs du client, du plus récent au plus ancien
  * @param journal       journal d'audit du dossier, du plus ancien au plus récent
+ * @param autorisation  autorisation de prélèvement, lue par l'API publique du module contrat ; vide
+ *                      tant que le dossier n'a pas de contrat
  */
 public record FicheDossier(Demande demande, Optional<Client> client, Optional<Emploi> emploi,
-        List<Document> justificatifs, List<EntreeJournal> journal) {
+        List<Document> justificatifs, List<EntreeJournal> journal, Optional<AutorisationPrelevement> autorisation) {
 
     public FicheDossier {
         Objects.requireNonNull(demande, "demande");
@@ -28,5 +31,6 @@ public record FicheDossier(Demande demande, Optional<Client> client, Optional<Em
         Objects.requireNonNull(emploi, "emploi");
         justificatifs = List.copyOf(justificatifs);
         journal = List.copyOf(journal);
+        Objects.requireNonNull(autorisation, "autorisation");
     }
 }
