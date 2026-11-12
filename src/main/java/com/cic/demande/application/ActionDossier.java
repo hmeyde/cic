@@ -12,5 +12,9 @@ public enum ActionDossier {
     /** Apport encaissé et autorisation de prélèvement ACCEPTEE : le dossier passe à APPORT_ET_AUTORISATION. */
     APPORT_ET_AUTORISATION_RECUS,
     /** Paiement fournisseur validé et bon de commande émis : le dossier passe à COMMANDEE. */
-    COMMANDE_FOURNISSEUR
+    COMMANDE_FOURNISSEUR,
+    /** Le client confirme avoir reçu son produit : le dossier passe à LIVREE. */
+    CONFIRMATION_REMISE,
+    /** Produit remis : le dossier passe à EN_REMBOURSEMENT, les échéances du contrat sont prélevées. */
+    DEBUT_REMBOURSEMENT
 }

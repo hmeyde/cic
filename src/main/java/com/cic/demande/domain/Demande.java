@@ -180,6 +180,25 @@ public final class Demande {
         return changement;
     }
 
+    /**
+     * COMMANDEE → LIVREE : le client confirme avoir reçu le produit.
+     *
+     * @throws TransitionInterditeException si la demande n'est pas COMMANDEE
+     */
+    public ChangementStatut confirmerRemise(Instant le) {
+        return passerA(StatutDossier.LIVREE, le);
+    }
+
+    /**
+     * LIVREE → EN_REMBOURSEMENT : le produit est remis, les mensualités fixées au contrat sont
+     * désormais prélevées à leurs dates.
+     *
+     * @throws TransitionInterditeException si la demande n'est pas LIVREE
+     */
+    public ChangementStatut demarrerRemboursement(Instant le) {
+        return passerA(StatutDossier.EN_REMBOURSEMENT, le);
+    }
+
     private ChangementStatut passerA(StatutDossier cible, Instant le) {
         ChangementStatut changement = statut.passerA(cible);
         appliquer(changement, le);

@@ -8,6 +8,7 @@
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-dossier">
         <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre demande est enregistrée.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n'est pas possible.</p>
         <h1 id="titre-dossier" th:text="#{client.dossier.titre}">Suivi de mon dossier</h1>
 
         <p th:if="${suivi == null}" class="texte-doux" th:text="#{client.dossier.aucun}">Vous n’avez pas encore de dossier.</p>
@@ -30,6 +31,15 @@
                 <p th:text="#{'client.dossier.prochaine.' + ${suivi.prochaine().name()}}">L’équipe CIC étudie votre demande.</p>
                 <p th:if="${suivi.dateLimite().isPresent()}" class="prochaine-etape__limite"
                    th:text="#{client.dossier.date-limite(${#temporals.format(suivi.dateLimite().get(), 'dd/MM/yyyy')})}">Avant le 19/11/2026</p>
+                <form th:if="${suivi.statut().name() == 'COMMANDEE'}" class="formulaire remise" method="post"
+                      th:action="@{/client/dossier/remise}">
+                    <div class="champ champ--case">
+                        <input id="confirmation-remise" type="checkbox" name="confirmation" value="oui" required>
+                        <label for="confirmation-remise" th:text="#{client.remise.attestation}">J’ai reçu mon produit en bon état.</label>
+                    </div>
+                    <p class="texte-doux" th:text="#{client.remise.aide}">En confirmant, votre remboursement démarre.</p>
+                    <button type="submit" class="bouton bouton--principal" th:text="#{client.remise.bouton}">Confirmer la remise</button>
+                </form>
                 <a th:if="${suivi.prochaine().name() == 'NOUVELLE_DEMANDE_POSSIBLE'}" class="bouton bouton--principal"
                    th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a>
             </section>

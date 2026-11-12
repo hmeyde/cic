@@ -43,6 +43,9 @@ import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.application.DossierActifExistantException;
 import com.cic.demande.application.EligibiliteService;
 import com.cic.demande.application.ScoreService;
+import com.cic.demande.application.RemiseNonConfirmeeException;
+import com.cic.demande.application.RemiseProduitService;
+import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.ProchaineEtape;
 import com.cic.demande.domain.StatutDossier;
 import com.cic.demande.domain.SuiviDossier;
@@ -99,7 +102,10 @@ class DemandeClientControllerTest {
                         new EmploiClientService(clients, emplois, clock), parametres,
                         contenu -> ("%PDF ordre " + contenu.contrat().numero()).getBytes(StandardCharsets.US_ASCII),
                         clock),
-                new InstructionsApportService(parametres), clock);
+                new InstructionsApportService(parametres),
+                new RemiseProduitService(demandes, decisions.contratService,
+                        new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock),
+                clock);
 
         clients.enregistrer(client);
         fournisseurs.enregistrer(fournisseur);
@@ -295,6 +301,58 @@ class DemandeClientControllerTest {
         controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
 
         assertThat(controller.contratPdf(principal).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Dossier du client accepté puis passé à COMMANDEE (commande fournisseur testée à part). */
+    private UUID dossierCommande() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        UUID demandeId = lignes().getFirst().id();
+        decisions.service.accepter(demandeId, "analyste");
+        Demande d = demandes.parId(demandeId).orElseThrow();
+        demandes.enregistrer(Demande.reconstituer(d.id(), d.clientId(), d.termes(), d.score(), d.soumiseLe(),
+                StatutDossier.COMMANDEE, clock.instant(), d.decision()));
+        return demandeId;
+    }
+
+    @Test
+    void le_client_confirme_la_remise_et_son_remboursement_demarre() {
+        UUID demandeId = dossierCommande();
+        RedirectAttributesModelMap redirection = new RedirectAttributesModelMap();
+
+        String vue = controller.confirmerRemise(principal, "oui", redirection);
+
+        assertThat(vue).isEqualTo("redirect:/client/dossier");
+        assertThat(redirection.getFlashAttributes().get("succes")).isEqualTo("client.remise.confirmee");
+        assertThat(demandes.parId(demandeId).orElseThrow().statut()).isEqualTo(StatutDossier.EN_REMBOURSEMENT);
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.suivi(principal, model);
+        assertThat(model.get("suivi")).isInstanceOfSatisfying(SuiviDossier.class,
+                s -> assertThat(s.prochaine()).isEqualTo(ProchaineEtape.PROVISIONNER_COMPTE));
+        assertThat(model.get("offre")).isInstanceOfSatisfying(OffreClient.class,
+                o -> assertThat(o.echeances()).extracting(Echeance::statut).containsOnly(StatutEcheance.A_VENIR));
+    }
+
+    @Test
+    void remise_sans_la_case_cochee_revient_au_suivi_avec_le_message() {
+        UUID demandeId = dossierCommande();
+        RedirectAttributesModelMap redirection = new RedirectAttributesModelMap();
+
+        String vue = controller.confirmerRemise(principal, null, redirection);
+
+        assertThat(vue).isEqualTo("redirect:/client/dossier");
+        assertThat(redirection.getFlashAttributes().get("erreur")).isEqualTo(RemiseNonConfirmeeException.CODE);
+        assertThat(demandes.parId(demandeId).orElseThrow().statut()).isEqualTo(StatutDossier.COMMANDEE);
+    }
+
+    @Test
+    void remise_impossible_avant_la_commande() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        RedirectAttributesModelMap redirection = new RedirectAttributesModelMap();
+
+        controller.confirmerRemise(principal, "oui", redirection);
+
+        assertThat(redirection.getFlashAttributes().get("erreur")).isEqualTo("dossier.transition.interdite");
+        assertThat(lignes().getFirst().statut()).isEqualTo(StatutDossier.EN_ANALYSE);
     }
 
     @Test

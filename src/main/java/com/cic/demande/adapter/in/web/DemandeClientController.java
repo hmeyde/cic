@@ -30,6 +30,7 @@ import com.cic.contrat.application.ContratPdfService;
 import com.cic.contrat.application.ContratService;
 import com.cic.demande.application.ApportInvalideException;
 import com.cic.demande.application.DemandeService;
+import com.cic.demande.application.RemiseProduitService;
 import com.cic.demande.domain.StatutDossier;
 import com.cic.paiement.application.InstructionsApportService;
 
@@ -48,6 +49,7 @@ class DemandeClientController {
     static final String VUE_SUIVI = "client/dossier/suivi";
     static final String CHEMIN_CONTRAT_PDF = "/client/dossier/contrat.pdf";
     static final String CHEMIN_AUTORISATION_PDF = "/client/dossier/autorisation-prelevement.pdf";
+    static final String CHEMIN_REMISE = "/client/dossier/remise";
     static final String CHEMIN_PRODUIT = "/client/catalogue/{id}";
 
     private static final Logger LOG = LoggerFactory.getLogger(DemandeClientController.class);
@@ -57,15 +59,18 @@ class DemandeClientController {
     private final ContratPdfService contratsPdf;
     private final AutorisationPdfService autorisationsPdf;
     private final InstructionsApportService instructionsApport;
+    private final RemiseProduitService remises;
     private final ZoneId fuseau;
 
     DemandeClientController(DemandeService demandes, ContratService contrats, ContratPdfService contratsPdf,
-            AutorisationPdfService autorisationsPdf, InstructionsApportService instructionsApport, Clock clock) {
+            AutorisationPdfService autorisationsPdf, InstructionsApportService instructionsApport,
+            RemiseProduitService remises, Clock clock) {
         this.demandes = demandes;
         this.contrats = contrats;
         this.contratsPdf = contratsPdf;
         this.autorisationsPdf = autorisationsPdf;
         this.instructionsApport = instructionsApport;
+        this.remises = remises;
         this.fuseau = clock.getZone();
     }
 
@@ -133,6 +138,25 @@ class DemandeClientController {
                 .cacheControl(CacheControl.noStore())
                 .body(p.contenu()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Le client confirme avoir reçu son produit (dossier COMMANDEE) : le dossier passe à LIVREE puis
+     * EN_REMBOURSEMENT. La case de confirmation doit être cochée. Aucun identifiant dans la requête :
+     * le dossier est celui du client connecté. Retour au suivi avec le message de succès ou d'erreur.
+     */
+    @PostMapping(CHEMIN_REMISE)
+    String confirmerRemise(Principal principal,
+            @RequestParam(name = "confirmation", required = false) String confirmation,
+            RedirectAttributes redirection) {
+        try {
+            remises.confirmer(clientId(principal), confirmation != null && !confirmation.isBlank());
+            redirection.addFlashAttribute("succes", "client.remise.confirmee");
+        } catch (ErreurMetier e) {
+            LOG.debug("Remise non confirmée : {}", e.code());
+            redirection.addFlashAttribute("erreur", e.code());
+        }
+        return "redirect:" + CHEMIN_SUIVI;
     }
 
     /**
