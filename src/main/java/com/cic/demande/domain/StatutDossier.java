@@ -77,6 +77,14 @@ public enum StatutDossier {
         return this != REFUSEE && this != ANNULEE && this != SOLDEE;
     }
 
+    /**
+     * Dossier en attente de la décision de l'analyste : accepter, refuser ou demander un
+     * justificatif (cette dernière laisse le dossier EN_ANALYSE).
+     */
+    public boolean attendDecision() {
+        return this == EN_ANALYSE;
+    }
+
     /** Le client a une échéance impayée sur ce dossier (EN_RETARD ou RECOUVREMENT). */
     public boolean estEnRetard() {
         return this == EN_RETARD || this == RECOUVREMENT;

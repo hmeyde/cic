@@ -7,8 +7,9 @@ import java.util.UUID;
 import com.cic.demande.domain.StatutDossier;
 
 /**
- * Événement publié à chaque changement de statut d'un dossier, y compris sa création, pour le
- * journal d'audit et les notifications. Aucune donnée personnelle : seulement des identifiants.
+ * Événement publié à chaque changement de statut d'un dossier, y compris sa création, pour les
+ * notifications et les autres modules (le journal d'audit est écrit directement, dans la même
+ * transaction). Aucune donnée personnelle : seulement des identifiants.
  *
  * @param depuis statut précédent ; {@code null} à la création du dossier
  */

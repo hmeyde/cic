@@ -27,6 +27,12 @@ public class DemandesEnMemoire implements DemandeRepository {
     }
 
     @Override
+    public Optional<Demande> parIdVerrouillee(UUID id) {
+        verrous++;
+        return parId(id);
+    }
+
+    @Override
     public List<Demande> parClient(UUID clientId) {
         return demandes.values().stream().filter(d -> d.clientId().equals(clientId))
                 .sorted(Comparator.comparing(Demande::soumiseLe).reversed()).toList();

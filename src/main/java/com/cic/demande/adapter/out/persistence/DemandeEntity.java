@@ -69,6 +69,15 @@ class DemandeEntity {
     @Column(name = "statut_change_le", nullable = false)
     private Instant statutChangeLe;
 
+    @Column(name = "decide_par", length = 100)
+    private String decidePar;
+
+    @Column(name = "decide_le")
+    private Instant decideLe;
+
+    @Column(name = "motif_refus", length = 500)
+    private String motifRefus;
+
     @Version
     @Column(name = "version", nullable = false)
     private long version;
@@ -98,10 +107,13 @@ class DemandeEntity {
         this.statutChangeLe = statutChangeLe;
     }
 
-    /** Seuls le statut et sa date changent après la soumission. */
-    void changerStatut(StatutDossier nouveau, Instant le) {
+    /** Seuls le statut, sa date et la décision de l'analyste changent après la soumission. */
+    void changerStatut(StatutDossier nouveau, Instant le, String decidePar, Instant decideLe, String motifRefus) {
         this.statut = nouveau;
         this.statutChangeLe = le;
+        this.decidePar = decidePar;
+        this.decideLe = decideLe;
+        this.motifRefus = motifRefus;
     }
 
     UUID getId() {
@@ -166,5 +178,17 @@ class DemandeEntity {
 
     Instant getStatutChangeLe() {
         return statutChangeLe;
+    }
+
+    String getDecidePar() {
+        return decidePar;
+    }
+
+    Instant getDecideLe() {
+        return decideLe;
+    }
+
+    String getMotifRefus() {
+        return motifRefus;
     }
 }

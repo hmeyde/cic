@@ -13,6 +13,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.application.JournalEnMemoire;
 import com.cic.catalogue.application.CatalogueClientService;
 import com.cic.catalogue.application.FournisseursEnMemoire;
 import com.cic.catalogue.application.ProduitsEnMemoire;
@@ -55,7 +57,7 @@ class FileAnalyseBackOfficeControllerTest {
                 new CatalogueClientService(new ProduitsEnMemoire(), new FournisseursEnMemoire(), calculPrix,
                         new SimulationService(calculPrix, echeancier), parametres),
                 echeancier, new ScoreService(parametres, new EligibiliteService(parametres, clock), clock),
-                parametres, evenement -> { }, clock);
+                parametres, new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
         controller = new FileAnalyseBackOfficeController(service, clock);
     }
 

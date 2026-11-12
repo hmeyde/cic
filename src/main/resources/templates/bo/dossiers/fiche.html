@@ -14,6 +14,9 @@
             <span class="texte-doux" dir="auto" th:text="#{bo.fiche.soumise(${fiche.soumiseLe()}, ${fiche.statutChangeLe()})}">Soumise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
         </p>
 
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Dossier accepté.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
+
         <!-- Score -->
         <section class="carte fiche-bloc" aria-labelledby="titre-score">
             <h2 id="titre-score" th:text="#{bo.fiche.score}">Score</h2>
@@ -71,6 +74,55 @@
                     </tr>
                     </tfoot>
                 </table>
+            </div>
+        </section>
+
+        <!-- Décision -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-decision">
+            <h2 id="titre-decision" th:text="#{bo.decision.titre}">Décision</h2>
+            <div th:if="${fiche.decision().isPresent()}" th:with="dec=${fiche.decision().get()}">
+                <p th:text="#{bo.decision.prise(${dec.analyste()}, ${dec.le()})}">Décision prise par analyste le 12/11/2026 10:00.</p>
+                <p th:if="${dec.motif().isPresent()}">
+                    <strong th:text="#{bo.decision.motif}">Motif du refus</strong> :
+                    <span dir="auto" th:text="${dec.motif().get()}">Revenus insuffisants</span>
+                </p>
+            </div>
+            <p th:if="${fiche.decision().isEmpty() and !fiche.decisionPossible()}" class="texte-doux"
+               th:text="#{bo.decision.aucune}">Aucune décision à prendre à ce stade du dossier.</p>
+
+            <div th:if="${fiche.decisionPossible()}" class="formulaire">
+                <p class="texte-doux" th:text="#{bo.fiche.score.aide}">Le score recommande, l’analyste décide toujours.</p>
+
+                <form method="post" th:action="@{/bo/dossiers/{id}/acceptation(id=${fiche.id()})}">
+                    <button type="submit" class="bouton bouton--principal" th:text="#{bo.decision.accepter}">Accepter le dossier</button>
+                </form>
+
+                <form method="post" class="formulaire" th:action="@{/bo/dossiers/{id}/refus(id=${fiche.id()})}">
+                    <div class="champ">
+                        <label for="motif" th:text="#{bo.decision.motif}">Motif du refus</label>
+                        <textarea id="motif" name="motif" rows="3" required th:maxlength="${longueurMotifMax}"
+                                  aria-describedby="motif-aide"></textarea>
+                        <p id="motif-aide" class="champ__aide texte-doux" th:text="#{bo.decision.motif.aide(${longueurMotifMax})}">Obligatoire, 500 caractères au plus.</p>
+                    </div>
+                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.decision.refuser}">Refuser le dossier</button>
+                </form>
+
+                <form method="post" class="formulaire" th:action="@{/bo/dossiers/{id}/justificatif(id=${fiche.id()})}">
+                    <div class="champ">
+                        <label for="type-justificatif" th:text="#{bo.decision.justificatif.type}">Justificatif à demander</label>
+                        <select id="type-justificatif" name="type" required>
+                            <option th:each="t : ${typesJustificatif}" th:value="${t.name()}"
+                                    th:selected="${#lists.contains(fiche.typesManquants(), t)}"
+                                    th:text="#{'client.justificatifs.type.' + ${t.name()}}">RIB</option>
+                        </select>
+                    </div>
+                    <div class="champ">
+                        <label for="precision" th:text="#{bo.decision.justificatif.precision}">Précision pour le client (facultatif)</label>
+                        <textarea id="precision" name="precision" rows="2" th:maxlength="${longueurPrecisionMax}"></textarea>
+                    </div>
+                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.decision.justificatif.demander}">Demander ce justificatif</button>
+                    <p class="champ__aide texte-doux" th:text="#{bo.decision.justificatif.aide}">Le dossier reste en analyse.</p>
+                </form>
             </div>
         </section>
 
@@ -220,6 +272,40 @@
                         <td class="nombre" th:text="#{client.justificatifs.taille.ko(${j.tailleKo()})}">120 Ko</td>
                         <td><a th:href="@{/bo/justificatifs/{id}(id=${j.id()})}" target="_blank" rel="noopener"
                                th:text="#{client.justificatifs.voir}">Voir</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Journal d'audit -->
+        <section class="fiche-bloc" aria-labelledby="titre-journal">
+            <h2 id="titre-journal" th:text="#{bo.journal.titre}">Journal du dossier</h2>
+            <p th:if="${#lists.isEmpty(fiche.journal())}" class="texte-doux" th:text="#{bo.journal.aucun}">Aucune entrée.</p>
+            <div th:unless="${#lists.isEmpty(fiche.journal())}" class="tableau-defilant">
+                <table class="tableau">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.journal.le}">Date</th>
+                        <th scope="col" th:text="#{bo.journal.action}">Action</th>
+                        <th scope="col" th:text="#{bo.journal.statut}">Statut</th>
+                        <th scope="col" th:text="#{bo.journal.acteur}">Par</th>
+                        <th scope="col" th:text="#{bo.journal.detail}">Détail</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${fiche.journal()}">
+                        <td dir="ltr" th:text="${e.le()}">12/11/2026 10:00</td>
+                        <td th:text="#{'bo.journal.action.' + ${e.action()}}">Acceptation</td>
+                        <td>
+                            <span th:if="${e.avant().isPresent()}" th:text="#{'client.demande.statut.' + ${e.avant().get()}} + ' → '">En cours d’étude →</span>
+                            <span th:if="${e.apres().isPresent()}" th:text="#{'client.demande.statut.' + ${e.apres().get()}}">Acceptée</span>
+                        </td>
+                        <td>
+                            <span th:text="#{'bo.journal.acteur.' + ${e.typeActeur().name()}}">Back-office</span>
+                            <span th:if="${e.acteur().isPresent()}" dir="ltr" th:text="${e.acteur().get()}">analyste</span>
+                        </td>
+                        <td dir="auto" th:text="${e.detail().orElse('')}">Revenus insuffisants</td>
                     </tr>
                     </tbody>
                 </table>

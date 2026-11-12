@@ -14,6 +14,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.domain.Acteur;
 import com.cic.catalogue.application.CatalogueClientService;
 import com.cic.catalogue.application.ConditionsProduit;
 import com.cic.commun.domain.Montant;
@@ -50,8 +52,8 @@ import com.cic.parametrage.domain.CleParametre;
  *       échéance tombe avant la fin du contrat, et le total des mensualités CIC ne dépasse pas
  *       {@code endettement.max.fraction} (1/3) du salaire net ; sinon la demande est refusée d'emblée ;</li>
  *   <li>score v1 calculé et stocké avec la demande ;</li>
- *   <li>DEMANDE_SOUMISE puis EN_ANALYSE par la machine à états ; chaque statut est publié
- *       ({@link StatutDossierChange}) pour le journal d'audit.</li>
+ *   <li>DEMANDE_SOUMISE puis EN_ANALYSE par la machine à états ; chaque statut est inscrit au
+ *       journal d'audit et publié ({@link StatutDossierChange}).</li>
  * </ol>
  */
 @Service
@@ -66,12 +68,15 @@ public class DemandeService {
     private final EcheancierService echeancier;
     private final ScoreService score;
     private final ParametreService parametres;
+    private final JournalAuditService journal;
     private final ApplicationEventPublisher evenements;
     private final Clock clock;
 
     public DemandeService(DemandeRepository demandes, ClientService clients, EmploiClientService emplois,
             CatalogueClientService catalogue, EcheancierService echeancier, ScoreService score,
-            ParametreService parametres, ApplicationEventPublisher evenements, Clock clock) {
+            ParametreService parametres, JournalAuditService journal, ApplicationEventPublisher evenements,
+            Clock clock) {
+        this.journal = journal;
         this.demandes = demandes;
         this.clients = clients;
         this.emplois = emplois;
@@ -146,6 +151,11 @@ public class DemandeService {
         StatutDossier initial = demande.statut();
         ChangementStatut analyse = demande.mettreEnAnalyse(maintenant);
         demandes.enregistrer(demande);
+        Acteur acteur = Acteur.client(clientId);
+        journal.journaliser(JournalDossier.transition(demande.id(), maintenant, acteur, ActionDossier.SOUMISSION,
+                null, initial, null));
+        journal.journaliser(JournalDossier.transition(demande.id(), maintenant, acteur,
+                ActionDossier.MISE_EN_ANALYSE, analyse.depuis(), analyse.vers(), null));
 
         evenements.publishEvent(new StatutDossierChange(demande.id(), clientId, null, initial, maintenant));
         evenements.publishEvent(new StatutDossierChange(demande.id(), clientId, analyse.depuis(), analyse.vers(),

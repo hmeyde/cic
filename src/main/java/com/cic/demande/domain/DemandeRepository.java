@@ -11,6 +11,12 @@ public interface DemandeRepository {
 
     Optional<Demande> parId(UUID id);
 
+    /**
+     * Lit la demande et la verrouille jusqu'à la fin de la transaction en cours, pour que deux
+     * analystes ne décident pas en même temps du même dossier.
+     */
+    Optional<Demande> parIdVerrouillee(UUID id);
+
     /** Demandes du client, de la plus récente à la plus ancienne. */
     List<Demande> parClient(UUID clientId);
 

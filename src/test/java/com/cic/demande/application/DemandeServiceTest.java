@@ -14,6 +14,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.application.JournalEnMemoire;
+import com.cic.audit.domain.Acteur;
 import com.cic.catalogue.application.CatalogueClientService;
 import com.cic.catalogue.application.FournisseursEnMemoire;
 import com.cic.catalogue.application.ProduitsEnMemoire;
@@ -56,6 +59,7 @@ class DemandeServiceTest {
     private final ProduitsEnMemoire produits = new ProduitsEnMemoire();
     private final FournisseursEnMemoire fournisseurs = new FournisseursEnMemoire();
     private final DemandesEnMemoire demandes = new DemandesEnMemoire();
+    private final JournalEnMemoire journal = new JournalEnMemoire();
     private final List<Object> evenements = new ArrayList<>();
     private final DemandeService service;
 
@@ -75,7 +79,7 @@ class DemandeServiceTest {
         ScoreService score = new ScoreService(parametres, new EligibiliteService(parametres, clock), clock);
         service = new DemandeService(demandes, new ClientService(clients),
                 new EmploiClientService(clients, emplois, clock), catalogue, echeancier, score, parametres,
-                evenements::add, clock);
+                new JournalAuditService(journal), evenements::add, clock);
 
         client.verifierNni();
         client.verifierPieceIdentite();
@@ -121,8 +125,21 @@ class DemandeServiceTest {
     }
 
     @Test
-    void chaque_statut_est_publie_pour_le_journal_d_audit() {
+    void chaque_statut_est_journalise_et_publie() {
         Demande demande = soumettre();
+
+        assertThat(journal.parObjet(JournalDossier.objet(demande.id()))).satisfiesExactly(
+                e -> {
+                    assertThat(e.action()).isEqualTo("SOUMISSION");
+                    assertThat(e.avant()).isEmpty();
+                    assertThat(e.apres()).contains("DEMANDE_SOUMISE");
+                    assertThat(e.acteur()).isEqualTo(Acteur.client(client.id()));
+                },
+                e -> {
+                    assertThat(e.action()).isEqualTo("MISE_EN_ANALYSE");
+                    assertThat(e.avant()).contains("DEMANDE_SOUMISE");
+                    assertThat(e.apres()).contains("EN_ANALYSE");
+                });
 
         assertThat(evenements).containsExactly(
                 new StatutDossierChange(demande.id(), client.id(), null, StatutDossier.DEMANDE_SOUMISE, clock.instant()),

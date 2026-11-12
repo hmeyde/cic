@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.cic.audit.domain.EntreeJournal;
+import com.cic.audit.domain.TypeActeur;
 import com.cic.commun.domain.Montant;
 import com.cic.demande.application.FicheDossier;
 import com.cic.demande.domain.Demande;
@@ -33,11 +35,15 @@ import com.cic.identite.domain.TypeDocument;
  *
  * @param client        vide si le client est introuvable
  * @param emploi        vide si le client n'a plus d'emploi déclaré
- * @param typesManquants types de justificatifs attendus que le client n'a pas encore envoyés
+ * @param typesManquants   types de justificatifs attendus que le client n'a pas encore envoyés
+ * @param decisionPossible le dossier attend la décision de l'analyste (EN_ANALYSE)
+ * @param decision         décision déjà prise ; vide sinon
+ * @param journal          journal d'audit du dossier, du plus ancien au plus récent
  */
 record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String statutChangeLe, Conditions conditions,
         Optional<VueClient> client, Optional<VueEmploi> emploi, List<VueJustificatif> justificatifs,
-        List<TypeDocument> typesManquants, VueScore score) {
+        List<TypeDocument> typesManquants, VueScore score, boolean decisionPossible,
+        Optional<VueDecision> decision, List<VueEntreeJournal> journal) {
 
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter DATE_HEURE = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -60,6 +66,18 @@ record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String s
     }
 
     record VueJustificatif(UUID id, TypeDocument type, String format, String recuLe, long tailleKo) {
+    }
+
+    /** @param motif motif du refus ; vide pour une acceptation */
+    record VueDecision(String analyste, String le, Optional<String> motif) {
+    }
+
+    /**
+     * @param acteur identifiant du membre du back-office ; vide pour le client (son identifiant
+     *               technique n'apprend rien à l'analyste) et pour un traitement automatique
+     */
+    record VueEntreeJournal(String le, TypeActeur typeActeur, Optional<String> acteur, String action,
+            Optional<String> avant, Optional<String> apres, Optional<String> detail) {
     }
 
     record VueScore(String versionGrille, int note, boolean eligible, String recommandation,
@@ -91,7 +109,10 @@ record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String s
 
         return new VueFicheDossier(d.id(), d.statut(), DATE_HEURE.format(d.soumiseLe().atZone(clock.getZone())),
                 DATE_HEURE.format(d.statutChangeLe().atZone(clock.getZone())), conditions, client, emploi,
-                justificatifs, manquants, score);
+                justificatifs, manquants, score, d.statut().attendDecision(),
+                d.decision().map(dec -> new VueDecision(dec.analyste(),
+                        DATE_HEURE.format(dec.le().atZone(clock.getZone())), dec.motif())),
+                fiche.journal().stream().map(e -> entree(e, clock)).toList());
     }
 
     private static VueClient client(Client c, LocalDate aujourdhui, Clock clock) {
@@ -109,6 +130,13 @@ record VueFicheDossier(UUID id, StatutDossier statut, String soumiseLe, String s
                 anciennete.getYears(), anciennete.getMonths(), e.dateFin().map(DATE::format), e.salaireNet(),
                 e.jourPaie(), e.estSalaireVerseSurCompte(), e.estSalaireDomicilieBmci(),
                 e.modeRemboursement().name(), part);
+    }
+
+    private static VueEntreeJournal entree(EntreeJournal e, Clock clock) {
+        Optional<String> acteur = e.acteur().type() == TypeActeur.BACK_OFFICE
+                ? Optional.of(e.acteur().identifiant()) : Optional.empty();
+        return new VueEntreeJournal(DATE_HEURE.format(e.le().atZone(clock.getZone())), e.acteur().type(), acteur,
+                e.action(), e.avant(), e.apres(), e.detail());
     }
 
     private static VueJustificatif justificatif(Document doc, Clock clock) {

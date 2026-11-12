@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.application.JournalEnMemoire;
 import com.cic.catalogue.application.CatalogueClientService;
 import com.cic.catalogue.application.FournisseursEnMemoire;
 import com.cic.catalogue.application.ProduitsEnMemoire;
@@ -72,7 +74,7 @@ class DemandeClientControllerTest {
                 new CatalogueClientService(produits, fournisseurs, calculPrix,
                         new SimulationService(calculPrix, echeancier), parametres),
                 echeancier, new ScoreService(parametres, new EligibiliteService(parametres, clock), clock),
-                parametres, evenement -> { }, clock);
+                parametres, new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
         controller = new DemandeClientController(service, clock);
 
         clients.enregistrer(client);

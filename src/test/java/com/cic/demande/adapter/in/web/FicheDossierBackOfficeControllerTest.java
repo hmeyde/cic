@@ -14,7 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.application.JournalEnMemoire;
+import com.cic.audit.domain.TypeActeur;
 import com.cic.commun.domain.Montant;
+import com.cic.demande.application.DecisionService;
 import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.application.FicheDossierService;
 import com.cic.demande.domain.ConditionEliminatoire;
@@ -49,10 +53,12 @@ class FicheDossierBackOfficeControllerTest {
     private final EmploisEnMemoire emplois = new EmploisEnMemoire();
     private final DocumentsEnMemoire documents = new DocumentsEnMemoire();
     private final DemandesEnMemoire demandes = new DemandesEnMemoire();
+    private final JournalEnMemoire journal = new JournalEnMemoire();
     private final FicheDossierBackOfficeController controller = new FicheDossierBackOfficeController(
             new FicheDossierService(demandes, new ClientService(clients),
                     new EmploiClientService(clients, emplois, clock),
-                    new DocumentService(clients, documents, new StockageEnMemoire(), clock)),
+                    new DocumentService(clients, documents, new StockageEnMemoire(), clock),
+                    new JournalAuditService(journal)),
             clock);
 
     private VueFicheDossier ouvrir(UUID id) {
@@ -137,5 +143,38 @@ class FicheDossierBackOfficeControllerTest {
         assertThatThrownBy(() -> ouvrir(UUID.randomUUID()))
                 .isInstanceOfSatisfying(ResponseStatusException.class,
                         e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
+    @Test
+    void la_fiche_montre_la_decision_et_le_journal_du_dossier() {
+        Demande demande = demande(UUID.randomUUID());
+        DecisionService decisions = new DecisionService(demandes, new JournalAuditService(journal), evenement -> { },
+                clock);
+        assertThat(ouvrir(demande.id()).decisionPossible()).isTrue();
+
+        decisions.demanderJustificatif(demande.id(), "analyste", TypeDocument.RIB, null);
+        decisions.refuser(demande.id(), "analyste", "Salaire non domicilié");
+        VueFicheDossier fiche = ouvrir(demande.id());
+
+        assertThat(fiche.statut()).isEqualTo(StatutDossier.REFUSEE);
+        assertThat(fiche.decisionPossible()).isFalse();
+        assertThat(fiche.decision()).hasValueSatisfying(d -> {
+            assertThat(d.analyste()).isEqualTo("analyste");
+            assertThat(d.le()).isEqualTo("12/11/2026 10:00");
+            assertThat(d.motif()).contains("Salaire non domicilié");
+        });
+        assertThat(fiche.journal()).satisfiesExactly(
+                e -> {
+                    assertThat(e.action()).isEqualTo("DEMANDE_JUSTIFICATIF");
+                    assertThat(e.detail()).contains("RIB");
+                },
+                e -> {
+                    assertThat(e.action()).isEqualTo("REFUS");
+                    assertThat(e.avant()).contains("EN_ANALYSE");
+                    assertThat(e.apres()).contains("REFUSEE");
+                    assertThat(e.acteur()).contains("analyste");
+                    assertThat(e.typeActeur()).isEqualTo(TypeActeur.BACK_OFFICE);
+                    assertThat(e.le()).isEqualTo("12/11/2026 10:00");
+                });
     }
 }

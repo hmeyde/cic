@@ -25,7 +25,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * rôles de l'équipe CIC ; la gestion du catalogue ({@code /bo/fournisseurs/**}, {@code /bo/produits/**}) est réservée au rôle ADMIN.
  * Les justificatifs des clients ({@code /bo/justificatifs/**}) sont réservés aux rôles ANALYSTE et ADMIN.
  * La file des dossiers à analyser ({@code /bo/dossiers}) et la fiche de chaque dossier
- * ({@code /bo/dossiers/{id}}) sont réservées au rôle ANALYSTE.
+ * ({@code /bo/dossiers/{id}}), avec la décision et le journal du dossier, sont réservées au rôle ANALYSTE.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
  * <p>Les autres pages restent publiques. CSRF actif partout ; en-têtes de sécurité par défaut de

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cic.commun.domain.Montant;
+import com.cic.demande.domain.Decision;
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandeRepository;
 import com.cic.demande.domain.Eligibilite;
@@ -38,13 +39,15 @@ class DemandePersistenceAdapter implements DemandeRepository {
         this.entityManager = entityManager;
     }
 
-    /** Nouvelle demande : demande et score insérés ; demande existante : seul le statut change. */
+    /** Nouvelle demande : demande et score insérés ; demande existante : seuls le statut et la décision changent. */
     @Override
     @Transactional
     public void enregistrer(Demande d) {
         Optional<DemandeEntity> existante = demandes.findById(d.id());
         if (existante.isPresent()) {
-            existante.get().changerStatut(d.statut(), d.statutChangeLe());
+            Optional<Decision> decision = d.decision();
+            existante.get().changerStatut(d.statut(), d.statutChangeLe(), decision.map(Decision::analyste).orElse(null),
+                    decision.map(Decision::le).orElse(null), decision.flatMap(Decision::motif).orElse(null));
             return;
         }
         entityManager.persist(versEntite(d));
@@ -55,6 +58,12 @@ class DemandePersistenceAdapter implements DemandeRepository {
     @Transactional(readOnly = true)
     public Optional<Demande> parId(UUID id) {
         return demandes.findById(id).map(e -> versDomaine(e, scores.findById(e.getId()).orElseThrow()));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<Demande> parIdVerrouillee(UUID id) {
+        return demandes.findVerrouilleeById(id).map(e -> versDomaine(e, scores.findById(e.getId()).orElseThrow()));
     }
 
     @Override
@@ -129,7 +138,9 @@ class DemandePersistenceAdapter implements DemandeRepository {
                 new NoteScore(s.getVersionGrille(), s.getCriteres().stream()
                         .map(c -> new ResultatCritere(c.getCritere(), c.getPoints(), c.getRaison())).toList(),
                         s.getRecommandationNote()));
+        Optional<Decision> decision = Optional.ofNullable(e.getDecidePar())
+                .map(par -> new Decision(par, e.getDecideLe(), Optional.ofNullable(e.getMotifRefus())));
         return Demande.reconstituer(e.getId(), e.getClientId(), termes, score, e.getSoumiseLe(), e.getStatut(),
-                e.getStatutChangeLe());
+                e.getStatutChangeLe(), decision);
     }
 }

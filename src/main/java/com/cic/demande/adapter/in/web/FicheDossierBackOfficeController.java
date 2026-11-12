@@ -10,11 +10,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.cic.demande.application.DecisionService;
 import com.cic.demande.application.FicheDossierService;
+import com.cic.demande.domain.Demande;
+import com.cic.identite.domain.TypeDocument;
 
 /**
  * Back-office : fiche d'un dossier (client, emploi, justificatifs, score détaillé critère par
- * critère), rôle ANALYSTE (voir {@code SecurityConfig}). L'URL ne porte que l'identifiant technique
+ * critère, décision et journal d'audit), rôle ANALYSTE (voir {@code SecurityConfig}). L'URL ne porte que l'identifiant technique
  * de la demande, aucune donnée personnelle.
  */
 @Controller
@@ -36,6 +39,9 @@ class FicheDossierBackOfficeController {
         VueFicheDossier fiche = fiches.fiche(id).map(f -> VueFicheDossier.depuis(f, clock))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("fiche", fiche);
+        model.addAttribute("typesJustificatif", TypeDocument.values());
+        model.addAttribute("longueurMotifMax", Demande.LONGUEUR_MOTIF_MAX);
+        model.addAttribute("longueurPrecisionMax", DecisionService.LONGUEUR_PRECISION_MAX);
         return VUE;
     }
 }

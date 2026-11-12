@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cic.audit.application.JournalAuditService;
 import com.cic.demande.domain.DemandeRepository;
 import com.cic.identite.application.ClientService;
 import com.cic.identite.application.DocumentService;
@@ -27,9 +28,11 @@ public class FicheDossierService {
     private final ClientService clients;
     private final EmploiClientService emplois;
     private final DocumentService documents;
+    private final JournalAuditService journal;
 
     public FicheDossierService(DemandeRepository demandes, ClientService clients, EmploiClientService emplois,
-            DocumentService documents) {
+            DocumentService documents, JournalAuditService journal) {
+        this.journal = journal;
         this.demandes = demandes;
         this.clients = clients;
         this.emplois = emplois;
@@ -41,7 +44,8 @@ public class FicheDossierService {
     public Optional<FicheDossier> fiche(UUID demandeId) {
         Objects.requireNonNull(demandeId, "demandeId");
         Optional<FicheDossier> fiche = demandes.parId(demandeId).map(d -> new FicheDossier(d,
-                clients.parId(d.clientId()), emplois.parClient(d.clientId()), documents.parClient(d.clientId())));
+                clients.parId(d.clientId()), emplois.parClient(d.clientId()), documents.parClient(d.clientId()),
+                journal.historique(JournalDossier.objet(d.id()))));
         fiche.ifPresent(f -> LOG.info("Fiche dossier consultée par le back-office : {}", f.demande()));
         return fiche;
     }

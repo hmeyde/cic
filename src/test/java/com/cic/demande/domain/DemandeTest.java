@@ -80,4 +80,72 @@ class DemandeTest {
         assertThat(StatutDossier.RECOUVREMENT.estEnRetard()).isTrue();
         assertThat(StatutDossier.EN_REMBOURSEMENT.estEnRetard()).isFalse();
     }
+
+    @Test
+    void l_analyste_accepte_un_dossier_en_analyse() {
+        Demande demande = DemandesFixtures.demande(CLIENT, StatutDossier.EN_ANALYSE);
+        Instant plusTard = DemandesFixtures.LE.plusSeconds(60);
+
+        ChangementStatut changement = demande.accepter("analyste", plusTard);
+
+        assertThat(changement).isEqualTo(new ChangementStatut(StatutDossier.EN_ANALYSE, StatutDossier.ACCEPTEE));
+        assertThat(demande.statut()).isEqualTo(StatutDossier.ACCEPTEE);
+        assertThat(demande.statutChangeLe()).isEqualTo(plusTard);
+        assertThat(demande.decision()).hasValueSatisfying(d -> {
+            assertThat(d.analyste()).isEqualTo("analyste");
+            assertThat(d.le()).isEqualTo(plusTard);
+            assertThat(d.motif()).isEmpty();
+            assertThat(d.prisePar("analyste")).isTrue();
+        });
+    }
+
+    @Test
+    void l_analyste_refuse_avec_un_motif() {
+        Demande demande = DemandesFixtures.demande(CLIENT, StatutDossier.EN_ANALYSE);
+
+        ChangementStatut changement = demande.refuser("analyste", "  Revenus insuffisants ", DemandesFixtures.LE);
+
+        assertThat(changement.vers()).isEqualTo(StatutDossier.REFUSEE);
+        assertThat(demande.estActive()).isFalse();
+        assertThat(demande.decision()).hasValueSatisfying(d -> assertThat(d.motif()).contains("Revenus insuffisants"));
+    }
+
+    @Test
+    void un_refus_sans_motif_ou_avec_un_motif_trop_long_ne_change_rien() {
+        Demande demande = DemandesFixtures.demande(CLIENT, StatutDossier.EN_ANALYSE);
+
+        for (String motif : new String[] {null, "  ", "x".repeat(Demande.LONGUEUR_MOTIF_MAX + 1)}) {
+            assertThatThrownBy(() -> demande.refuser("analyste", motif, DemandesFixtures.LE))
+                    .isInstanceOf(MotifRefusInvalideException.class);
+        }
+        assertThat(demande.statut()).isEqualTo(StatutDossier.EN_ANALYSE);
+        assertThat(demande.decision()).isEmpty();
+    }
+
+    @Test
+    void pas_de_decision_hors_analyse() {
+        Demande soumise = DemandesFixtures.demande(CLIENT, StatutDossier.DEMANDE_SOUMISE);
+        Demande acceptee = DemandesFixtures.demande(CLIENT, StatutDossier.ACCEPTEE);
+
+        assertThatThrownBy(() -> soumise.accepter("analyste", DemandesFixtures.LE))
+                .isInstanceOf(TransitionInterditeException.class);
+        assertThatThrownBy(() -> acceptee.accepter("analyste", DemandesFixtures.LE))
+                .isInstanceOf(TransitionInterditeException.class);
+        assertThatThrownBy(() -> acceptee.refuser("analyste", "Motif", DemandesFixtures.LE))
+                .isInstanceOf(TransitionInterditeException.class);
+        assertThatThrownBy(acceptee::demanderJustificatif).isInstanceOf(DecisionImpossibleException.class);
+        assertThat(acceptee.statut()).isEqualTo(StatutDossier.ACCEPTEE);
+        assertThat(soumise.statut()).isEqualTo(StatutDossier.DEMANDE_SOUMISE);
+    }
+
+    @Test
+    void une_demande_de_justificatif_laisse_le_dossier_en_analyse() {
+        Demande demande = DemandesFixtures.demande(CLIENT, StatutDossier.EN_ANALYSE);
+
+        demande.demanderJustificatif();
+
+        assertThat(demande.statut()).isEqualTo(StatutDossier.EN_ANALYSE);
+        assertThat(demande.statutChangeLe()).isEqualTo(DemandesFixtures.LE);
+        assertThat(demande.decision()).isEmpty();
+    }
 }
