@@ -99,6 +99,12 @@ class DemandePersistenceAdapter implements DemandeRepository {
      * l'identifiant du client (une collision entre deux clients ne fait que sérialiser leurs demandes).
      */
     @Override
+    @Transactional(readOnly = true)
+    public long nombre() {
+        return demandes.count();
+    }
+
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void verrouillerClient(UUID clientId) {
         long cle = clientId.getMostSignificantBits() ^ clientId.getLeastSignificantBits();

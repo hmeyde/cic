@@ -62,4 +62,9 @@ class InscriptionEntity {
         this.consentementLe = i.consentementLe();
         this.creeLe = i.creeLe();
     }
+
+    Inscription versDomaine() {
+        return new Inscription(id, nom, telephone, employeur, typeContrat, trancheSalaire, produitSouhaite,
+                consentementLe, creeLe);
+    }
 }

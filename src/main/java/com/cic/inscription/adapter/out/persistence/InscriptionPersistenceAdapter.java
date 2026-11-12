@@ -1,5 +1,7 @@
 package com.cic.inscription.adapter.out.persistence;
 
+import java.util.List;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,5 +38,17 @@ class InscriptionPersistenceAdapter implements InscriptionRepository {
     @Transactional(readOnly = true)
     public boolean existeTelephone(String telephone) {
         return inscriptions.existsByTelephone(telephone);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long nombre() {
+        return inscriptions.count();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Inscription> toutesDeLaPlusRecente() {
+        return inscriptions.findAllByOrderByCreeLeDescIdAsc().stream().map(InscriptionEntity::versDomaine).toList();
     }
 }

@@ -1,6 +1,7 @@
 package com.cic.inscription.application;
 
 import java.time.Clock;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -47,6 +48,18 @@ public class InscriptionService {
         inscriptions.enregistrer(inscription);
         LOG.info("Pré-inscription enregistrée : {}", inscription);
         return inscription;
+    }
+
+    /** Nombre total de pré-inscriptions. */
+    @Transactional(readOnly = true)
+    public long nombre() {
+        return inscriptions.nombre();
+    }
+
+    /** Toutes les pré-inscriptions, de la plus récente à la plus ancienne (export du back-office). */
+    @Transactional(readOnly = true)
+    public List<Inscription> toutes() {
+        return inscriptions.toutesDeLaPlusRecente();
     }
 
     private static <E extends Enum<E>> E valeur(Class<E> type, String saisie, String code) {

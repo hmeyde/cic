@@ -38,4 +38,7 @@ public interface DemandeRepository {
      * deux demandes simultanées ne passent pas toutes deux la règle du dossier actif unique.
      */
     void verrouillerClient(UUID clientId);
+
+    /** Nombre de demandes soumises, tous statuts confondus. */
+    long nombre();
 }

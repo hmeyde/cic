@@ -37,6 +37,9 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * Le tableau de bord des associés ({@code /bo/pilotage}) et la liste des apports en capital
  * ({@code GET /bo/capital}) sont ouverts aux rôles ASSOCIE et ADMIN ; la saisie d'un apport en capital
  * ({@code POST /bo/capital}) est réservée au rôle ADMIN.
+ * Le suivi des pré-inscriptions ({@code GET /bo/inscriptions} : nombre d'inscrits et de demandes complètes)
+ * est ouvert aux rôles ASSOCIE et ADMIN ; l'export CSV ({@code /bo/inscriptions/export.csv}), qui contient
+ * des données personnelles, est réservé au rôle ADMIN.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
  * <p>Les autres pages restent publiques, dont la pré-inscription ({@code /inscription}). CSRF actif partout ; en-têtes de sécurité par défaut de
@@ -93,6 +96,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/bo/capital").hasAnyRole("ASSOCIE", "ADMIN")
                 .requestMatchers("/bo/capital", "/bo/capital/**").hasRole("ADMIN")
                 .requestMatchers("/bo/pilotage", "/bo/pilotage/**").hasAnyRole("ASSOCIE", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/bo/inscriptions").hasAnyRole("ASSOCIE", "ADMIN")
+                .requestMatchers("/bo/inscriptions", "/bo/inscriptions/**").hasRole("ADMIN")
                 .requestMatchers("/bo", "/bo/**").hasAnyRole(ROLES_BACK_OFFICE)
                 .anyRequest().permitAll()
             )

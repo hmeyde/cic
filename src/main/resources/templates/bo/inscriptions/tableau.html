@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.inscriptions.titre-page}">Pré-inscriptions — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-inscriptions">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <h1 id="titre-inscriptions" th:text="#{bo.inscriptions.titre}">Pré-inscriptions</h1>
+        <p class="texte-doux" th:text="#{bo.inscriptions.texte}">Intérêt mesuré par la page publique d’inscription.</p>
+
+        <ul class="indicateurs">
+            <li class="carte indicateur">
+                <h2 class="indicateur__titre" id="indicateur-inscrits" th:text="#{bo.inscriptions.inscrits}">Inscrits</h2>
+                <p class="indicateur__valeur" data-indicateur="inscrits" aria-describedby="indicateur-inscrits-aide"
+                   th:text="${#numbers.formatInteger(nombreInscrits, 1, 'WHITESPACE')}">0</p>
+                <p class="indicateur__aide texte-doux" id="indicateur-inscrits-aide"
+                   th:text="#{bo.inscriptions.inscrits.aide}">Pré-inscriptions reçues par la page publique.</p>
+            </li>
+            <li class="carte indicateur">
+                <h2 class="indicateur__titre" id="indicateur-demandes" th:text="#{bo.inscriptions.demandesCompletes}">Demandes complètes</h2>
+                <p class="indicateur__valeur" data-indicateur="demandes-completes" aria-describedby="indicateur-demandes-aide"
+                   th:text="${#numbers.formatInteger(nombreDemandesCompletes, 1, 'WHITESPACE')}">0</p>
+                <p class="indicateur__aide texte-doux" id="indicateur-demandes-aide"
+                   th:text="#{bo.inscriptions.demandesCompletes.aide}">Demandes de crédit soumises.</p>
+            </li>
+        </ul>
+
+        <p sec:authorize="hasRole('ADMIN')">
+            <a class="bouton bouton--principal" th:href="@{/bo/inscriptions/export.csv}" download
+               th:text="#{bo.inscriptions.export}">Exporter les inscriptions (CSV)</a>
+            <span class="texte-doux" th:text="#{bo.inscriptions.export.aide}">Données personnelles.</span>
+        </p>
+    </section>
+</main>
+</body>
+</html>

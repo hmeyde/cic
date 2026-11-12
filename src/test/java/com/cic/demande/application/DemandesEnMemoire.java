@@ -53,6 +53,11 @@ public class DemandesEnMemoire implements DemandeRepository {
     }
 
     @Override
+    public long nombre() {
+        return demandes.size();
+    }
+
+    @Override
     public void verrouillerClient(UUID clientId) {
         verrous++;
     }

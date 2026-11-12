@@ -1,5 +1,7 @@
 package com.cic.inscription.domain;
 
+import java.util.List;
+
 /** Stockage des pré-inscriptions (port de sortie). */
 public interface InscriptionRepository {
 
@@ -13,4 +15,10 @@ public interface InscriptionRepository {
 
     /** @param telephone téléphone normalisé (8 chiffres) */
     boolean existeTelephone(String telephone);
+
+    /** Nombre total de pré-inscriptions. */
+    long nombre();
+
+    /** Toutes les pré-inscriptions, de la plus récente à la plus ancienne. */
+    List<Inscription> toutesDeLaPlusRecente();
 }
