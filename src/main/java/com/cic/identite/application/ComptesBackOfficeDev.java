@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.cic.identite.domain.RoleBackOffice;
 
 /**
- * Profil dev uniquement : crée au démarrage un compte ADMIN, un compte ANALYSTE, un compte RECOUVREMENT et un
+ * Profils dev et demo : crée au démarrage un compte ADMIN, un compte ANALYSTE, un compte RECOUVREMENT et un
  * compte ASSOCIE s'ils n'existent pas.
  * Identifiants et mots de passe viennent de la configuration ({@code cic.back-office.admin-dev.*},
  * {@code cic.back-office.analyste-dev.*}, {@code cic.back-office.recouvrement-dev.*},
@@ -19,7 +19,7 @@ import com.cic.identite.domain.RoleBackOffice;
  * variables d'environnement. Les mots de passe ne sont jamais journalisés.
  */
 @Component
-@Profile("dev")
+@Profile({"dev", "demo"})
 class ComptesBackOfficeDev implements ApplicationRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComptesBackOfficeDev.class);
@@ -64,7 +64,7 @@ class ComptesBackOfficeDev implements ApplicationRunner {
 
     private void creerSiAbsent(String identifiant, String motDePasse, RoleBackOffice role) {
         if (comptes.creerSiAbsent(identifiant, motDePasse, role)) {
-            LOG.info("Compte {} de développement créé", role);
+            LOG.info("Compte {} du back-office créé au démarrage", role);
         }
     }
 }
