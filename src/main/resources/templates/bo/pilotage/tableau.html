@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.pilotage.titre-page}">Tableau de bord des associés — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-pilotage">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <h1 id="titre-pilotage" th:text="#{bo.pilotage.titre}">Tableau de bord des associés</h1>
+        <p class="texte-doux" th:text="#{bo.pilotage.texte}">Chiffres tirés de la comptabilité, à jour à chaque mouvement d’argent.</p>
+
+        <ul class="indicateurs" th:with="t=${tableau}">
+            <li class="carte indicateur" th:each="cle : ${ {'capitalApporte', 'capitalEngage', 'encours', 'beneficeRealise'} }"
+                th:with="m=${cle == 'capitalApporte'} ? ${t.capitalApporte()} : (${cle == 'capitalEngage'} ? ${t.capitalEngage()} : (${cle == 'encours'} ? ${t.encours()} : ${t.beneficeRealise()}))">
+                <h2 class="indicateur__titre" th:id="'indicateur-' + ${cle}" th:text="#{'bo.pilotage.' + ${cle}}">Capital apporté</h2>
+                <p class="indicateur__valeur" th:attr="aria-describedby='indicateur-' + ${cle} + '-aide'"
+                   th:text="#{client.catalogue.montant(${#numbers.formatInteger(m.valeur(), 1, 'WHITESPACE')})}">100 000 MRU</p>
+                <p class="indicateur__aide texte-doux" th:id="'indicateur-' + ${cle} + '-aide'"
+                   th:text="#{'bo.pilotage.' + ${cle} + '.aide'}">Somme des apports en capital des associés.</p>
+            </li>
+        </ul>
+
+        <p class="actions-formulaire">
+            <a class="bouton bouton--contour" th:href="@{/bo/capital}" th:text="#{bo.capital.titre}">Apports en capital</a>
+        </p>
+    </section>
+</main>
+</body>
+</html>

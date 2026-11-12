@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.capital.titre-page}">Apports en capital — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-capital">
+        <p><a th:href="@{/bo/pilotage}" th:text="#{bo.capital.retour}">Retour au tableau de bord</a></p>
+        <h1 id="titre-capital" th:text="#{bo.capital.titre}">Apports en capital</h1>
+        <p class="texte-doux" th:text="#{bo.capital.texte}">Argent versé par les associés pour financer les achats aux fournisseurs. Chaque apport est comptabilisé et ne peut plus être modifié.</p>
+
+        <div th:if="${enregistre != null}" role="status">
+            <p class="alerte alerte--info"
+               th:text="#{bo.capital.enregistre(${#numbers.formatInteger(enregistre.montant().valeur(), 1, 'WHITESPACE')}, ${enregistre.associe()}, ${enregistre.verseLe()})}">Apport de 100 000 MRU de Sidi enregistré, versé le 12/11/2026.</p>
+        </div>
+        <div th:if="${erreur != null}" role="alert">
+            <p class="alerte alerte--erreur" th:text="#{${erreur}(${longueurAssocieMax})}">Indiquez le montant versé.</p>
+        </div>
+
+        <form th:if="${peutSaisir}" class="formulaire carte" method="post" novalidate
+              th:action="@{/bo/capital}" aria-labelledby="titre-saisie-capital">
+            <h2 id="titre-saisie-capital" th:text="#{bo.capital.saisie}">Saisir un apport en capital</h2>
+            <div class="champ">
+                <label for="associe" th:text="#{bo.capital.associe}">Associé</label>
+                <input id="associe" name="associe" type="text" dir="auto" required autocomplete="off"
+                       th:maxlength="${longueurAssocieMax}" th:value="${saisie.associe()}">
+            </div>
+            <div class="champ">
+                <label for="montant" th:text="#{bo.capital.montant}">Montant versé (MRU)</label>
+                <input id="montant" name="montant" type="text" dir="ltr" required inputmode="numeric" maxlength="15"
+                       autocomplete="off" th:value="${saisie.montant()}" aria-describedby="montant-aide">
+                <p id="montant-aide" class="champ__aide texte-doux" th:text="#{bo.paiement.montant.aide}">En ouguiyas, sans décimale.</p>
+            </div>
+            <div class="champ">
+                <label for="verseLe" th:text="#{bo.capital.verse-le}">Date du versement</label>
+                <input id="verseLe" name="verseLe" type="date" dir="ltr" required th:max="${aujourdhui}" th:value="${saisie.verseLe()}">
+            </div>
+            <div class="actions-formulaire">
+                <button type="submit" class="bouton bouton--principal" th:text="#{bo.capital.enregistrer}">Enregistrer l’apport</button>
+            </div>
+        </form>
+
+        <h2 th:text="#{bo.capital.liste}">Apports reçus</h2>
+        <p th:if="${#lists.isEmpty(apports)}" class="texte-doux" th:text="#{bo.capital.aucun}">Aucun apport en capital saisi.</p>
+        <div th:unless="${#lists.isEmpty(apports)}" class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                <tr>
+                    <th scope="col" th:text="#{bo.capital.verse-le}">Date du versement</th>
+                    <th scope="col" th:text="#{bo.capital.associe}">Associé</th>
+                    <th scope="col" class="nombre" th:text="#{bo.paiement.montant.court}">Montant</th>
+                    <th scope="col" th:text="#{bo.paiement.saisi}">Saisi le, par</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${apports}">
+                    <td dir="ltr" th:text="${a.verseLe()}">12/11/2026</td>
+                    <td dir="auto" th:text="${a.associe()}">Sidi</td>
+                    <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(a.montant().valeur(), 1, 'WHITESPACE')})}">100 000 MRU</td>
+                    <td dir="auto" th:text="#{bo.paiement.saisi.valeur(${a.saisiLe()}, ${a.saisiPar()})}">12/11/2026 10:00, admin</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

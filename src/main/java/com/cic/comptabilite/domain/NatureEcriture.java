@@ -15,6 +15,8 @@ public enum NatureEcriture {
     ECHEANCE_ENCAISSEE,
     /** Paiement reçu dont la référence ne désigne aucun dossier ; source : le paiement. */
     PAIEMENT_A_IDENTIFIER,
+    /** Apport en capital d'un associé ; source : l'apport. */
+    APPORT_CAPITAL,
     /** Écriture inverse d'une écriture erronée ; source : l'écriture contrepassée. */
     CONTREPASSATION
 }

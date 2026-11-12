@@ -9,6 +9,7 @@ import java.util.UUID;
 import com.cic.comptabilite.domain.EcritureComptable;
 import com.cic.comptabilite.domain.EcritureComptableRepository;
 import com.cic.comptabilite.domain.NatureEcriture;
+import com.cic.comptabilite.domain.SoldesDossier;
 
 /** Comme la base : (nature, source) unique, insertion seule. */
 public class EcrituresEnMemoire implements EcritureComptableRepository {
@@ -45,6 +46,11 @@ public class EcrituresEnMemoire implements EcritureComptableRepository {
         toutes.sort(Comparator.comparing(EcritureComptable::date).thenComparing(EcritureComptable::passeeLe)
                 .reversed());
         return toutes.stream().limit(limite).toList();
+    }
+
+    @Override
+    public List<SoldesDossier> soldesParDossier() {
+        return SoldesDossier.depuis(ecritures);
     }
 
     public List<EcritureComptable> toutes() {

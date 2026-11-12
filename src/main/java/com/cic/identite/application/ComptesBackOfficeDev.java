@@ -11,10 +11,11 @@ import org.springframework.stereotype.Component;
 import com.cic.identite.domain.RoleBackOffice;
 
 /**
- * Profil dev uniquement : crée au démarrage un compte ADMIN, un compte ANALYSTE et un compte RECOUVREMENT
- * s'ils n'existent pas.
+ * Profil dev uniquement : crée au démarrage un compte ADMIN, un compte ANALYSTE, un compte RECOUVREMENT et un
+ * compte ASSOCIE s'ils n'existent pas.
  * Identifiants et mots de passe viennent de la configuration ({@code cic.back-office.admin-dev.*},
- * {@code cic.back-office.analyste-dev.*}, {@code cic.back-office.recouvrement-dev.*}), surchargeables par
+ * {@code cic.back-office.analyste-dev.*}, {@code cic.back-office.recouvrement-dev.*},
+ * {@code cic.back-office.associe-dev.*}), surchargeables par
  * variables d'environnement. Les mots de passe ne sont jamais journalisés.
  */
 @Component
@@ -30,6 +31,8 @@ class ComptesBackOfficeDev implements ApplicationRunner {
     private final String motDePasseAnalyste;
     private final String recouvrement;
     private final String motDePasseRecouvrement;
+    private final String associe;
+    private final String motDePasseAssocie;
 
     ComptesBackOfficeDev(CompteBackOfficeService comptes,
             @Value("${cic.back-office.admin-dev.identifiant}") String admin,
@@ -37,7 +40,9 @@ class ComptesBackOfficeDev implements ApplicationRunner {
             @Value("${cic.back-office.analyste-dev.identifiant}") String analyste,
             @Value("${cic.back-office.analyste-dev.mot-de-passe}") String motDePasseAnalyste,
             @Value("${cic.back-office.recouvrement-dev.identifiant}") String recouvrement,
-            @Value("${cic.back-office.recouvrement-dev.mot-de-passe}") String motDePasseRecouvrement) {
+            @Value("${cic.back-office.recouvrement-dev.mot-de-passe}") String motDePasseRecouvrement,
+            @Value("${cic.back-office.associe-dev.identifiant}") String associe,
+            @Value("${cic.back-office.associe-dev.mot-de-passe}") String motDePasseAssocie) {
         this.comptes = comptes;
         this.admin = admin;
         this.motDePasseAdmin = motDePasseAdmin;
@@ -45,6 +50,8 @@ class ComptesBackOfficeDev implements ApplicationRunner {
         this.motDePasseAnalyste = motDePasseAnalyste;
         this.recouvrement = recouvrement;
         this.motDePasseRecouvrement = motDePasseRecouvrement;
+        this.associe = associe;
+        this.motDePasseAssocie = motDePasseAssocie;
     }
 
     @Override
@@ -52,6 +59,7 @@ class ComptesBackOfficeDev implements ApplicationRunner {
         creerSiAbsent(admin, motDePasseAdmin, RoleBackOffice.ADMIN);
         creerSiAbsent(analyste, motDePasseAnalyste, RoleBackOffice.ANALYSTE);
         creerSiAbsent(recouvrement, motDePasseRecouvrement, RoleBackOffice.RECOUVREMENT);
+        creerSiAbsent(associe, motDePasseAssocie, RoleBackOffice.ASSOCIE);
     }
 
     private void creerSiAbsent(String identifiant, String motDePasse, RoleBackOffice role) {

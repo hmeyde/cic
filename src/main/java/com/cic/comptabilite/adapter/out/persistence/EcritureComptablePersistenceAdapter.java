@@ -1,5 +1,6 @@
 package com.cic.comptabilite.adapter.out.persistence;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import com.cic.comptabilite.domain.EcritureComptable;
 import com.cic.comptabilite.domain.EcritureComptableRepository;
 import com.cic.comptabilite.domain.LigneEcriture;
 import com.cic.comptabilite.domain.NatureEcriture;
+import com.cic.comptabilite.domain.SoldesDossier;
 
 import jakarta.persistence.EntityManager;
 
@@ -94,6 +96,28 @@ class EcritureComptablePersistenceAdapter implements EcritureComptableRepository
     public List<EcritureComptable> parDemande(UUID demandeId) {
         return ecritures.findByDemandeIdOrderByPasseeLeAscIdAsc(demandeId).stream()
                 .map(EcritureComptablePersistenceAdapter::versDomaine).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SoldesDossier> soldesParDossier() {
+        @SuppressWarnings("unchecked")
+        List<Object[]> lignes = entityManager.createNativeQuery("""
+                SELECT e.demande_id,
+                       coalesce(sum(CASE WHEN l.compte = :banque
+                                         THEN CASE WHEN l.sens = 'DEBIT' THEN l.montant ELSE -l.montant END END), 0),
+                       coalesce(sum(CASE WHEN l.compte = :achats
+                                         THEN CASE WHEN l.sens = 'DEBIT' THEN l.montant ELSE -l.montant END END), 0)
+                  FROM ecriture_comptable e
+                  JOIN ligne_ecriture l ON l.ecriture_id = e.id
+                 WHERE e.demande_id IS NOT NULL
+                 GROUP BY e.demande_id
+                """)
+                .setParameter("banque", Compte.BANQUE.numero())
+                .setParameter("achats", Compte.ACHATS.numero())
+                .getResultList();
+        return lignes.stream().map(l -> new SoldesDossier((UUID) l[0], (BigDecimal) l[1], (BigDecimal) l[2]))
+                .toList();
     }
 
     @Override

@@ -112,6 +112,14 @@ public final class EcritureComptable {
                 le);
     }
 
+    /** Apport en capital d'un associé : la banque encaisse, le capital augmente. Libellé sans nom d'associé. */
+    public static EcritureComptable apportCapital(UUID apportId, Montant montant, LocalDate verseLe, Instant le) {
+        return new EcritureComptable(UUID.randomUUID(), NatureEcriture.APPORT_CAPITAL, apportId, verseLe,
+                "Apport en capital d'un associé", null, null,
+                List.of(LigneEcriture.debit(Compte.BANQUE, montant), LigneEcriture.credit(Compte.CAPITAL, montant)),
+                le);
+    }
+
     public static EcritureComptable reconstituer(UUID id, NatureEcriture nature, UUID sourceId, LocalDate date,
             String libelle, UUID demandeId, UUID contratId, List<LigneEcriture> lignes, Instant passeeLe) {
         return new EcritureComptable(id, nature, sourceId, date, libelle, demandeId, contratId, lignes, passeeLe);

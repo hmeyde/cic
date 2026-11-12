@@ -21,6 +21,9 @@ public interface EcritureComptableRepository {
     /** Écritures d'un dossier, dans l'ordre où elles ont été passées. */
     List<EcritureComptable> parDemande(UUID demandeId);
 
+    /** Soldes banque et achats de chaque dossier ayant au moins une écriture. */
+    List<SoldesDossier> soldesParDossier();
+
     /** Écritures les plus récentes d'abord. */
     List<EcritureComptable> dernieres(int limite);
 }
