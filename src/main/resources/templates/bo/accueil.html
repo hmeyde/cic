@@ -16,6 +16,7 @@
         <nav th:if="${role == 'ADMIN' or role == 'ANALYSTE'}" aria-labelledby="titre-menu-bo">
             <h2 id="titre-menu-bo" th:text="#{bo.menu.titre}">Gestion</h2>
             <ul class="liens-bo">
+                <li th:if="${role == 'ANALYSTE'}"><a class="bouton bouton--principal" th:href="@{/bo/dossiers}" th:text="#{bo.dossiers.titre}">Dossiers à analyser</a></li>
                 <li><a class="bouton bouton--contour" th:href="@{/bo/justificatifs}" th:text="#{bo.justificatifs.titre}">Justificatifs reçus</a></li>
                 <li th:if="${role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/fournisseurs}" th:text="#{bo.fournisseurs.titre}">Fournisseurs</a></li>
                 <li th:if="${role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/produits}" th:text="#{bo.produits.titre}">Produits</a></li>

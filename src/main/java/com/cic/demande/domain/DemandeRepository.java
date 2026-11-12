@@ -15,6 +15,12 @@ public interface DemandeRepository {
     List<Demande> parClient(UUID clientId);
 
     /**
+     * Demandes au statut donné, de la plus ancienne à la plus récente (date de soumission ; à date
+     * égale, ordre de l'identifiant pour un ordre stable).
+     */
+    List<Demande> parStatutDeLaPlusAncienne(StatutDossier statut);
+
+    /**
      * Sérialise les soumissions d'un même client jusqu'à la fin de la transaction en cours, pour que
      * deux demandes simultanées ne passent pas toutes deux la règle du dossier actif unique.
      */

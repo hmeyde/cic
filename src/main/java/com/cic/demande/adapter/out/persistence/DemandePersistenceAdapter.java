@@ -20,6 +20,7 @@ import com.cic.demande.domain.NoteScore;
 import com.cic.demande.domain.ResultatCondition;
 import com.cic.demande.domain.ResultatCritere;
 import com.cic.demande.domain.Score;
+import com.cic.demande.domain.StatutDossier;
 import com.cic.demande.domain.TermesDemande;
 
 import jakarta.persistence.EntityManager;
@@ -59,7 +60,17 @@ class DemandePersistenceAdapter implements DemandeRepository {
     @Override
     @Transactional(readOnly = true)
     public List<Demande> parClient(UUID clientId) {
-        List<DemandeEntity> entites = demandes.findByClientIdOrderBySoumiseLeDesc(clientId);
+        return avecScores(demandes.findByClientIdOrderBySoumiseLeDesc(clientId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Demande> parStatutDeLaPlusAncienne(StatutDossier statut) {
+        return avecScores(demandes.findByStatutOrderBySoumiseLeAscIdAsc(statut));
+    }
+
+    /** Scores chargés en une seule requête ; l'ordre des demandes est conservé. */
+    private List<Demande> avecScores(List<DemandeEntity> entites) {
         if (entites.isEmpty()) {
             return List.of();
         }

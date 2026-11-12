@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandeRepository;
+import com.cic.demande.domain.StatutDossier;
 
 public class DemandesEnMemoire implements DemandeRepository {
 
@@ -29,6 +30,12 @@ public class DemandesEnMemoire implements DemandeRepository {
     public List<Demande> parClient(UUID clientId) {
         return demandes.values().stream().filter(d -> d.clientId().equals(clientId))
                 .sorted(Comparator.comparing(Demande::soumiseLe).reversed()).toList();
+    }
+
+    @Override
+    public List<Demande> parStatutDeLaPlusAncienne(StatutDossier statut) {
+        return demandes.values().stream().filter(d -> d.statut() == statut)
+                .sorted(Comparator.comparing(Demande::soumiseLe).thenComparing(Demande::id)).toList();
     }
 
     @Override

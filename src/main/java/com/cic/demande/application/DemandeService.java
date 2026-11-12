@@ -162,6 +162,18 @@ public class DemandeService {
     }
 
     /**
+     * File des analystes : dossiers EN_ANALYSE, du plus ancien au plus récent (date de soumission),
+     * pour traiter d'abord les clients qui attendent depuis le plus longtemps.
+     */
+    @Transactional(readOnly = true)
+    public List<DossierEnAnalyse> fileAnalyse() {
+        return demandes.parStatutDeLaPlusAncienne(StatutDossier.EN_ANALYSE).stream()
+                .map(d -> new DossierEnAnalyse(d, clients.parId(d.clientId())
+                        .map(c -> (c.prenom() + " " + c.nom()).strip()).orElse("")))
+                .toList();
+    }
+
+    /**
      * Suivi du dossier en cours du client : son dossier actif s'il en a un, sinon sa demande la plus
      * récente (refusée, annulée ou soldée) ; vide s'il n'a jamais fait de demande.
      */

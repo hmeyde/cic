@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.dossiers.titre-page}">Dossiers à analyser — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-dossiers">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <h1 id="titre-dossiers" th:text="#{bo.dossiers.titre}">Dossiers à analyser</h1>
+        <p class="texte-doux" th:text="#{bo.dossiers.texte}">Dossiers en analyse, du plus ancien au plus récent.</p>
+
+        <p th:if="${#lists.isEmpty(dossiers)}" class="texte-doux" th:text="#{bo.dossiers.aucun}">Aucun dossier à analyser.</p>
+        <div th:unless="${#lists.isEmpty(dossiers)}" class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                <tr>
+                    <th scope="col" class="nombre" th:text="#{bo.dossiers.rang}">N°</th>
+                    <th scope="col" th:text="#{bo.dossiers.soumise-le}">Soumise le</th>
+                    <th scope="col" class="nombre" th:text="#{bo.dossiers.attente}">Attente</th>
+                    <th scope="col" th:text="#{bo.dossiers.client}">Client</th>
+                    <th scope="col" th:text="#{bo.dossiers.produit}">Produit</th>
+                    <th scope="col" class="nombre" th:text="#{client.simulation.prix-total}">Prix total</th>
+                    <th scope="col" class="nombre" th:text="#{client.simulation.apport}">Apport</th>
+                    <th scope="col" class="nombre" th:text="#{bo.dossiers.mensualites}">Mensualités</th>
+                    <th scope="col" class="nombre" th:text="#{bo.dossiers.note}">Note</th>
+                    <th scope="col" th:text="#{bo.dossiers.recommandation}">Recommandation</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d : ${dossiers}">
+                    <td class="nombre" th:text="${d.rang()}">1</td>
+                    <td dir="ltr" th:text="${d.soumiseLe()}">12/11/2026 10:00</td>
+                    <td class="nombre" th:text="#{bo.dossiers.attente.jours(${d.attenteJours()})}">0 j</td>
+                    <td th:text="${d.client()}">Mohamed Ould Ahmed</td>
+                    <td th:text="${d.designation()}">Galaxy A35</td>
+                    <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</td>
+                    <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</td>
+                    <td class="nombre" th:text="#{bo.dossiers.mensualites.valeur(${d.nombreMois()}, ${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</td>
+                    <td class="nombre" th:text="#{bo.dossiers.note.valeur(${d.note()})}">85 / 100</td>
+                    <td>
+                        <span class="etiquette etiquette--sans-marge" th:text="#{'score.recommandation.' + ${d.recommandation().name()}}">Favorable</span>
+                        <span th:unless="${d.eligible()}" class="texte-doux" th:text="#{bo.dossiers.non-eligible}">non éligible</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>
