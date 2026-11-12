@@ -21,6 +21,7 @@
         <java.version>25</java.version>
         <spring-modulith.version>2.1.2</spring-modulith.version>
         <htmx.version>2.0.6</htmx.version>
+        <openpdf.version>3.0.5</openpdf.version>
     </properties>
 
     <dependencyManagement>
@@ -113,6 +114,13 @@
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-jpa</artifactId>
+        </dependency>
+
+        <!-- PDF (contrat, autorisation de prélèvement) -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${openpdf.version}</version>
         </dependency>
 
         <!-- Tests -->

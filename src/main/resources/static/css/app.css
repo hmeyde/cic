@@ -225,6 +225,7 @@ a { color: var(--couleur-primaire); }
 .barre-titre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-block-end: 1rem; }
 .barre-titre h1 { margin: 0; }
 .tableau-defilant { overflow-x: auto; border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); }
+.offre__contrat { margin-block-start: 1.25rem; }
 .tableau { width: 100%; border-collapse: collapse; }
 .tableau th, .tableau td { padding: .75rem; text-align: start; border-block-end: 1px solid var(--couleur-bordure); white-space: nowrap; }
 .tableau thead th { background: var(--couleur-fond-doux); font-weight: 600; }

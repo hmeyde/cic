@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -12,6 +13,10 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
@@ -25,6 +30,7 @@ import com.cic.catalogue.domain.Fournisseur;
 import com.cic.catalogue.domain.Produit;
 import com.cic.commun.domain.Montant;
 import com.cic.contrat.application.CalculPrixService;
+import com.cic.contrat.application.ContratPdfService;
 import com.cic.contrat.application.EcheancierService;
 import com.cic.contrat.application.SimulationService;
 import com.cic.contrat.domain.Echeance;
@@ -83,7 +89,10 @@ class DemandeClientControllerTest {
                 parametres, new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
         decisions = new DecisionsDeTest(demandes, new JournalAuditService(new JournalEnMemoire()), emplois,
                 evenement -> { }, clock);
-        controller = new DemandeClientController(service, decisions.contratService, clock);
+        controller = new DemandeClientController(service, decisions.contratService,
+                new ContratPdfService(decisions.contrats, new ClientService(clients), parametres,
+                        contenu -> ("%PDF " + contenu.contrat().numero()).getBytes(StandardCharsets.US_ASCII), clock),
+                clock);
 
         clients.enregistrer(client);
         fournisseurs.enregistrer(fournisseur);
@@ -206,6 +215,30 @@ class DemandeClientControllerTest {
             assertThat(o.echeances()).extracting(Echeance::montant).containsOnly(Montant.de(2_080));
             assertThat(o.echeances()).extracting(Echeance::statut).containsOnly(StatutEcheance.A_VENIR);
         });
+    }
+
+    @Test
+    void apres_l_acceptation_le_client_telecharge_son_contrat_en_pdf() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        decisions.service.accepter(lignes().getFirst().id(), "analyste");
+
+        ResponseEntity<byte[]> reponse = controller.contratPdf(principal);
+
+        assertThat(reponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(reponse.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PDF);
+        assertThat(reponse.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
+                .isEqualTo("attachment; filename=\"contrat-CIC-2026-000001.pdf\"");
+        assertThat(reponse.getHeaders().getCacheControl()).isEqualTo("no-store");
+        assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF CIC-2026-000001");
+    }
+
+    @Test
+    void pas_de_contrat_pdf_tant_que_le_dossier_n_est_pas_accepte() {
+        assertThat(controller.contratPdf(principal).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+
+        assertThat(controller.contratPdf(principal).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

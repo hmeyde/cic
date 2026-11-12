@@ -8,6 +8,11 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +23,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.cic.commun.domain.ErreurMetier;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.ContratPdf;
+import com.cic.contrat.application.ContratPdfService;
 import com.cic.contrat.application.ContratService;
 import com.cic.demande.application.ApportInvalideException;
 import com.cic.demande.application.DemandeService;
@@ -36,17 +43,21 @@ class DemandeClientController {
     static final String VUE_LISTE = "client/demandes/liste";
     static final String CHEMIN_SUIVI = "/client/dossier";
     static final String VUE_SUIVI = "client/dossier/suivi";
+    static final String CHEMIN_CONTRAT_PDF = "/client/dossier/contrat.pdf";
     static final String CHEMIN_PRODUIT = "/client/catalogue/{id}";
 
     private static final Logger LOG = LoggerFactory.getLogger(DemandeClientController.class);
 
     private final DemandeService demandes;
     private final ContratService contrats;
+    private final ContratPdfService contratsPdf;
     private final ZoneId fuseau;
 
-    DemandeClientController(DemandeService demandes, ContratService contrats, Clock clock) {
+    DemandeClientController(DemandeService demandes, ContratService contrats, ContratPdfService contratsPdf,
+            Clock clock) {
         this.demandes = demandes;
         this.contrats = contrats;
+        this.contratsPdf = contratsPdf;
         this.fuseau = clock.getZone();
     }
 
@@ -73,6 +84,25 @@ class DemandeClientController {
             }
         });
         return VUE_SUIVI;
+    }
+
+    /**
+     * Contrat de vente à tempérament du dossier en cours, en PDF. Introuvable (404) tant que le dossier
+     * n'est pas accepté, ou si l'offre est annulée. Aucun identifiant dans l'URL : le dossier est celui
+     * du client connecté. Le document n'est pas mis en cache (données personnelles).
+     */
+    @GetMapping(CHEMIN_CONTRAT_PDF)
+    ResponseEntity<byte[]> contratPdf(Principal principal) {
+        Optional<ContratPdf> pdf = demandes.suiviDossierCourant(clientId(principal))
+                .filter(s -> s.statut() != StatutDossier.ANNULEE)
+                .flatMap(s -> contratsPdf.pourDemande(s.demande().id()));
+        return pdf.map(p -> ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(p.nomFichier()).build().toString())
+                .cacheControl(CacheControl.noStore())
+                .body(p.contenu()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
