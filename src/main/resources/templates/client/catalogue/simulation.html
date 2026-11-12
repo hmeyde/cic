@@ -2,30 +2,47 @@
 <!--/*
   Résultat de la simulation, inclus dans la page produit et renvoyé seul par
   GET /client/catalogue/{id}/simulation?duree=N (requête HTMX à chaque changement de durée).
+  Le formulaire de demande est dans le fragment pour que sa durée suive toujours la simulation affichée.
 */-->
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<dl th:fragment="resultat" id="simulation" class="conditions">
-    <div>
-        <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
-    </div>
-    <div>
-        <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
-    </div>
-    <div>
-        <dt th:text="#{client.produit.reste}">Reste à rembourser</dt>
-        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
-    </div>
-    <div class="conditions__principale">
-        <dt th:text="#{client.simulation.mensualite(${simulation.nombreMois()})}">Mensualité sur 6 mois</dt>
-        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
-    </div>
-    <div th:if="${simulation.derniereDiffere()}">
-        <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
-    </div>
-</dl>
+<div th:fragment="resultat" id="simulation">
+    <dl class="conditions">
+        <div>
+            <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+        </div>
+        <div>
+            <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+        </div>
+        <div>
+            <dt th:text="#{client.produit.reste}">Reste à rembourser</dt>
+            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+        </div>
+        <div class="conditions__principale">
+            <dt th:text="#{client.simulation.mensualite(${simulation.nombreMois()})}">Mensualité sur 6 mois</dt>
+            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+        </div>
+        <div th:if="${simulation.derniereDiffere()}">
+            <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+        </div>
+    </dl>
+
+    <form class="formulaire formulaire-demande" method="post" th:action="@{/client/demandes}">
+        <input type="hidden" name="produit" th:value="${produitId}">
+        <input type="hidden" name="duree" th:value="${simulation.nombreMois()}">
+        <div class="champ">
+            <label for="apport" th:text="#{client.demande.apport}">Mon apport (facultatif)</label>
+            <p id="apport-aide" class="champ__aide texte-doux"
+               th:text="#{client.demande.apport.aide(${#numbers.formatInteger(simulation.apport().valeur(), 1, 'WHITESPACE')})}">Minimum 8 320 MRU. Un apport plus élevé réduit vos mensualités.</p>
+            <input id="apport" name="apport" type="text" inputmode="numeric" autocomplete="off"
+                   aria-describedby="apport-aide" th:placeholder="${simulation.apport().valeur().toPlainString()}">
+        </div>
+        <button type="submit" class="bouton bouton--principal"
+                th:text="#{client.demande.soumettre(${simulation.nombreMois()})}">Faire ma demande sur 6 mois</button>
+    </form>
+</div>
 </body>
 </html>

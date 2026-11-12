@@ -292,3 +292,6 @@ html { scroll-behavior: smooth; }
 .choix-duree__option input:checked + span { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: #fff; }
 .choix-duree__option input:focus-visible + span { outline: 3px solid var(--couleur-primaire); outline-offset: 2px; }
 .conditions__principale dd { font-size: 1.25rem; color: var(--couleur-primaire); }
+
+/* Demande depuis la page produit */
+.formulaire-demande { margin-block-start: 1.5rem; padding-block-start: 1rem; border-block-start: 1px solid var(--couleur-bordure); }

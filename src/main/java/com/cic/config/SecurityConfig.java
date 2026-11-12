@@ -18,7 +18,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * <p>Espace client ({@code /client/**}) : connexion par téléphone et code à usage unique, traitée par le
  * module identite ({@code ConnexionClientController}) ; seules les pages de connexion (dont la création du
  * compte d'un nouveau client, après un code valide) sont publiques, le
- * reste exige le rôle CLIENT (dont le catalogue {@code /client/catalogue/**}).
+ * reste exige le rôle CLIENT (dont le catalogue {@code /client/catalogue/**} et les demandes {@code /client/demandes}).
  *
  * <p>Back-office ({@code /bo/**}) : connexion par identifiant et mot de passe (BCrypt), réservée aux
  * rôles de l'équipe CIC ; la gestion du catalogue ({@code /bo/fournisseurs/**}, {@code /bo/produits/**}) est réservée au rôle ADMIN.

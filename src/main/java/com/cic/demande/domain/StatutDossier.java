@@ -70,6 +70,19 @@ public enum StatutDossier {
     }
 
     /**
+     * Dossier actif : ni refusé, ni annulé, ni soldé. Un dossier en recouvrement reste actif tant
+     * que le client doit encore de l'argent à CIC. Sert à la règle « un seul dossier actif par client ».
+     */
+    public boolean estActif() {
+        return this != REFUSEE && this != ANNULEE && this != SOLDEE;
+    }
+
+    /** Le client a une échéance impayée sur ce dossier (EN_RETARD ou RECOUVREMENT). */
+    public boolean estEnRetard() {
+        return this == EN_RETARD || this == RECOUVREMENT;
+    }
+
+    /**
      * Vérifie la transition et la décrit pour le journal d'audit.
      *
      * @throws TransitionInterditeException si la transition n'est pas permise

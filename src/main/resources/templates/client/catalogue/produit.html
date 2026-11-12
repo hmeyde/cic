@@ -8,6 +8,7 @@
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-produit">
         <p><a th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Vous avez déjà un dossier en cours.</p>
         <span class="etiquette etiquette--sans-marge" th:text="#{'bo.produit.categorie.' + ${produit.categorie().name()}}">Téléphone</span>
         <h1 id="titre-produit" th:text="${produit.designation()}">Galaxy A35 128 Go</h1>
         <p class="texte-doux" th:text="${produit.marque()}">Samsung</p>
@@ -29,7 +30,7 @@
                 <noscript><button type="submit" class="bouton" th:text="#{client.simulation.calculer}">Calculer</button></noscript>
             </form>
             <div aria-live="polite">
-                <dl th:replace="~{client/catalogue/simulation :: resultat}"></dl>
+                <div th:replace="~{client/catalogue/simulation :: resultat}"></div>
             </div>
         </div>
 

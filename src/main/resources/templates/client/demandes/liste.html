@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.demandes.titre-page}">Mes demandes — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-demandes">
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre demande est enregistrée.</p>
+        <h1 id="titre-demandes" th:text="#{client.demandes.titre}">Mes demandes</h1>
+
+        <p th:if="${#lists.isEmpty(demandes)}" class="texte-doux" th:text="#{client.demandes.aucune}">Vous n’avez encore fait aucune demande.</p>
+
+        <ul th:unless="${#lists.isEmpty(demandes)}" class="grille-produits">
+            <li th:each="d : ${demandes}" class="carte carte-produit">
+                <span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${d.statut().name()}}">En cours d’étude</span>
+                <h2 class="carte-produit__titre" th:text="${d.designation()}">Galaxy A35</h2>
+                <p class="texte-doux" th:text="#{client.demandes.soumise-le(${#temporals.format(d.soumiseLe(), 'dd/MM/yyyy')})}">Envoyée le 12/11/2026</p>
+                <dl class="conditions">
+                    <div>
+                        <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    </div>
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.simulation.mensualite(${d.nombreMois()})}">Mensualité sur 6 mois</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                    </div>
+                    <div th:if="${d.derniereDiffere()}">
+                        <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+                    </div>
+                </dl>
+                <p class="texte-doux" th:text="#{'client.demande.statut.' + ${d.statut().name()} + '.aide'}">L’équipe CIC étudie votre demande.</p>
+            </li>
+        </ul>
+
+        <ul class="liens-bo">
+            <li><a class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a></li>
+            <li><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>

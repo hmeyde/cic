@@ -20,7 +20,8 @@ import com.cic.contrat.domain.Simulation;
 
 /**
  * Espace client : catalogue des produits proposés (filtrable par catégorie) et page d'un produit
- * avec la simulation HTMX (durée → prix total, apport, mensualité) calculée par le module contrat.
+ * avec la simulation HTMX (durée → prix total, apport, mensualité) calculée par le module contrat,
+ * suivie du formulaire de demande (envoyé au module demande, {@code POST /client/demandes}).
  * Réservé au rôle CLIENT (chaîne de sécurité {@code /client/**}). Un produit non proposé répond 404.
  */
 @Controller
@@ -58,6 +59,7 @@ class CatalogueClientController {
         int retenue = duree != null && duree >= produit.dureeMinMois() && duree <= produit.dureeMaxMois()
                 ? duree : produit.dureeMaxMois();
         model.addAttribute("produit", produit);
+        model.addAttribute("produitId", id);
         model.addAttribute("durees", IntStream.rangeClosed(produit.dureeMinMois(), produit.dureeMaxMois())
                 .boxed().toList());
         model.addAttribute("simulation",
@@ -75,6 +77,7 @@ class CatalogueClientController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         model.addAttribute("simulation", simulation);
+        model.addAttribute("produitId", id);
         return FRAGMENT_SIMULATION;
     }
 

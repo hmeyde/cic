@@ -78,6 +78,18 @@ public class CatalogueClientService {
                 .map(prix -> simulation.simuler(prix, nombreMois));
     }
 
+    /**
+     * Conditions d'un produit proposé pour une demande : fournisseur et prix complet ; vide si le
+     * produit n'est pas proposé au client.
+     */
+    @Transactional(readOnly = true)
+    public Optional<ConditionsProduit> conditions(UUID id) {
+        Objects.requireNonNull(id, "id");
+        return produits.parId(id).filter(Produit::estDisponible).flatMap(produit -> prix(produit)
+                .map(prix -> new ConditionsProduit(produit.id(), produit.fournisseurId(), produit.designation(),
+                        prix)));
+    }
+
     private Optional<ProduitPropose> proposer(Produit produit) {
         return prix(produit).map(prix -> {
             int dureeMin = parametres.entier(CleParametre.DUREE_MIN_MOIS);
