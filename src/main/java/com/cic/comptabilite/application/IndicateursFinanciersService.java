@@ -1,10 +1,16 @@
 package com.cic.comptabilite.application;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cic.commun.domain.Montant;
 import com.cic.comptabilite.domain.ApportCapitalRepository;
 import com.cic.comptabilite.domain.EcritureComptableRepository;
+import com.cic.comptabilite.domain.EncoursDossier;
 import com.cic.comptabilite.domain.IndicateursFinanciers;
 import com.cic.contrat.application.ContratService;
 
@@ -29,7 +35,19 @@ public class IndicateursFinanciersService {
 
     @Transactional(readOnly = true)
     public IndicateursFinanciers indicateurs() {
-        return IndicateursFinanciers.calculer(apports.total(), ecritures.soldesParDossier(),
-                demandeId -> contrats.parDemande(demandeId).map(c -> c.prix().prixVente()));
+        return IndicateursFinanciers.calculer(apports.total(), ecritures.soldesParDossier(), this::prixVente);
+    }
+
+    /**
+     * Encours détaillé par dossier (fournisseur payé, reste dû positif) : sert aux indicateurs de
+     * risque (retards, concentration). La somme des restants dus est l'encours des indicateurs.
+     */
+    @Transactional(readOnly = true)
+    public List<EncoursDossier> encoursParDossier() {
+        return EncoursDossier.depuis(ecritures.soldesParDossier(), this::prixVente);
+    }
+
+    private Optional<Montant> prixVente(UUID demandeId) {
+        return contrats.parDemande(demandeId).map(c -> c.prix().prixVente());
     }
 }

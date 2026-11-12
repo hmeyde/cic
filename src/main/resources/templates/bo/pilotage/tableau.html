@@ -6,12 +6,63 @@
 </head>
 <body>
 <main id="contenu" class="contenu">
-    <section class="section conteneur" aria-labelledby="titre-pilotage">
+    <section class="section conteneur" aria-labelledby="titre-pilotage"
+             th:with="t=${tableau}, r=${tableau.risque()}, s=${tableau.risque().seuils()}">
         <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
         <h1 id="titre-pilotage" th:text="#{bo.pilotage.titre}">Tableau de bord des associés</h1>
         <p class="texte-doux" th:text="#{bo.pilotage.texte}">Chiffres tirés de la comptabilité, à jour à chaque mouvement d’argent.</p>
 
-        <ul class="indicateurs" th:with="t=${tableau}">
+        <!--/* Alertes : une ligne par seuil dépassé. */-->
+        <div th:if="${r.aDesAlertes()}" class="alerte alerte--erreur alertes-risque" role="alert"
+             aria-labelledby="titre-alertes">
+            <h2 id="titre-alertes" class="alertes-risque__titre" th:text="#{bo.pilotage.alertes.titre}">Alertes de risque</h2>
+            <ul class="alertes-risque__liste">
+                <li th:if="${r.enAlerte('RETARD_30_JOURS')}" data-alerte="RETARD_30_JOURS"
+                    th:text="#{bo.pilotage.alerte.RETARD_30_JOURS(${r.dossiersRetard30()}, ${s.provisionPalier1Jours()},
+                        #{client.catalogue.montant(${#numbers.formatInteger(r.restantDuRetard30().valeur(), 1, 'WHITESPACE')})},
+                        #{client.catalogue.montant(${#numbers.formatInteger(r.provisions().valeur(), 1, 'WHITESPACE')})})}">
+                    1 dossier en retard depuis 30 jours ou plus.
+                </li>
+                <li th:if="${r.enAlerte('PERTE')}" data-alerte="PERTE"
+                    th:text="#{bo.pilotage.alerte.PERTE(${r.dossiersPerte()}, ${s.perteJours()},
+                        #{client.catalogue.montant(${#numbers.formatInteger(r.perte().valeur(), 1, 'WHITESPACE')})})}">
+                    1 dossier en retard depuis 180 jours ou plus.
+                </li>
+                <li th:if="${r.enAlerte('PRELEVEMENTS_REUSSIS')}" data-alerte="PRELEVEMENTS_REUSSIS"
+                    th:text="#{bo.pilotage.alerte.PRELEVEMENTS_REUSSIS(
+                        ${#numbers.formatDecimal(r.tauxPrelevementsReussisPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
+                        ${s.prelevementsReussisMinPct().stripTrailingZeros().toPlainString()})}">
+                    Prélèvements réussis sous le minimum.
+                </li>
+                <li th:if="${r.enAlerte('UTILISATION_CAPITAL')}" data-alerte="UTILISATION_CAPITAL"
+                    th:text="${r.utilisationCapitalPct().isPresent()}
+                        ? #{bo.pilotage.alerte.UTILISATION_CAPITAL(
+                            ${#numbers.formatDecimal(r.utilisationCapitalPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
+                            ${s.encoursCapitalMaxPct().stripTrailingZeros().toPlainString()})}
+                        : #{bo.pilotage.alerte.UTILISATION_CAPITAL.sans-capital}">
+                    L’encours dépasse le capital disponible autorisé.
+                </li>
+                <li th:if="${r.enAlerte('CONCENTRATION_EMPLOYEUR')}" data-alerte="CONCENTRATION_EMPLOYEUR"
+                    th:with="c=${r.employeurPrincipal().get()}"
+                    th:text="#{bo.pilotage.alerte.CONCENTRATION_EMPLOYEUR(
+                        ${c.libelle().isPresent()} ? ${c.libelle().get()} : #{bo.pilotage.employeur.inconnu},
+                        ${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
+                        ${s.employeurMaxPct().stripTrailingZeros().toPlainString()})}">
+                    Concentration sur un employeur.
+                </li>
+                <li th:if="${r.enAlerte('CONCENTRATION_FOURNISSEUR')}" data-alerte="CONCENTRATION_FOURNISSEUR"
+                    th:with="c=${r.fournisseurPrincipal().get()}"
+                    th:text="#{bo.pilotage.alerte.CONCENTRATION_FOURNISSEUR(${c.libelle().orElse('')},
+                        ${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
+                        ${s.fournisseurMaxPct().stripTrailingZeros().toPlainString()})}">
+                    Concentration sur un fournisseur.
+                </li>
+            </ul>
+        </div>
+        <p th:unless="${r.aDesAlertes()}" class="alerte alerte--info" role="status"
+           th:text="#{bo.pilotage.alertes.aucune}">Aucun seuil de risque n’est dépassé.</p>
+
+        <ul class="indicateurs">
             <li class="carte indicateur" th:each="cle : ${ {'capitalApporte', 'capitalEngage', 'encours', 'beneficeRealise'} }"
                 th:with="m=${cle == 'capitalApporte'} ? ${t.capitalApporte()} : (${cle == 'capitalEngage'} ? ${t.capitalEngage()} : (${cle == 'encours'} ? ${t.encours()} : ${t.beneficeRealise()}))">
                 <h2 class="indicateur__titre" th:id="'indicateur-' + ${cle}" th:text="#{'bo.pilotage.' + ${cle}}">Capital apporté</h2>
@@ -19,6 +70,76 @@
                    th:text="#{client.catalogue.montant(${#numbers.formatInteger(m.valeur(), 1, 'WHITESPACE')})}">100 000 MRU</p>
                 <p class="indicateur__aide texte-doux" th:id="'indicateur-' + ${cle} + '-aide'"
                    th:text="#{'bo.pilotage.' + ${cle} + '.aide'}">Somme des apports en capital des associés.</p>
+            </li>
+        </ul>
+
+        <h2 id="titre-risque" th:text="#{bo.pilotage.risque.titre}">Indicateurs de risque</h2>
+        <p class="texte-doux" th:text="#{bo.pilotage.risque.texte}">Seuils lus dans les paramètres.</p>
+        <ul class="indicateurs" aria-labelledby="titre-risque">
+            <li class="carte indicateur" th:classappend="${r.enAlerte('RETARD_30_JOURS')} ? 'indicateur--alerte'">
+                <h3 class="indicateur__titre" th:text="#{bo.pilotage.retard30(${s.provisionPalier1Jours()})}">Retard à 30 jours</h3>
+                <p class="indicateur__valeur" th:text="#{bo.pilotage.dossiers(${r.dossiersRetard30()})}">0 dossier</p>
+                <p class="indicateur__aide texte-doux"
+                   th:text="#{bo.pilotage.retard30.aide(
+                       #{client.catalogue.montant(${#numbers.formatInteger(r.restantDuRetard30().valeur(), 1, 'WHITESPACE')})},
+                       #{client.catalogue.montant(${#numbers.formatInteger(r.provisions().valeur(), 1, 'WHITESPACE')})},
+                       ${s.provisionPalier1Pct().stripTrailingZeros().toPlainString()},
+                       ${s.provisionPalier2Pct().stripTrailingZeros().toPlainString()},
+                       ${s.provisionPalier2Jours()})}">0 MRU restant dû ; provisions 0 MRU.</p>
+            </li>
+            <li class="carte indicateur" th:classappend="${r.enAlerte('PERTE')} ? 'indicateur--alerte'">
+                <h3 class="indicateur__titre" th:text="#{bo.pilotage.perte(${s.perteJours()})}">Perte</h3>
+                <p class="indicateur__valeur" th:text="#{client.catalogue.montant(${#numbers.formatInteger(r.perte().valeur(), 1, 'WHITESPACE')})}">0 MRU</p>
+                <p class="indicateur__aide texte-doux" th:text="#{bo.pilotage.perte.aide(${r.dossiersPerte()}, ${s.perteJours()})}">0 dossier.</p>
+            </li>
+            <li class="carte indicateur" th:classappend="${r.enAlerte('PRELEVEMENTS_REUSSIS')} ? 'indicateur--alerte'">
+                <h3 class="indicateur__titre" th:text="#{bo.pilotage.prelevements}">Prélèvements réussis</h3>
+                <p class="indicateur__valeur"
+                   th:text="${r.tauxPrelevementsReussisPct().isPresent()}
+                       ? #{bo.pilotage.pct(${#numbers.formatDecimal(r.tauxPrelevementsReussisPct().get(), 1, 'WHITESPACE', 1, 'COMMA')})}
+                       : #{bo.pilotage.sans-valeur}">—</p>
+                <p class="indicateur__aide texte-doux"
+                   th:text="#{bo.pilotage.prelevements.aide(${r.prelevementsReussis()}, ${r.prelevementsEchoues()},
+                       ${s.prelevementsReussisMinPct().stripTrailingZeros().toPlainString()})}">0 payée, 0 en retard.</p>
+            </li>
+            <li class="carte indicateur" th:classappend="${r.enAlerte('UTILISATION_CAPITAL')} ? 'indicateur--alerte'">
+                <h3 class="indicateur__titre" th:text="#{bo.pilotage.utilisation}">Utilisation du capital</h3>
+                <p class="indicateur__valeur"
+                   th:text="${r.utilisationCapitalPct().isPresent()}
+                       ? #{bo.pilotage.pct(${#numbers.formatDecimal(r.utilisationCapitalPct().get(), 1, 'WHITESPACE', 1, 'COMMA')})}
+                       : #{bo.pilotage.sans-valeur}">—</p>
+                <p class="indicateur__aide texte-doux"
+                   th:text="#{bo.pilotage.utilisation.aide(
+                       #{client.catalogue.montant(${#numbers.formatInteger(r.capitalDisponible().valeur(), 1, 'WHITESPACE')})},
+                       ${s.encoursCapitalMaxPct().stripTrailingZeros().toPlainString()})}">Encours / capital disponible.</p>
+            </li>
+            <li class="carte indicateur" th:classappend="${r.enAlerte('CONCENTRATION_EMPLOYEUR')} ? 'indicateur--alerte'">
+                <h3 class="indicateur__titre" th:text="#{bo.pilotage.concentration.employeur}">Concentration par employeur</h3>
+                <th:block th:if="${r.employeurPrincipal().isPresent()}" th:with="c=${r.employeurPrincipal().get()}">
+                    <p class="indicateur__valeur" th:text="#{bo.pilotage.pct(${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}">0 %</p>
+                    <p class="indicateur__aide texte-doux"
+                       th:text="#{bo.pilotage.concentration.aide(${c.libelle().isPresent()} ? ${c.libelle().get()} : #{bo.pilotage.employeur.inconnu},
+                           #{client.catalogue.montant(${#numbers.formatInteger(c.montant().valeur(), 1, 'WHITESPACE')})},
+                           ${s.employeurMaxPct().stripTrailingZeros().toPlainString()})}">Employeur principal.</p>
+                </th:block>
+                <th:block th:unless="${r.employeurPrincipal().isPresent()}">
+                    <p class="indicateur__valeur" th:text="#{bo.pilotage.sans-valeur}">—</p>
+                    <p class="indicateur__aide texte-doux" th:text="#{bo.pilotage.concentration.aucune}">Aucun encours.</p>
+                </th:block>
+            </li>
+            <li class="carte indicateur" th:classappend="${r.enAlerte('CONCENTRATION_FOURNISSEUR')} ? 'indicateur--alerte'">
+                <h3 class="indicateur__titre" th:text="#{bo.pilotage.concentration.fournisseur}">Concentration par fournisseur</h3>
+                <th:block th:if="${r.fournisseurPrincipal().isPresent()}" th:with="c=${r.fournisseurPrincipal().get()}">
+                    <p class="indicateur__valeur" th:text="#{bo.pilotage.pct(${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}">0 %</p>
+                    <p class="indicateur__aide texte-doux"
+                       th:text="#{bo.pilotage.concentration.aide(${c.libelle().orElse('')},
+                           #{client.catalogue.montant(${#numbers.formatInteger(c.montant().valeur(), 1, 'WHITESPACE')})},
+                           ${s.fournisseurMaxPct().stripTrailingZeros().toPlainString()})}">Fournisseur principal.</p>
+                </th:block>
+                <th:block th:unless="${r.fournisseurPrincipal().isPresent()}">
+                    <p class="indicateur__valeur" th:text="#{bo.pilotage.sans-valeur}">—</p>
+                    <p class="indicateur__aide texte-doux" th:text="#{bo.pilotage.concentration.aucune}">Aucun encours.</p>
+                </th:block>
             </li>
         </ul>
 

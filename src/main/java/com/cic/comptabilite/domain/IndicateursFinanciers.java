@@ -54,8 +54,7 @@ public record IndicateursFinanciers(Montant capitalApporte, Montant capitalEngag
             } else {
                 benefice = benefice.add(flux);
             }
-            BigDecimal reste = prixVente.apply(d.demandeId()).map(Montant::valeur).orElse(BigDecimal.ZERO)
-                    .subtract(d.encaissements());
+            BigDecimal reste = EncoursDossier.restantDu(d, prixVente);
             if (reste.signum() > 0) {
                 encours = encours.add(reste);
             }

@@ -353,3 +353,9 @@ html { scroll-behavior: smooth; }
 .indicateur__titre { margin: 0; font-size: 1rem; }
 .indicateur__valeur { margin: 0; font-size: 1.6rem; font-weight: 700; direction: ltr; text-align: start; unicode-bidi: plaintext; }
 .indicateur__aide { margin: 0; font-size: .9rem; }
+
+/* Tableau de bord : alertes de risque */
+.alertes-risque { margin-block-end: 1.5rem; }
+.alertes-risque__titre { margin: 0 0 .5rem; font-size: 1.1rem; }
+.alertes-risque__liste { margin: 0; padding-inline-start: 1.25rem; display: grid; gap: .35rem; }
+.indicateur--alerte { border-inline-start-color: #b42318; background: #fdecec; }

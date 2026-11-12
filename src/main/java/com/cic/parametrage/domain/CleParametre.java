@@ -36,6 +36,7 @@ public enum CleParametre {
     PROVISION_PALIER2_JOURS("provision.palier2.jours", ENTIER),
     PROVISION_PALIER2_PCT("provision.palier2.pct", POURCENTAGE),
     PERTE_RETARD_JOURS("perte.retard.jours", ENTIER),
+    ALERTE_PRELEVEMENTS_REUSSIS_MIN_PCT("alerte.prelevements.reussis.min.pct", POURCENTAGE),
 
     SCORE_GRILLE_VERSION("score.grille.version", TEXTE),
     SCORE_SEUIL_FAVORABLE("score.seuil.favorable", ENTIER),
