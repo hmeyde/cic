@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cic.contrat.domain.AutorisationPrelevement;
+import com.cic.contrat.domain.AutorisationPrelevementRepository;
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratDejaEtabliException;
 import com.cic.contrat.domain.ContratRepository;
@@ -20,7 +22,9 @@ import com.cic.parametrage.domain.CleParametre;
 
 /**
  * Établit l'offre et le contrat d'un dossier accepté : prix et apport repris tels quels de la
- * demande, échéances générées et fixées une fois pour toutes.
+ * demande, échéances générées et fixées une fois pour toutes. L'autorisation de prélèvement des
+ * mensualités est émise dans la même transaction, à signer par le client (virement permanent par
+ * défaut).
  *
  * <p>L'échéancier court à partir de la date limite de l'apport et de l'autorisation de prélèvement
  * (date d'acceptation + {@code delai.apport.autorisation.jours}) : la première échéance tombe au
@@ -34,11 +38,14 @@ public class ContratService {
     private static final Logger LOG = LoggerFactory.getLogger(ContratService.class);
 
     private final ContratRepository contrats;
+    private final AutorisationPrelevementRepository autorisations;
     private final ParametreService parametres;
     private final Clock clock;
 
-    public ContratService(ContratRepository contrats, ParametreService parametres, Clock clock) {
+    public ContratService(ContratRepository contrats, AutorisationPrelevementRepository autorisations,
+            ParametreService parametres, Clock clock) {
         this.contrats = contrats;
+        this.autorisations = autorisations;
         this.parametres = parametres;
         this.clock = clock;
     }
@@ -62,7 +69,9 @@ public class ContratService {
                 a.clientId(), a.produitId(), a.fournisseurId(), a.designationProduit(), a.prix(), a.apport(), plan,
                 a.accepteLe());
         contrats.enregistrer(contrat);
-        LOG.info("Contrat établi : {}", contrat);
+        AutorisationPrelevement autorisation = AutorisationPrelevement.emettre(contrat, a.accepteLe());
+        autorisations.enregistrer(autorisation);
+        LOG.info("Contrat établi : {}, {}", contrat, autorisation);
         return contrat;
     }
 
@@ -71,6 +80,13 @@ public class ContratService {
     public Optional<Contrat> parDemande(UUID demandeId) {
         Objects.requireNonNull(demandeId, "demandeId");
         return contrats.parDemande(demandeId);
+    }
+
+    /** Autorisation de prélèvement d'un contrat ; une par contrat, émise avec lui. */
+    @Transactional(readOnly = true)
+    public Optional<AutorisationPrelevement> autorisation(UUID contratId) {
+        Objects.requireNonNull(contratId, "contratId");
+        return autorisations.parContrat(contratId);
     }
 
     /** Numéro lisible du contrat, par exemple {@code CIC-2026-000042}. */

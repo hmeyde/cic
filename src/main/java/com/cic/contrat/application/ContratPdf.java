@@ -2,7 +2,7 @@ package com.cic.contrat.application;
 
 import java.util.Objects;
 
-/** Contrat imprimé : nom du fichier proposé au téléchargement et contenu PDF. */
+/** Document du contrat imprimé (contrat, autorisation de prélèvement) : nom du fichier proposé au téléchargement et contenu PDF. */
 public record ContratPdf(String nomFichier, byte[] contenu) {
 
     public ContratPdf {

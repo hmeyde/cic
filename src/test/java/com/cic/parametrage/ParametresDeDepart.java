@@ -37,7 +37,10 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.SCORE_SEUIL_A_EXAMINER, "50"),
             Map.entry(CleParametre.CONNEXION_CODE_VALIDITE_MINUTES, "5"),
             Map.entry(CleParametre.CONNEXION_CODE_ESSAIS_MAX, "5"),
-            Map.entry(CleParametre.CONNEXION_CODE_RENVOI_SECONDES, "60"));
+            Map.entry(CleParametre.CONNEXION_CODE_RENVOI_SECONDES, "60"),
+            Map.entry(CleParametre.CIC_COMPTE_TITULAIRE, "CIC SARL"),
+            Map.entry(CleParametre.CIC_COMPTE_BANQUE, "BMCI"),
+            Map.entry(CleParametre.CIC_COMPTE_NUMERO, "00020 00101 00001234567 53"));
 
     private ParametresDeDepart() {
     }

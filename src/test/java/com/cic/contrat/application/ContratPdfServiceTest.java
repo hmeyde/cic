@@ -28,6 +28,7 @@ class ContratPdfServiceTest {
     private static final Instant ACCEPTE_LE = Instant.parse("2026-11-13T09:30:00Z");
 
     private final ContratsEnMemoire contrats = new ContratsEnMemoire();
+    private final AutorisationsEnMemoire autorisations = new AutorisationsEnMemoire();
     private final ClientsEnMemoire clients = new ClientsEnMemoire();
     private final AtomicReference<ContenuContrat> rendu = new AtomicReference<>();
     private final ContratService contratService;
@@ -39,7 +40,7 @@ class ContratPdfServiceTest {
         ParametreService parametres = new ParametreService(ParametresDeDepart::lignes);
         parametres.afterSingletonsInstantiated();
         Clock clock = Clock.fixed(ACCEPTE_LE, NOUAKCHOTT);
-        contratService = new ContratService(contrats, parametres, clock);
+        contratService = new ContratService(contrats, autorisations, parametres, clock);
         service = new ContratPdfService(contrats, new ClientService(clients), parametres, contenu -> {
             rendu.set(contenu);
             return new byte[] {'%', 'P', 'D', 'F'};

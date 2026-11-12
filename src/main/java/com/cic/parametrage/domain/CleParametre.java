@@ -43,7 +43,11 @@ public enum CleParametre {
 
     CONNEXION_CODE_VALIDITE_MINUTES("connexion.code.validite.minutes", ENTIER),
     CONNEXION_CODE_ESSAIS_MAX("connexion.code.essais.max", ENTIER),
-    CONNEXION_CODE_RENVOI_SECONDES("connexion.code.renvoi.secondes", ENTIER);
+    CONNEXION_CODE_RENVOI_SECONDES("connexion.code.renvoi.secondes", ENTIER),
+
+    CIC_COMPTE_TITULAIRE("cic.compte.titulaire", TEXTE),
+    CIC_COMPTE_BANQUE("cic.compte.banque", TEXTE),
+    CIC_COMPTE_NUMERO("cic.compte.numero", TEXTE);
 
     private final String cle;
     private final TypeParametre type;

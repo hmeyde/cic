@@ -29,6 +29,7 @@ import com.cic.catalogue.domain.CategorieProduit;
 import com.cic.catalogue.domain.Fournisseur;
 import com.cic.catalogue.domain.Produit;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.AutorisationPdfService;
 import com.cic.contrat.application.CalculPrixService;
 import com.cic.contrat.application.ContratPdfService;
 import com.cic.contrat.application.EcheancierService;
@@ -92,6 +93,10 @@ class DemandeClientControllerTest {
         controller = new DemandeClientController(service, decisions.contratService,
                 new ContratPdfService(decisions.contrats, new ClientService(clients), parametres,
                         contenu -> ("%PDF " + contenu.contrat().numero()).getBytes(StandardCharsets.US_ASCII), clock),
+                new AutorisationPdfService(decisions.contrats, decisions.autorisations, new ClientService(clients),
+                        new EmploiClientService(clients, emplois, clock), parametres,
+                        contenu -> ("%PDF ordre " + contenu.contrat().numero()).getBytes(StandardCharsets.US_ASCII),
+                        clock),
                 clock);
 
         clients.enregistrer(client);
@@ -230,6 +235,30 @@ class DemandeClientControllerTest {
                 .isEqualTo("attachment; filename=\"contrat-CIC-2026-000001.pdf\"");
         assertThat(reponse.getHeaders().getCacheControl()).isEqualTo("no-store");
         assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF CIC-2026-000001");
+    }
+
+    @Test
+    void apres_l_acceptation_le_client_telecharge_son_autorisation_de_prelevement_remplie() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        decisions.service.accepter(lignes().getFirst().id(), "analyste");
+
+        ResponseEntity<byte[]> reponse = controller.autorisationPdf(principal);
+
+        assertThat(reponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(reponse.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PDF);
+        assertThat(reponse.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
+                .isEqualTo("attachment; filename=\"autorisation-prelevement-CIC-2026-000001.pdf\"");
+        assertThat(reponse.getHeaders().getCacheControl()).isEqualTo("no-store");
+        assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF ordre CIC-2026-000001");
+    }
+
+    @Test
+    void pas_d_autorisation_pdf_tant_que_le_dossier_n_est_pas_accepte() {
+        assertThat(controller.autorisationPdf(principal).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+
+        assertThat(controller.autorisationPdf(principal).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

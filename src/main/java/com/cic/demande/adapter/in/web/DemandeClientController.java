@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.cic.commun.domain.ErreurMetier;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.AutorisationPdfService;
 import com.cic.contrat.application.ContratPdf;
 import com.cic.contrat.application.ContratPdfService;
 import com.cic.contrat.application.ContratService;
@@ -44,6 +46,7 @@ class DemandeClientController {
     static final String CHEMIN_SUIVI = "/client/dossier";
     static final String VUE_SUIVI = "client/dossier/suivi";
     static final String CHEMIN_CONTRAT_PDF = "/client/dossier/contrat.pdf";
+    static final String CHEMIN_AUTORISATION_PDF = "/client/dossier/autorisation-prelevement.pdf";
     static final String CHEMIN_PRODUIT = "/client/catalogue/{id}";
 
     private static final Logger LOG = LoggerFactory.getLogger(DemandeClientController.class);
@@ -51,13 +54,15 @@ class DemandeClientController {
     private final DemandeService demandes;
     private final ContratService contrats;
     private final ContratPdfService contratsPdf;
+    private final AutorisationPdfService autorisationsPdf;
     private final ZoneId fuseau;
 
     DemandeClientController(DemandeService demandes, ContratService contrats, ContratPdfService contratsPdf,
-            Clock clock) {
+            AutorisationPdfService autorisationsPdf, Clock clock) {
         this.demandes = demandes;
         this.contrats = contrats;
         this.contratsPdf = contratsPdf;
+        this.autorisationsPdf = autorisationsPdf;
         this.fuseau = clock.getZone();
     }
 
@@ -93,9 +98,26 @@ class DemandeClientController {
      */
     @GetMapping(CHEMIN_CONTRAT_PDF)
     ResponseEntity<byte[]> contratPdf(Principal principal) {
-        Optional<ContratPdf> pdf = demandes.suiviDossierCourant(clientId(principal))
+        return telechargement(document(principal, contratsPdf::pourDemande));
+    }
+
+    /**
+     * Autorisation de prélèvement du dossier en cours (ordre de virement permanent vers le compte de
+     * CIC), remplie et à signer pour la banque du client. Mêmes règles que le contrat : 404 tant que le
+     * dossier n'est pas accepté ou si l'offre est annulée, pas d'identifiant dans l'URL, pas de cache.
+     */
+    @GetMapping(CHEMIN_AUTORISATION_PDF)
+    ResponseEntity<byte[]> autorisationPdf(Principal principal) {
+        return telechargement(document(principal, autorisationsPdf::pourDemande));
+    }
+
+    private Optional<ContratPdf> document(Principal principal, Function<UUID, Optional<ContratPdf>> imprimer) {
+        return demandes.suiviDossierCourant(clientId(principal))
                 .filter(s -> s.statut() != StatutDossier.ANNULEE)
-                .flatMap(s -> contratsPdf.pourDemande(s.demande().id()));
+                .flatMap(s -> imprimer.apply(s.demande().id()));
+    }
+
+    private static ResponseEntity<byte[]> telechargement(Optional<ContratPdf> pdf) {
         return pdf.map(p -> ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION,

@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import com.cic.audit.application.JournalAuditService;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.AutorisationsEnMemoire;
 import com.cic.contrat.application.ContratService;
 import com.cic.contrat.application.ContratsEnMemoire;
 import com.cic.identite.application.ClientsEnMemoire;
@@ -24,6 +25,7 @@ public final class DecisionsDeTest {
 
     public final EmploisEnMemoire emplois;
     public final ContratsEnMemoire contrats = new ContratsEnMemoire();
+    public final AutorisationsEnMemoire autorisations = new AutorisationsEnMemoire();
     public final ContratService contratService;
     public final DecisionService service;
 
@@ -37,7 +39,7 @@ public final class DecisionsDeTest {
         this.emplois = emplois;
         ParametreService parametres = new ParametreService(ParametresDeDepart::lignes);
         parametres.afterSingletonsInstantiated();
-        contratService = new ContratService(contrats, parametres, clock);
+        contratService = new ContratService(contrats, autorisations, parametres, clock);
         service = new DecisionService(demandes, journal,
                 new EmploiClientService(new ClientsEnMemoire(), emplois, clock),
                 contratService, evenements, clock);

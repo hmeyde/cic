@@ -122,6 +122,11 @@
                        th:text="#{client.offre.contrat-pdf}">Télécharger mon contrat (PDF)</a>
                 </p>
                 <p class="texte-doux" th:text="#{client.offre.contrat-pdf.aide}">Le contrat est rédigé en français.</p>
+                <p class="offre__contrat">
+                    <a class="bouton bouton--contour" th:href="@{/client/dossier/autorisation-prelevement.pdf}" download
+                       th:text="#{client.offre.autorisation-pdf}">Télécharger mon autorisation de prélèvement (PDF)</a>
+                </p>
+                <p class="texte-doux" th:text="#{client.offre.autorisation-pdf.aide}">Ordre de virement permanent à signer et à remettre à votre banque.</p>
             </section>
         </th:block>
 

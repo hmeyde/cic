@@ -18,7 +18,9 @@ import com.cic.contrat.domain.ContratDejaEtabliException;
 import com.cic.contrat.domain.Echeance;
 import com.cic.contrat.domain.FinContratDepasseeException;
 import com.cic.contrat.domain.Prix;
+import com.cic.contrat.domain.StatutAutorisation;
 import com.cic.contrat.domain.StatutEcheance;
+import com.cic.contrat.domain.TypeAutorisation;
 import com.cic.parametrage.ParametresDeDepart;
 import com.cic.parametrage.application.ParametreService;
 
@@ -29,12 +31,13 @@ class ContratServiceTest {
     private static final Instant ACCEPTE_LE = Instant.parse("2026-11-13T09:30:00Z");
 
     private final ContratsEnMemoire contrats = new ContratsEnMemoire();
+    private final AutorisationsEnMemoire autorisations = new AutorisationsEnMemoire();
     private final ContratService service;
 
     ContratServiceTest() {
         ParametreService parametres = new ParametreService(ParametresDeDepart::lignes);
         parametres.afterSingletonsInstantiated();
-        service = new ContratService(contrats, parametres, Clock.fixed(ACCEPTE_LE, NOUAKCHOTT));
+        service = new ContratService(contrats, autorisations, parametres, Clock.fixed(ACCEPTE_LE, NOUAKCHOTT));
     }
 
     /** Exemple chiffré de CLAUDE.md : prix public 20 000, achat 18 400, vente 20 800, apport 8 320. */
@@ -70,6 +73,22 @@ class ContratServiceTest {
     }
 
     @Test
+    void emet_avec_le_contrat_une_autorisation_de_prelevement_a_signer_en_virement_permanent() {
+        UUID demandeId = UUID.randomUUID();
+
+        Contrat contrat = service.etablir(exemple(demandeId, 25, Optional.empty()));
+
+        assertThat(service.autorisation(contrat.id())).hasValueSatisfying(a -> {
+            assertThat(a.contratId()).isEqualTo(contrat.id());
+            assertThat(a.demandeId()).isEqualTo(demandeId);
+            assertThat(a.clientId()).isEqualTo(contrat.clientId());
+            assertThat(a.type()).isEqualTo(TypeAutorisation.VIREMENT_PERMANENT);
+            assertThat(a.statut()).isEqualTo(StatutAutorisation.A_SIGNER);
+            assertThat(a.emiseLe()).isEqualTo(ACCEPTE_LE);
+        });
+    }
+
+    @Test
     void la_premiere_echeance_suit_la_date_limite_de_l_apport() {
         // Paie le 15 : le 15/11 précède la date limite du 20/11, première échéance le 15/12.
         Contrat contrat = service.etablir(exemple(UUID.randomUUID(), 15, Optional.empty()));
@@ -97,6 +116,7 @@ class ContratServiceTest {
                 Optional.of(LocalDate.of(2027, 4, 25)))))
                 .isInstanceOf(FinContratDepasseeException.class);
         assertThat(contrats.tous()).isEmpty();
+        assertThat(autorisations.toutes()).isEmpty();
     }
 
     @Test
