@@ -27,6 +27,8 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * La file des dossiers à analyser ({@code /bo/dossiers}) et la fiche de chaque dossier
  * ({@code /bo/dossiers/{id}}), avec la décision et le journal du dossier, sont réservées au rôle ANALYSTE.
  * Le suivi des autorisations de prélèvement ({@code /bo/autorisations/**}) est réservé au rôle ANALYSTE.
+ * La saisie des paiements reçus et leur rapprochement ({@code /bo/paiements/**}) sont réservés aux rôles
+ * RECOUVREMENT et ADMIN : l'encaissement est tenu par d'autres personnes que l'analyste qui décide.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
  * <p>Les autres pages restent publiques. CSRF actif partout ; en-têtes de sécurité par défaut de
@@ -77,6 +79,7 @@ public class SecurityConfig {
                 .requestMatchers("/bo/justificatifs", "/bo/justificatifs/**").hasAnyRole("ANALYSTE", "ADMIN")
                 .requestMatchers("/bo/dossiers", "/bo/dossiers/**").hasRole("ANALYSTE")
                 .requestMatchers("/bo/autorisations", "/bo/autorisations/**").hasRole("ANALYSTE")
+                .requestMatchers("/bo/paiements", "/bo/paiements/**").hasAnyRole("RECOUVREMENT", "ADMIN")
                 .requestMatchers("/bo", "/bo/**").hasAnyRole(ROLES_BACK_OFFICE)
                 .anyRequest().permitAll()
             )

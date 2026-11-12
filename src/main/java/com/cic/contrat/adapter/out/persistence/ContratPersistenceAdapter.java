@@ -53,6 +53,12 @@ class ContratPersistenceAdapter implements ContratRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Contrat> parNumero(String numero) {
+        return contrats.findByNumero(numero).map(ContratPersistenceAdapter::versDomaine);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public long prochainNumeroOrdre() {
         return ((Number) entityManager.createNativeQuery("SELECT nextval('contrat_numero_seq')").getSingleResult())

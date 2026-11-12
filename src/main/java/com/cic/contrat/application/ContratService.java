@@ -37,6 +37,10 @@ public class ContratService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContratService.class);
 
+    private static final int CHIFFRES_ANNEE = 4;
+    /** Année puis numéro d'ordre, qui tient dans un {@code long} (18 chiffres au plus). */
+    private static final int CHIFFRES_MAX = CHIFFRES_ANNEE + 18;
+
     private final ContratRepository contrats;
     private final AutorisationPrelevementRepository autorisations;
     private final ParametreService parametres;
@@ -89,8 +93,31 @@ public class ContratService {
         return autorisations.parContrat(contratId);
     }
 
+    /**
+     * Contrat dont le numéro, débarrassé de ses séparateurs, donne ces chiffres : {@code 2026000042}
+     * désigne {@code CIC-2026-000042}. Sert à retrouver le dossier d'une référence de paiement tirée
+     * du numéro de contrat. Vide si les chiffres ne forment aucun numéro possible ou si aucun contrat
+     * ne porte ce numéro.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Contrat> parChiffresDuNumero(String chiffres) {
+        if (chiffres == null || !chiffres.matches("\\d{" + (CHIFFRES_ANNEE + 1) + "," + CHIFFRES_MAX + "}")) {
+            return Optional.empty();
+        }
+        String numero = numero(Integer.parseInt(chiffres.substring(0, CHIFFRES_ANNEE)),
+                Long.parseLong(chiffres.substring(CHIFFRES_ANNEE)));
+        if (!numero.replaceAll("\\D", "").equals(chiffres)) {
+            return Optional.empty();
+        }
+        return contrats.parNumero(numero);
+    }
+
     /** Numéro lisible du contrat, par exemple {@code CIC-2026-000042}. */
     static String numero(LocalDate le, long ordre) {
-        return "CIC-%d-%06d".formatted(le.getYear(), ordre);
+        return numero(le.getYear(), ordre);
+    }
+
+    private static String numero(int annee, long ordre) {
+        return "CIC-%d-%06d".formatted(annee, ordre);
     }
 }

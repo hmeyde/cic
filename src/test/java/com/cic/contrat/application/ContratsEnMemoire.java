@@ -32,6 +32,11 @@ public class ContratsEnMemoire implements ContratRepository {
     }
 
     @Override
+    public Optional<Contrat> parNumero(String numero) {
+        return parDemande.values().stream().filter(c -> c.numero().equals(numero)).findFirst();
+    }
+
+    @Override
     public long prochainNumeroOrdre() {
         return ++ordre;
     }

@@ -12,5 +12,8 @@ interface ContratJpaRepository extends JpaRepository<ContratEntity, UUID> {
     Optional<ContratEntity> findByDemandeId(UUID demandeId);
 
     @EntityGraph(attributePaths = "echeances")
+    Optional<ContratEntity> findByNumero(String numero);
+
+    @EntityGraph(attributePaths = "echeances")
     Optional<ContratEntity> findWithEcheancesById(UUID id);
 }

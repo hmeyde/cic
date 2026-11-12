@@ -1,0 +1,156 @@
+package com.cic.paiement.application;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.domain.Acteur;
+import com.cic.audit.domain.EntreeJournal;
+import com.cic.audit.domain.ObjetAudite;
+import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.ContratService;
+import com.cic.paiement.PaiementRapproche;
+import com.cic.paiement.domain.ApportAttendu;
+import com.cic.paiement.domain.Paiement;
+import com.cic.paiement.domain.PaiementEnDoubleException;
+import com.cic.paiement.domain.PaiementRepository;
+import com.cic.paiement.domain.ReferenceApport;
+import com.cic.paiement.domain.ReferencePaiement;
+
+/**
+ * Saisie manuelle des paiements reçus au back-office et rapprochement par référence.
+ *
+ * <p>La référence d'un paiement est unique : saisir une seconde fois un paiement de même référence
+ * est refusé ({@link PaiementEnDoubleException}) sans rien enregistrer, ce qui rend la saisie
+ * idempotente. Une contrainte d'unicité en base couvre deux saisies simultanées.
+ *
+ * <p>Rapprochement : une référence d'apport valide ({@link ReferenceApport}, clé juste) désigne le
+ * contrat dont elle est tirée, donc son dossier ; le paiement lui est rattaché et l'événement
+ * {@link PaiementRapproche} est publié. Une référence qui ne désigne aucun dossier n'empêche pas
+ * d'enregistrer l'argent reçu : le paiement reste NON_RAPPROCHE. Chaque saisie est journalisée
+ * (objet {@value #TYPE_OBJET}), dans la même transaction.
+ */
+@Service
+public class PaiementService {
+
+    static final String TYPE_OBJET = "PAIEMENT";
+    static final String ACTION_SAISIE = "SAISIE_PAIEMENT";
+
+    /** Montant le plus élevé accepté à la saisie, contre une faute de frappe grossière. */
+    static final int CHIFFRES_MONTANT_MAX = 9;
+
+    private static final Logger LOG = LoggerFactory.getLogger(PaiementService.class);
+
+    private final PaiementRepository paiements;
+    private final ContratService contrats;
+    private final JournalAuditService journal;
+    private final ApplicationEventPublisher evenements;
+    private final Clock clock;
+
+    public PaiementService(PaiementRepository paiements, ContratService contrats, JournalAuditService journal,
+            ApplicationEventPublisher evenements, Clock clock) {
+        this.paiements = paiements;
+        this.contrats = contrats;
+        this.journal = journal;
+        this.evenements = evenements;
+        this.clock = clock;
+    }
+
+    static ObjetAudite objet(UUID paiementId) {
+        return new ObjetAudite(TYPE_OBJET, paiementId);
+    }
+
+    /**
+     * Enregistre un paiement reçu et le rapproche par sa référence.
+     *
+     * @param auteur identifiant de connexion du back-office
+     * @throws SaisiePaiementInvalideException référence, montant ou date invalide
+     * @throws PaiementEnDoubleException       un paiement porte déjà cette référence
+     */
+    @Transactional
+    public Paiement saisir(SaisiePaiement saisie, String auteur) {
+        Objects.requireNonNull(saisie, "saisie");
+        Objects.requireNonNull(auteur, "auteur");
+        ReferencePaiement reference = reference(saisie.reference());
+        Montant montant = montant(saisie.montant());
+        LocalDate recuLe = date(saisie.recuLe());
+        Optional<Paiement> existant = paiements.parReference(reference);
+        if (existant.isPresent()) {
+            LOG.info("Saisie refusée : {} porte déjà cette référence", existant.get());
+            throw new PaiementEnDoubleException(existant.get().id());
+        }
+        Instant maintenant = clock.instant();
+        Paiement paiement = Paiement.saisir(reference, montant, recuLe, apportAttendu(reference), auteur, maintenant);
+        paiements.enregistrer(paiement);
+        journal.journaliser(EntreeJournal.transition(maintenant, Acteur.backOffice(auteur), ACTION_SAISIE,
+                objet(paiement.id()), null, paiement.statut().name(),
+                paiement.apportAttendu().map(a -> "Apport du contrat " + a.numeroContrat()).orElse(null)));
+        paiement.apportAttendu().ifPresent(a -> evenements.publishEvent(new PaiementRapproche(paiement.id(),
+                a.demandeId(), a.contratId(), a.clientId(), montant, a.montant(), recuLe, maintenant)));
+        LOG.info("Paiement saisi : {}", paiement);
+        return paiement;
+    }
+
+    /** Paiements les plus récemment saisis d'abord. */
+    @Transactional(readOnly = true)
+    public List<Paiement> derniers(int limite) {
+        return paiements.derniers(limite);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Paiement> parId(UUID id) {
+        Objects.requireNonNull(id, "id");
+        return paiements.parId(id);
+    }
+
+    private Optional<ApportAttendu> apportAttendu(ReferencePaiement reference) {
+        return reference.commeReferenceApport()
+                .flatMap(r -> contrats.parChiffresDuNumero(r.chiffresContrat()))
+                .map(c -> new ApportAttendu(c.id(), c.numero(), c.demandeId(), c.clientId(), c.apport()));
+    }
+
+    private static ReferencePaiement reference(String saisie) {
+        try {
+            return ReferencePaiement.lire(saisie == null ? "" : saisie);
+        } catch (IllegalArgumentException e) {
+            throw new SaisiePaiementInvalideException(SaisiePaiementInvalideException.REFERENCE_INVALIDE);
+        }
+    }
+
+    private static Montant montant(String saisie) {
+        String chiffres = saisie == null ? "" : saisie.replaceAll("[\\s\\u00A0\\u202F]", "");
+        if (!chiffres.matches("\\d{1," + CHIFFRES_MONTANT_MAX + "}")) {
+            throw new SaisiePaiementInvalideException(SaisiePaiementInvalideException.MONTANT_INVALIDE);
+        }
+        Montant montant = Montant.de(Long.parseLong(chiffres));
+        if (montant.estZero()) {
+            throw new SaisiePaiementInvalideException(SaisiePaiementInvalideException.MONTANT_INVALIDE);
+        }
+        return montant;
+    }
+
+    private LocalDate date(String saisie) {
+        LocalDate date;
+        try {
+            date = LocalDate.parse(saisie == null ? "" : saisie.strip());
+        } catch (DateTimeParseException e) {
+            throw new SaisiePaiementInvalideException(SaisiePaiementInvalideException.DATE_INVALIDE);
+        }
+        if (date.isAfter(LocalDate.now(clock))) {
+            throw new SaisiePaiementInvalideException(SaisiePaiementInvalideException.DATE_INVALIDE);
+        }
+        return date;
+    }
+}

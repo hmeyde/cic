@@ -132,4 +132,18 @@ class ContratServiceTest {
     void numero_lisible() {
         assertThat(ContratService.numero(LocalDate.of(2026, 11, 13), 42)).isEqualTo("CIC-2026-000042");
     }
+
+    @Test
+    void retrouve_un_contrat_par_les_chiffres_de_son_numero() {
+        Contrat c = service.etablir(exemple(UUID.randomUUID(), 25, Optional.empty()));
+
+        assertThat(service.parChiffresDuNumero("2026000001")).contains(c);
+        assertThat(service.parChiffresDuNumero("2026000002")).isEmpty();
+        assertThat(service.parChiffresDuNumero("202600001")).as("zéros manquants").isEmpty();
+        assertThat(service.parChiffresDuNumero("20260000001")).as("zéro de trop").isEmpty();
+        assertThat(service.parChiffresDuNumero("2026")).isEmpty();
+        assertThat(service.parChiffresDuNumero("9".repeat(23))).isEmpty();
+        assertThat(service.parChiffresDuNumero("AP2026000001")).isEmpty();
+        assertThat(service.parChiffresDuNumero(null)).isEmpty();
+    }
 }

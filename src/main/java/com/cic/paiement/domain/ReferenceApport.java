@@ -32,6 +32,11 @@ public record ReferenceApport(String valeur) {
         return new ReferenceApport(PREFIXE + chiffres + cleLuhn(chiffres));
     }
 
+    /** Chiffres du numéro de contrat dont la référence est tirée, sans le préfixe ni la clé. */
+    public String chiffresContrat() {
+        return valeur.substring(PREFIXE.length(), valeur.length() - 1);
+    }
+
     /** Vrai si la saisie a la forme d'une référence d'apport et que sa clé est juste. */
     public static boolean estValide(String saisie) {
         if (saisie == null || !saisie.matches(PREFIXE + "\\d{2,}")) {
