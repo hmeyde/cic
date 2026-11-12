@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{inscription.titre-page}">Je m'inscris — CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-inscription">
+        <h1 id="titre-inscription" th:text="#{inscription.titre}">Je m'inscris</h1>
+        <p class="texte-doux" th:text="#{inscription.texte}">Laissez-nous vos coordonnées : un conseiller CIC vous rappelle pour préparer votre demande.</p>
+
+        <div th:if="${erreur != null}" role="alert">
+            <p class="alerte alerte--erreur" th:text="#{${erreur}}">Vérifiez le formulaire.</p>
+        </div>
+
+        <form class="formulaire carte" method="post" novalidate th:action="@{/inscription}">
+            <div class="champ">
+                <label for="nom" th:text="#{inscription.nom}">Nom complet</label>
+                <input id="nom" name="nom" type="text" th:value="${saisie.nom}" required th:maxlength="${nomMax}"
+                       autocomplete="name"
+                       th:attr="aria-invalid=${erreurChamp == 'nom'} ? 'true' : null">
+            </div>
+            <div class="champ">
+                <label for="telephone" th:text="#{inscription.telephone}">Téléphone</label>
+                <p id="telephone-aide" class="champ__aide texte-doux" th:text="#{inscription.telephone.aide}">8 chiffres, par exemple 22 12 34 56.</p>
+                <input id="telephone" name="telephone" type="tel" th:value="${saisie.telephone}" required maxlength="20"
+                       inputmode="tel" autocomplete="tel-national" dir="ltr" aria-describedby="telephone-aide"
+                       th:attr="aria-invalid=${erreurChamp == 'telephone'} ? 'true' : null">
+            </div>
+            <div class="champ">
+                <label for="employeur" th:text="#{inscription.employeur}">Employeur</label>
+                <input id="employeur" name="employeur" type="text" th:value="${saisie.employeur}" required
+                       th:maxlength="${employeurMax}" autocomplete="organization"
+                       th:attr="aria-invalid=${erreurChamp == 'employeur'} ? 'true' : null">
+            </div>
+            <div class="champ">
+                <label for="typeContrat" th:text="#{inscription.type-contrat}">Type de contrat</label>
+                <select id="typeContrat" name="typeContrat" required
+                        th:attr="aria-invalid=${erreurChamp == 'typeContrat'} ? 'true' : null">
+                    <option value="" th:text="#{inscription.choisir}">Choisissez…</option>
+                    <option th:each="t : ${typesContrat}" th:value="${t.name()}"
+                            th:selected="${t.name() == saisie.typeContrat}"
+                            th:text="#{'inscription.type-contrat.' + ${t.name()}}">CDI</option>
+                </select>
+            </div>
+            <div class="champ">
+                <label for="trancheSalaire" th:text="#{inscription.tranche-salaire}">Salaire net mensuel</label>
+                <select id="trancheSalaire" name="trancheSalaire" required
+                        th:attr="aria-invalid=${erreurChamp == 'trancheSalaire'} ? 'true' : null">
+                    <option value="" th:text="#{inscription.choisir}">Choisissez…</option>
+                    <option th:each="t : ${tranchesSalaire}" th:value="${t.name()}"
+                            th:selected="${t.name() == saisie.trancheSalaire}"
+                            th:text="#{'inscription.tranche-salaire.' + ${t.name()}}">De 10 000 à 20 000 MRU</option>
+                </select>
+            </div>
+            <div class="champ">
+                <label for="produitSouhaite" th:text="#{inscription.produit}">Produit souhaité</label>
+                <p id="produit-aide" class="champ__aide texte-doux" th:text="#{inscription.produit.aide}">Par exemple : smartphone, réfrigérateur, climatiseur.</p>
+                <input id="produitSouhaite" name="produitSouhaite" type="text" th:value="${saisie.produitSouhaite}" required
+                       th:maxlength="${produitMax}" aria-describedby="produit-aide"
+                       th:attr="aria-invalid=${erreurChamp == 'produitSouhaite'} ? 'true' : null">
+            </div>
+            <div class="champ-piege" aria-hidden="true">
+                <label th:for="${champPiege}">Site web</label>
+                <input th:id="${champPiege}" th:name="${champPiege}" type="text" value="" tabindex="-1" autocomplete="off">
+            </div>
+            <div class="champ champ--case">
+                <input id="consentement" name="consentement" type="checkbox" value="on" required
+                       th:checked="${saisie.consentement}"
+                       th:attr="aria-invalid=${erreurChamp == 'consentement'} ? 'true' : null">
+                <label for="consentement" th:text="#{inscription.consentement}">J’accepte que CIC utilise ces informations pour me recontacter au sujet d’un achat à crédit.</label>
+            </div>
+            <button type="submit" class="bouton bouton--principal" th:text="#{inscription.envoyer}">Envoyer</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

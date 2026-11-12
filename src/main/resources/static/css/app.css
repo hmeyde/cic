@@ -359,3 +359,6 @@ html { scroll-behavior: smooth; }
 .alertes-risque__titre { margin: 0 0 .5rem; font-size: 1.1rem; }
 .alertes-risque__liste { margin: 0; padding-inline-start: 1.25rem; display: grid; gap: .35rem; }
 .indicateur--alerte { border-inline-start-color: #b42318; background: #fdecec; }
+
+/* Inscription : champ piège anti-robot, invisible pour les humains */
+.champ-piege { position: absolute; inset-inline-start: -10000px; width: 1px; height: 1px; overflow: hidden; }

@@ -39,7 +39,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * ({@code POST /bo/capital}) est réservée au rôle ADMIN.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
- * <p>Les autres pages restent publiques. CSRF actif partout ; en-têtes de sécurité par défaut de
+ * <p>Les autres pages restent publiques, dont la pré-inscription ({@code /inscription}). CSRF actif partout ; en-têtes de sécurité par défaut de
  * Spring Security, plus une politique de référent.
  */
 @Configuration
