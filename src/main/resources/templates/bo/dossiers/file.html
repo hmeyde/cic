@@ -34,7 +34,7 @@
                     <td dir="ltr" th:text="${d.soumiseLe()}">12/11/2026 10:00</td>
                     <td class="nombre" th:text="#{bo.dossiers.attente.jours(${d.attenteJours()})}">0 j</td>
                     <td th:text="${d.client()}">Mohamed Ould Ahmed</td>
-                    <td th:text="${d.designation()}">Galaxy A35</td>
+                    <td><a th:href="@{/bo/dossiers/{id}(id=${d.id()})}" th:text="${d.designation()}" th:attr="aria-label=#{bo.dossiers.ouvrir} + ' — ' + ${d.designation()}">Galaxy A35</a></td>
                     <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</td>
                     <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</td>
                     <td class="nombre" th:text="#{bo.dossiers.mensualites.valeur(${d.nombreMois()}, ${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</td>

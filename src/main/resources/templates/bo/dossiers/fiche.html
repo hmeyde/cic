@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.fiche.titre-page}">Fiche dossier — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-fiche" th:with="c=${fiche.conditions()}, s=${fiche.score()}">
+        <p><a th:href="@{/bo/dossiers}" th:text="#{bo.fiche.retour}">Retour à la file des dossiers</a></p>
+        <h1 id="titre-fiche" th:text="#{bo.fiche.titre(${c.designation()})}">Dossier — Galaxy A35</h1>
+        <p>
+            <span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${fiche.statut().name()}}">En cours d’étude</span>
+            <span class="texte-doux" dir="auto" th:text="#{bo.fiche.soumise(${fiche.soumiseLe()}, ${fiche.statutChangeLe()})}">Soumise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
+        </p>
+
+        <!-- Score -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-score">
+            <h2 id="titre-score" th:text="#{bo.fiche.score}">Score</h2>
+            <p class="fiche-score">
+                <strong class="fiche-score__note" th:text="#{bo.dossiers.note.valeur(${s.note()})}">85 / 100</strong>
+                <span class="etiquette" th:text="#{'score.recommandation.' + ${s.recommandation()}}">Favorable</span>
+                <span class="texte-doux" th:text="#{bo.fiche.grille(${s.versionGrille()})}">Grille v1</span>
+            </p>
+            <p th:unless="${s.eligible()}" class="alerte alerte--erreur" role="status"
+               th:text="#{bo.fiche.non-eligible}">Dossier non éligible.</p>
+            <p class="texte-doux" th:text="#{bo.fiche.score.aide}">Le score recommande, l’analyste décide.</p>
+
+            <h3 th:text="#{bo.fiche.eliminatoires}">Conditions éliminatoires</h3>
+            <div class="tableau-defilant">
+                <table class="tableau tableau--retour">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.fiche.condition}">Condition</th>
+                        <th scope="col" th:text="#{bo.fiche.resultat}">Résultat</th>
+                        <th scope="col" th:text="#{bo.fiche.raison}">Raison</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${s.conditions()}" th:classappend="${!r.satisfaite()} ? 'ligne--echec'">
+                        <th scope="row" th:text="#{${r.condition().code()}}">18 ans ou plus</th>
+                        <td th:text="${r.satisfaite()} ? #{bo.fiche.satisfaite} : #{bo.fiche.non-satisfaite}">Satisfaite</td>
+                        <td dir="auto" th:text="${r.raison()}">36 ans</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 th:text="#{bo.fiche.criteres}">Note critère par critère</h3>
+            <div class="tableau-defilant">
+                <table class="tableau tableau--retour">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.fiche.critere}">Critère</th>
+                        <th scope="col" class="nombre" th:text="#{bo.fiche.points}">Points</th>
+                        <th scope="col" th:text="#{bo.fiche.raison}">Raison</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${s.criteres()}">
+                        <th scope="row" th:text="#{${r.critere().code()}}">Type de contrat</th>
+                        <td class="nombre" th:text="#{bo.fiche.points.valeur(${r.points()}, ${r.pointsMax()})}">25 / 25</td>
+                        <td dir="auto" th:text="${r.raison()}">CDI</td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th scope="row" th:text="#{bo.fiche.total}">Total</th>
+                        <td class="nombre"><strong th:text="#{bo.dossiers.note.valeur(${s.note()})}">85 / 100</strong></td>
+                        <td th:text="#{'score.recommandation.' + ${s.recommandationNote()}}">Favorable</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- Conditions de la demande -->
+        <section class="fiche-bloc" aria-labelledby="titre-conditions">
+            <h2 id="titre-conditions" th:text="#{bo.fiche.conditions}">Conditions demandées</h2>
+            <dl class="conditions">
+                <div>
+                    <dt th:text="#{bo.fiche.prix-public}">Prix public</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixPublic().valeur(), 1, 'WHITESPACE')})}">20 000 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.prix-achat}">Prix d’achat fournisseur</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixAchat().valeur(), 1, 'WHITESPACE')})}">18 400 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.simulation.apport}">Apport</dt>
+                    <dd>
+                        <span th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</span>
+                        <span class="texte-doux" th:text="#{bo.fiche.apport-minimum(${#numbers.formatInteger(c.apportMinimum().valeur(), 1, 'WHITESPACE')})}">(minimum 8 320 MRU)</span>
+                    </dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.reste}">Reste à financer</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.dossiers.mensualites}">Mensualités</dt>
+                    <dd th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#numbers.formatInteger(c.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</dd>
+                </div>
+                <div th:if="${c.derniereDiffere()}">
+                    <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Client -->
+        <section class="fiche-bloc" aria-labelledby="titre-client">
+            <h2 id="titre-client" th:text="#{bo.fiche.client}">Client</h2>
+            <p th:if="${fiche.client().isEmpty()}" class="alerte alerte--erreur" th:text="#{bo.fiche.client.introuvable}">Client introuvable.</p>
+            <dl th:if="${fiche.client().isPresent()}" th:with="cl=${fiche.client().get()}" class="conditions">
+                <div>
+                    <dt th:text="#{bo.fiche.client.nom}">Nom</dt>
+                    <dd th:text="${cl.nomComplet()}">Mohamed Ould Ahmed</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.client.nni}">NNI</dt>
+                    <dd>
+                        <span dir="ltr" th:text="${cl.nni()}">1000000001</span>
+                        <span class="etiquette" th:text="${cl.nniVerifie()} ? #{bo.fiche.verifie} : #{bo.fiche.non-verifie}">vérifié</span>
+                    </dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.client.piece}">Pièce d’identité</dt>
+                    <dd><span class="etiquette etiquette--sans-marge" th:text="${cl.pieceIdentiteVerifiee()} ? #{bo.fiche.verifiee} : #{bo.fiche.non-verifiee}">vérifiée</span></dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.client.naissance}">Date de naissance</dt>
+                    <dd th:text="#{bo.fiche.client.naissance.valeur(${cl.dateNaissance()}, ${cl.age()})}">01/05/1990 (36 ans)</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.client.telephone}">Téléphone</dt>
+                    <dd dir="ltr" th:text="${cl.telephone()}">22120001</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.client.consentement}">Consentement aux données</dt>
+                    <dd dir="ltr" th:text="${cl.consentementLe()}">12/11/2026 10:00</dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Emploi -->
+        <section class="fiche-bloc" aria-labelledby="titre-emploi">
+            <h2 id="titre-emploi" th:text="#{bo.fiche.emploi}">Emploi</h2>
+            <p class="texte-doux" th:text="#{bo.fiche.emploi.aide}">Emploi actuellement déclaré par le client.</p>
+            <p th:if="${fiche.emploi().isEmpty()}" class="alerte alerte--erreur" th:text="#{bo.fiche.emploi.aucun}">Aucun emploi déclaré.</p>
+            <dl th:if="${fiche.emploi().isPresent()}" th:with="e=${fiche.emploi().get()}" class="conditions">
+                <div>
+                    <dt th:text="#{client.emploi.employeur}">Employeur</dt>
+                    <dd th:text="${e.employeur()}">SOMELEC</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.emploi.type-contrat}">Type de contrat</dt>
+                    <dd th:text="#{'client.emploi.type-contrat.' + ${e.typeContrat()}}">CDI</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.emploi.debut}">Embauche</dt>
+                    <dd th:text="#{bo.fiche.emploi.anciennete(${e.dateDebut()}, ${e.ancienneteAnnees()}, ${e.ancienneteMois()})}">01/01/2020 (6 ans 10 mois)</dd>
+                </div>
+                <div th:if="${e.dateFin().isPresent()}">
+                    <dt th:text="#{client.emploi.date-fin}">Fin du contrat</dt>
+                    <dd dir="ltr" th:text="${e.dateFin().get()}">31/12/2027</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.emploi.salaire}">Salaire net mensuel</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.salaireNet().valeur(), 1, 'WHITESPACE')})}">30 000 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.emploi.part}">Part du salaire (ce dossier)</dt>
+                    <dd th:text="#{bo.fiche.emploi.part.valeur(${e.partSalairePourcent()})}">7 %</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.emploi.jour-paie}">Jour de paie</dt>
+                    <dd th:text="${e.jourPaie()}">25</dd>
+                </div>
+                <div>
+                    <dt th:text="#{bo.fiche.emploi.versement}">Versement du salaire</dt>
+                    <dd th:text="${e.salaireDomicilieBmci()} ? #{bo.fiche.emploi.versement.bmci} : (${e.salaireVerseSurCompte()} ? #{bo.fiche.emploi.versement.compte} : #{bo.fiche.emploi.versement.aucun})">Compte BMCI</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.emploi.mode}">Mode de remboursement</dt>
+                    <dd th:text="#{'client.emploi.mode.' + ${e.modeRemboursement()}}">Retenue sur salaire</dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Justificatifs -->
+        <section class="fiche-bloc" aria-labelledby="titre-justificatifs">
+            <h2 id="titre-justificatifs" th:text="#{bo.fiche.justificatifs}">Justificatifs</h2>
+            <p th:unless="${#lists.isEmpty(fiche.typesManquants())}" class="alerte alerte--info">
+                <span th:text="#{bo.fiche.justificatifs.manquants}">Pièces manquantes :</span>
+                <span th:each="t, it : ${fiche.typesManquants()}"
+                      th:text="#{'client.justificatifs.type.' + ${t.name()}} + (${it.last} ? '' : ' · ')">RIB</span>
+            </p>
+            <p th:if="${#lists.isEmpty(fiche.justificatifs())}" class="texte-doux" th:text="#{client.justificatifs.aucun}">Aucun justificatif.</p>
+            <div th:unless="${#lists.isEmpty(fiche.justificatifs())}" class="tableau-defilant">
+                <table class="tableau">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{client.justificatifs.type}">Type</th>
+                        <th scope="col" th:text="#{bo.justificatifs.date}">Reçu le</th>
+                        <th scope="col" th:text="#{client.justificatifs.format}">Format</th>
+                        <th scope="col" class="nombre" th:text="#{client.justificatifs.taille}">Taille</th>
+                        <th scope="col"><span class="visuellement-cache" th:text="#{client.justificatifs.actions}">Actions</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="j : ${fiche.justificatifs()}">
+                        <td th:text="#{'client.justificatifs.type.' + ${j.type().name()}}">Pièce d’identité</td>
+                        <td dir="ltr" th:text="${j.recuLe()}">11/11/2026 10:00</td>
+                        <td th:text="${j.format()}">PDF</td>
+                        <td class="nombre" th:text="#{client.justificatifs.taille.ko(${j.tailleKo()})}">120 Ko</td>
+                        <td><a th:href="@{/bo/justificatifs/{id}(id=${j.id()})}" target="_blank" rel="noopener"
+                               th:text="#{client.justificatifs.voir}">Voir</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

@@ -325,3 +325,12 @@ html { scroll-behavior: smooth; }
 .frise__etape--arretee { border-color: #b42318; }
 .frise__etape--arretee::before { content: "✕"; background: #b42318; border-color: #b42318; color: #fff; }
 .frise__etape--a_venir .frise__nom { color: var(--couleur-texte-doux); font-weight: 400; }
+
+/* Fiche dossier du back-office */
+.fiche-bloc { margin-block: 0 1.5rem; }
+.fiche-bloc h3 { font-size: 1.05rem; margin-block: 1rem .5rem; }
+.fiche-score { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-block: 0 .5rem; }
+.fiche-score__note { font-size: 1.75rem; }
+.tableau--retour td, .tableau--retour th { white-space: normal; }
+.tableau tfoot th, .tableau tfoot td { border-block-start: 2px solid var(--couleur-bordure); border-block-end: 0; }
+.ligne--echec th, .ligne--echec td { background: #fdecec; color: #7a1a12; }
