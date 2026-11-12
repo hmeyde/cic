@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!--/*
+  Résultat de la simulation, inclus dans la page produit et renvoyé seul par
+  GET /client/catalogue/{id}/simulation?duree=N (requête HTMX à chaque changement de durée).
+*/-->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<dl th:fragment="resultat" id="simulation" class="conditions">
+    <div>
+        <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+    </div>
+    <div>
+        <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+    </div>
+    <div>
+        <dt th:text="#{client.produit.reste}">Reste à rembourser</dt>
+        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+    </div>
+    <div class="conditions__principale">
+        <dt th:text="#{client.simulation.mensualite(${simulation.nombreMois()})}">Mensualité sur 6 mois</dt>
+        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+    </div>
+    <div th:if="${simulation.derniereDiffere()}">
+        <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(simulation.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+    </div>
+</dl>
+</body>
+</html>

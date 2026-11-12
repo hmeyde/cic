@@ -12,32 +12,28 @@
         <h1 id="titre-produit" th:text="${produit.designation()}">Galaxy A35 128 Go</h1>
         <p class="texte-doux" th:text="${produit.marque()}">Samsung</p>
 
-        <div class="carte">
-            <dl class="conditions">
-                <div>
-                    <dt th:text="#{client.produit.prix}">Prix de vente CIC</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.produit.apport}">Apport minimum à la commande</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.apportMinimum().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.produit.reste}">Reste à rembourser</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.produit.duree}">Durée</dt>
-                    <dd th:text="#{client.produit.duree.valeur(${produit.dureeMinMois()}, ${produit.dureeMaxMois()})}">3 à 6 mois</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.produit.mensualite(${produit.dureeMaxMois()})}">Mensualité indicative sur 6 mois</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.mensualiteIndicative().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
-                </div>
-            </dl>
+        <div class="carte" aria-labelledby="titre-simulation">
+            <h2 id="titre-simulation" th:text="#{client.simulation.titre}">Simuler mon crédit</h2>
+            <!--/* Sans JavaScript, le formulaire recharge la page ; avec HTMX, seul le résultat est remplacé. */-->
+            <form class="simulation" method="get"
+                  th:action="@{/client/catalogue/{id}(id=${produit.id()})}"
+                  th:attr="hx-get=@{/client/catalogue/{id}/simulation(id=${produit.id()})}"
+                  hx-trigger="change" hx-target="#simulation" hx-swap="outerHTML">
+                <fieldset class="choix-duree">
+                    <legend th:text="#{client.simulation.duree}">Durée de remboursement</legend>
+                    <label th:each="d : ${durees}" class="choix-duree__option">
+                        <input type="radio" name="duree" th:value="${d}" th:checked="${d == simulation.nombreMois()}">
+                        <span th:text="#{client.simulation.duree.option(${d})}">6 mois</span>
+                    </label>
+                </fieldset>
+                <noscript><button type="submit" class="bouton" th:text="#{client.simulation.calculer}">Calculer</button></noscript>
+            </form>
+            <div aria-live="polite">
+                <dl th:replace="~{client/catalogue/simulation :: resultat}"></dl>
+            </div>
         </div>
 
-        <p class="texte-doux" th:text="#{client.produit.mentions}">Prix fixé à la signature : sans intérêt ni pénalité de retard. Les mensualités sont prélevées le jour de votre paie. Le montant exact dépend de la durée et de l’apport choisis lors de la simulation.</p>
+        <p class="texte-doux" th:text="#{client.produit.mentions}">Prix fixé à la signature : sans intérêt ni pénalité de retard. Les mensualités sont prélevées le jour de votre paie.</p>
 
         <p><a class="bouton bouton--contour" th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
     </section>

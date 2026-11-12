@@ -13,6 +13,8 @@ import com.cic.catalogue.domain.Fournisseur;
 import com.cic.catalogue.domain.Produit;
 import com.cic.commun.domain.Montant;
 import com.cic.contrat.application.CalculPrixService;
+import com.cic.contrat.application.EcheancierService;
+import com.cic.contrat.application.SimulationService;
 import com.cic.parametrage.ParametresDeDepart;
 import com.cic.parametrage.application.ParametreService;
 
@@ -25,7 +27,9 @@ class CatalogueClientServiceTest {
     private CatalogueClientService service() {
         ParametreService parametres = new ParametreService(ParametresDeDepart::lignes);
         parametres.afterSingletonsInstantiated();
-        return new CatalogueClientService(produits, fournisseurs, new CalculPrixService(parametres), parametres);
+        CalculPrixService calculPrix = new CalculPrixService(parametres);
+        return new CatalogueClientService(produits, fournisseurs, calculPrix,
+                new SimulationService(calculPrix, new EcheancierService(parametres)), parametres);
     }
 
     private Fournisseur fournisseur(String remisePct) {
@@ -99,5 +103,17 @@ class CatalogueClientServiceTest {
     @Test
     void un_produit_inconnu_n_est_pas_propose() {
         assertThat(catalogue.propose(UUID.randomUUID())).isEmpty();
+    }
+
+    @Test
+    void simule_un_produit_propose_sur_la_duree_choisie() {
+        Produit p = produit("TEL-002", "Galaxy A35", CategorieProduit.TELEPHONE, fournisseur("8"), 20_000);
+
+        assertThat(catalogue.simuler(p.id(), 4)).hasValueSatisfying(s -> {
+            assertThat(s.prixTotal()).isEqualTo(Montant.de(20_800));
+            assertThat(s.apport()).isEqualTo(Montant.de(8_320));
+            assertThat(s.mensualite()).isEqualTo(Montant.de(3_120));
+        });
+        assertThat(catalogue.simuler(UUID.randomUUID(), 4)).isEmpty();
     }
 }
