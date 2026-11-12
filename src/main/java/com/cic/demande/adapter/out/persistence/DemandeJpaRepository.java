@@ -1,5 +1,6 @@
 package com.cic.demande.adapter.out.persistence;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +20,12 @@ interface DemandeJpaRepository extends JpaRepository<DemandeEntity, UUID> {
 
     /** S'appuie sur l'index {@code demande_statut_idx (statut, soumise_le)}. */
     List<DemandeEntity> findByStatutOrderBySoumiseLeAscIdAsc(StatutDossier statut);
+
+    /** S'appuie sur l'index {@code demande_statut_change_idx (statut, statut_change_le)}. */
+    @Query("select d.id from DemandeEntity d where d.statut = :statut and d.statutChangeLe <= :limite"
+            + " order by d.statutChangeLe, d.id")
+    List<UUID> findIdsByStatutAndStatutChangeLeAuPlusTard(@Param("statut") StatutDossier statut,
+            @Param("limite") Instant limite);
 
     /** {@code SELECT … FOR UPDATE} : verrou sur la ligne jusqu'à la fin de la transaction. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)

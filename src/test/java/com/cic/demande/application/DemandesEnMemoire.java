@@ -1,5 +1,6 @@
 package com.cic.demande.application;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,6 +43,13 @@ public class DemandesEnMemoire implements DemandeRepository {
     public List<Demande> parStatutDeLaPlusAncienne(StatutDossier statut) {
         return demandes.values().stream().filter(d -> d.statut() == statut)
                 .sorted(Comparator.comparing(Demande::soumiseLe).thenComparing(Demande::id)).toList();
+    }
+
+    @Override
+    public List<UUID> idsParStatutDepuisAuPlusTard(StatutDossier statut, Instant limite) {
+        return demandes.values().stream().filter(d -> d.statut() == statut && !d.statutChangeLe().isAfter(limite))
+                .sorted(Comparator.comparing(Demande::statutChangeLe).thenComparing(Demande::id))
+                .map(Demande::id).toList();
     }
 
     @Override

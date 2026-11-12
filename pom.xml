@@ -22,6 +22,7 @@
         <spring-modulith.version>2.1.2</spring-modulith.version>
         <htmx.version>2.0.6</htmx.version>
         <openpdf.version>3.0.5</openpdf.version>
+        <shedlock.version>7.11.0</shedlock.version>
     </properties>
 
     <dependencyManagement>
@@ -121,6 +122,18 @@
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
             <version>${openpdf.version}</version>
+        </dependency>
+
+        <!-- Jobs planifiés : un seul nœud exécute chaque job (verrou JDBC) -->
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
 
         <!-- Tests -->

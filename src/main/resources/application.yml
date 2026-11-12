@@ -44,3 +44,7 @@ cic:
     repertoire: ${CIC_AUTORISATIONS_REPERTOIRE:${user.home}/.cic/autorisations-signees}
   parametres:
     rechargement: PT5M   # relecture périodique de la table parametre
+  jobs:
+    expiration-dossiers:
+      # Annulation des dossiers ACCEPTEE sans apport ou autorisation après le délai (heure de Nouakchott).
+      cron: "0 */15 * * * *"

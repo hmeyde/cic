@@ -1,5 +1,6 @@
 package com.cic.demande.domain;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,12 @@ public interface DemandeRepository {
      * égale, ordre de l'identifiant pour un ordre stable).
      */
     List<Demande> parStatutDeLaPlusAncienne(StatutDossier statut);
+
+    /**
+     * Identifiants des demandes au statut donné depuis {@code limite} ou avant (date du dernier
+     * changement de statut), du plus ancien au plus récent.
+     */
+    List<UUID> idsParStatutDepuisAuPlusTard(StatutDossier statut, Instant limite);
 
     /**
      * Sérialise les soumissions d'un même client jusqu'à la fin de la transaction en cours, pour que

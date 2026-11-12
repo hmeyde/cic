@@ -6,5 +6,7 @@ public enum ActionDossier {
     MISE_EN_ANALYSE,
     ACCEPTATION,
     REFUS,
-    DEMANDE_JUSTIFICATIF
+    DEMANDE_JUSTIFICATIF,
+    /** Dossier ACCEPTEE annulé par le traitement planifié : apport ou autorisation manquant après le délai. */
+    ANNULATION_DELAI_DEPASSE
 }

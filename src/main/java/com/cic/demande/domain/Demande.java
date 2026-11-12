@@ -1,5 +1,6 @@
 package com.cic.demande.domain;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
@@ -110,6 +111,32 @@ public final class Demande {
         if (!statut.attendDecision()) {
             throw new DecisionImpossibleException(statut);
         }
+    }
+
+    /**
+     * Le dossier est ACCEPTEE depuis au moins {@code delai} : l'apport ou l'autorisation de
+     * prélèvement manque encore, sinon il serait passé à APPORT_ET_AUTORISATION.
+     */
+    public boolean delaiApportEtAutorisationDepasse(Duration delai, Instant maintenant) {
+        Objects.requireNonNull(delai, "delai");
+        Objects.requireNonNull(maintenant, "maintenant");
+        return statut == StatutDossier.ACCEPTEE && !maintenant.isBefore(statutChangeLe.plus(delai));
+    }
+
+    /**
+     * ACCEPTEE → ANNULEE : l'apport ou l'autorisation de prélèvement n'est pas arrivé dans le délai
+     * suivant l'acceptation.
+     *
+     * @throws TransitionInterditeException si la demande n'est pas ACCEPTEE
+     * @throws DelaiNonDepasseException     si le délai n'est pas encore écoulé
+     */
+    public ChangementStatut annulerFauteApportOuAutorisation(Duration delai, Instant le) {
+        ChangementStatut changement = statut.passerA(StatutDossier.ANNULEE);
+        if (!delaiApportEtAutorisationDepasse(delai, le)) {
+            throw new DelaiNonDepasseException();
+        }
+        appliquer(changement, le);
+        return changement;
     }
 
     private ChangementStatut passerA(StatutDossier cible, Instant le) {

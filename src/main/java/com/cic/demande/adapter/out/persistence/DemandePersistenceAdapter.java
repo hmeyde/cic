@@ -1,5 +1,6 @@
 package com.cic.demande.adapter.out.persistence;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,11 @@ class DemandePersistenceAdapter implements DemandeRepository {
     @Transactional(readOnly = true)
     public List<Demande> parStatutDeLaPlusAncienne(StatutDossier statut) {
         return avecScores(demandes.findByStatutOrderBySoumiseLeAscIdAsc(statut));
+    }
+
+    @Override
+    public List<UUID> idsParStatutDepuisAuPlusTard(StatutDossier statut, Instant limite) {
+        return demandes.findIdsByStatutAndStatutChangeLeAuPlusTard(statut, limite);
     }
 
     /** Scores chargés en une seule requête ; l'ordre des demandes est conservé. */
