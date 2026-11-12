@@ -75,16 +75,22 @@ class ContratPersistenceAdapter implements ContratRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au) {
-        return contrats.findAvecEcheanceEntre(StatutEcheance.A_VENIR, du, au).stream()
+    public List<EcheanceAPrelever> echeancesEntre(StatutEcheance statut, LocalDate du, LocalDate au) {
+        return contrats.findAvecEcheanceEntre(statut, du, au).stream()
                 .map(ContratPersistenceAdapter::versDomaine)
                 .flatMap(c -> c.echeances().stream()
-                        .filter(e -> e.statut() == StatutEcheance.A_VENIR && !e.date().isBefore(du)
+                        .filter(e -> e.statut() == statut && !e.date().isBefore(du)
                                 && !e.date().isAfter(au))
                         .map(e -> EcheanceAPrelever.de(c, e)))
                 .sorted(Comparator.comparing((EcheanceAPrelever e) -> e.echeance().date())
                         .thenComparing(EcheanceAPrelever::numeroContrat))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean clientAUneEcheanceEnRetard(UUID clientId) {
+        return contrats.existeEcheanceDuClient(clientId, StatutEcheance.EN_RETARD);
     }
 
     @Override

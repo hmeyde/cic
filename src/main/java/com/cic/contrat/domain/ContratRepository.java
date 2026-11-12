@@ -23,8 +23,16 @@ public interface ContratRepository {
     /** Enregistre le nouveau statut d'une échéance du contrat ; seul le statut change après la signature. */
     void enregistrerStatut(UUID contratId, Echeance echeance);
 
+    /** Échéances de ce statut dont la date est comprise entre {@code du} et {@code au} inclus, par date puis contrat. */
+    List<EcheanceAPrelever> echeancesEntre(StatutEcheance statut, LocalDate du, LocalDate au);
+
     /** Échéances A_VENIR dont la date est comprise entre {@code du} et {@code au} inclus, par date puis contrat. */
-    List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au);
+    default List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au) {
+        return echeancesEntre(StatutEcheance.A_VENIR, du, au);
+    }
+
+    /** Le client a au moins une échéance EN_RETARD, sur l'un quelconque de ses contrats. */
+    boolean clientAUneEcheanceEnRetard(UUID clientId);
 
     /** Numéro d'ordre suivant, unique et croissant, pour numéroter les contrats. */
     long prochainNumeroOrdre();

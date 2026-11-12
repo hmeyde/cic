@@ -199,6 +199,16 @@ public final class Demande {
         return passerA(StatutDossier.EN_REMBOURSEMENT, le);
     }
 
+    /**
+     * EN_REMBOURSEMENT → EN_RETARD : une échéance n'a pas été payée à sa date. Le prix ne change
+     * pas : aucune pénalité de retard.
+     *
+     * @throws TransitionInterditeException si la demande n'est pas EN_REMBOURSEMENT
+     */
+    public ChangementStatut constaterRetard(Instant le) {
+        return passerA(StatutDossier.EN_RETARD, le);
+    }
+
     private ChangementStatut passerA(StatutDossier cible, Instant le) {
         ChangementStatut changement = statut.passerA(cible);
         appliquer(changement, le);

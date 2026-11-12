@@ -20,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
+import com.cic.contrat.application.ContratsEnMemoire;
+import com.cic.contrat.application.AutorisationsEnMemoire;
+import com.cic.contrat.application.ContratService;
 import com.cic.audit.application.JournalAuditService;
 import com.cic.audit.application.JournalEnMemoire;
 import com.cic.catalogue.application.CatalogueClientService;
@@ -91,7 +94,8 @@ class DemandeClientControllerTest {
                 new EmploiClientService(clients, emplois, clock),
                 new CatalogueClientService(produits, fournisseurs, calculPrix,
                         new SimulationService(calculPrix, echeancier), parametres),
-                echeancier, new ScoreService(parametres, new EligibiliteService(parametres, clock), clock),
+                echeancier, new ContratService(new ContratsEnMemoire(), new AutorisationsEnMemoire(), parametres, clock),
+                new ScoreService(parametres, new EligibiliteService(parametres, clock), clock),
                 parametres, new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
         decisions = new DecisionsDeTest(demandes, new JournalAuditService(new JournalEnMemoire()), emplois,
                 evenement -> { }, clock);

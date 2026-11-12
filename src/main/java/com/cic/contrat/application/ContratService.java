@@ -20,6 +20,7 @@ import com.cic.contrat.domain.ContratRepository;
 import com.cic.contrat.domain.Echeance;
 import com.cic.contrat.domain.EcheanceAPrelever;
 import com.cic.contrat.domain.Echeancier;
+import com.cic.contrat.domain.StatutEcheance;
 import com.cic.parametrage.application.ParametreService;
 import com.cic.parametrage.domain.CleParametre;
 
@@ -98,6 +99,53 @@ public class ContratService {
         Objects.requireNonNull(du, "du");
         Objects.requireNonNull(au, "au");
         return contrats.echeancesAVenirEntre(du, au);
+    }
+
+    /**
+     * Échéances encore A_VENIR dont la date est passée ({@code date} exclue), par date puis numéro de
+     * contrat : elles n'ont pas été payées à la date prévue.
+     */
+    @Transactional(readOnly = true)
+    public List<EcheanceAPrelever> echeancesAVenirAvant(LocalDate date) {
+        Objects.requireNonNull(date, "date");
+        return contrats.echeancesEntre(StatutEcheance.A_VENIR, LocalDate.EPOCH, date.minusDays(1));
+    }
+
+    /** Échéances EN_RETARD dont la date est comprise entre ces deux dates incluses : sert aux relances. */
+    @Transactional(readOnly = true)
+    public List<EcheanceAPrelever> echeancesEnRetardEntre(LocalDate du, LocalDate au) {
+        Objects.requireNonNull(du, "du");
+        Objects.requireNonNull(au, "au");
+        return contrats.echeancesEntre(StatutEcheance.EN_RETARD, du, au);
+    }
+
+    /** Le client a au moins une échéance EN_RETARD : ses nouveaux achats sont bloqués. */
+    @Transactional(readOnly = true)
+    public boolean clientAUneEcheanceEnRetard(UUID clientId) {
+        Objects.requireNonNull(clientId, "clientId");
+        return contrats.clientAUneEcheanceEnRetard(clientId);
+    }
+
+    /**
+     * Constate qu'une échéance n'a pas été payée à sa date : A_VENIR → EN_RETARD. Sans effet si elle
+     * est déjà payée ou déjà en retard, ou si sa date n'est pas encore passée. Le montant ne change pas.
+     *
+     * @return vrai si l'échéance vient de passer à EN_RETARD
+     * @throws IllegalArgumentException le contrat n'a pas d'échéance de ce rang
+     */
+    @Transactional
+    public boolean constaterEcheanceEnRetard(UUID contratId, int rang) {
+        Objects.requireNonNull(contratId, "contratId");
+        Contrat contrat = contrats.parId(contratId)
+                .orElseThrow(() -> new IllegalArgumentException("Contrat introuvable : " + contratId));
+        Echeance echeance = contrat.echeance(rang)
+                .orElseThrow(() -> new IllegalArgumentException("Pas d'échéance " + rang + " pour " + contrat));
+        if (echeance.statut() != StatutEcheance.A_VENIR || !echeance.date().isBefore(LocalDate.now(clock))) {
+            return false;
+        }
+        contrats.enregistrerStatut(contratId, echeance.enRetard());
+        LOG.info("Échéance {} de {} impayée à sa date du {} : EN_RETARD", rang, contrat, echeance.date());
+        return true;
     }
 
     /** Autorisation de prélèvement d'un contrat ; une par contrat, émise avec lui. */

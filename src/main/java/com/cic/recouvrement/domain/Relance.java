@@ -24,4 +24,17 @@ public record Relance(UUID id, UUID echeanceId, UUID contratId, TypeRelance type
     public static Relance avantPrelevement(UUID echeanceId, UUID contratId, LocalDate dateEcheance, Instant le) {
         return new Relance(UUID.randomUUID(), echeanceId, contratId, TypeRelance.AVANT_PRELEVEMENT, dateEcheance, le);
     }
+
+    /**
+     * Relance après une échéance impayée.
+     *
+     * @throws IllegalArgumentException si le type n'est pas une relance d'échec
+     */
+    public static Relance apresEchec(TypeRelance type, UUID echeanceId, UUID contratId, LocalDate dateEcheance,
+            Instant le) {
+        if (type != TypeRelance.ECHEC_PREMIERE && type != TypeRelance.ECHEC_SECONDE) {
+            throw new IllegalArgumentException("Pas une relance après échec : " + type);
+        }
+        return new Relance(UUID.randomUUID(), echeanceId, contratId, type, dateEcheance, le);
+    }
 }

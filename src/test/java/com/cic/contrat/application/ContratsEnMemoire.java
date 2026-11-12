@@ -51,15 +51,21 @@ public class ContratsEnMemoire implements ContratRepository {
     }
 
     @Override
-    public List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au) {
+    public List<EcheanceAPrelever> echeancesEntre(StatutEcheance statut, LocalDate du, LocalDate au) {
         return parDemande.values().stream()
                 .flatMap(c -> c.echeances().stream()
-                        .filter(e -> e.statut() == StatutEcheance.A_VENIR && !e.date().isBefore(du)
+                        .filter(e -> e.statut() == statut && !e.date().isBefore(du)
                                 && !e.date().isAfter(au))
                         .map(e -> EcheanceAPrelever.de(c, e)))
                 .sorted(Comparator.comparing((EcheanceAPrelever e) -> e.echeance().date())
                         .thenComparing(EcheanceAPrelever::numeroContrat))
                 .toList();
+    }
+
+    @Override
+    public boolean clientAUneEcheanceEnRetard(UUID clientId) {
+        return parDemande.values().stream().filter(c -> c.clientId().equals(clientId))
+                .flatMap(c -> c.echeances().stream()).anyMatch(Echeance::estEnRetard);
     }
 
     @Override

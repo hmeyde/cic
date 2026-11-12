@@ -30,4 +30,11 @@ interface ContratJpaRepository extends JpaRepository<ContratEntity, UUID> {
                           and e.dateEcheance between :du and :au)
             """)
     List<ContratEntity> findAvecEcheanceEntre(StatutEcheance statut, LocalDate du, LocalDate au);
+
+    /** Le client a au moins une échéance de ce statut, sur l'un quelconque de ses contrats. */
+    @Query("""
+            select count(e) > 0 from EcheanceEntity e
+            where e.contrat.clientId = :clientId and e.statut = :statut
+            """)
+    boolean existeEcheanceDuClient(UUID clientId, StatutEcheance statut);
 }

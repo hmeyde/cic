@@ -79,6 +79,24 @@ public final class Echeance {
         return new Echeance(id, rang, date, montant, StatutEcheance.PAYEE);
     }
 
+    /** L'échéance n'a pas été payée à sa date. */
+    public boolean estEnRetard() {
+        return statut == StatutEcheance.EN_RETARD;
+    }
+
+    /**
+     * Même échéance, impayée à sa date : A_VENIR → EN_RETARD. Le montant ne change pas : aucune
+     * pénalité de retard.
+     *
+     * @throws IllegalStateException l'échéance n'est pas A_VENIR
+     */
+    public Echeance enRetard() {
+        if (statut != StatutEcheance.A_VENIR) {
+            throw new IllegalStateException("Échéance " + rang + " " + statut + " : seule une échéance A_VENIR passe en retard");
+        }
+        return new Echeance(id, rang, date, montant, StatutEcheance.EN_RETARD);
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof Echeance e && id.equals(e.id);

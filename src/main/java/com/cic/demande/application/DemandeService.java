@@ -19,6 +19,7 @@ import com.cic.audit.domain.Acteur;
 import com.cic.catalogue.application.CatalogueClientService;
 import com.cic.catalogue.application.ConditionsProduit;
 import com.cic.commun.domain.Montant;
+import com.cic.contrat.application.ContratService;
 import com.cic.contrat.application.EcheancierService;
 import com.cic.contrat.domain.Echeancier;
 import com.cic.contrat.domain.Prix;
@@ -46,6 +47,8 @@ import com.cic.parametrage.domain.CleParametre;
  *
  * <p>Soumission, dans une seule transaction :
  * <ol>
+ *   <li>client en retard (dossier EN_RETARD ou RECOUVREMENT, ou échéance EN_RETARD sur l'un de ses
+ *       contrats) : nouveaux achats bloqués ;</li>
  *   <li>au plus {@code dossier.actif.max} (1) dossier actif par client ;</li>
  *   <li>produit proposé, durée dans les bornes, apport ≥ apport minimum et inférieur au prix de vente ;</li>
  *   <li>échéancier au jour de paie du client à partir de la date du jour : pour un CDD la dernière
@@ -66,6 +69,7 @@ public class DemandeService {
     private final EmploiClientService emplois;
     private final CatalogueClientService catalogue;
     private final EcheancierService echeancier;
+    private final ContratService contrats;
     private final ScoreService score;
     private final ParametreService parametres;
     private final JournalAuditService journal;
@@ -73,9 +77,10 @@ public class DemandeService {
     private final Clock clock;
 
     public DemandeService(DemandeRepository demandes, ClientService clients, EmploiClientService emplois,
-            CatalogueClientService catalogue, EcheancierService echeancier, ScoreService score,
-            ParametreService parametres, JournalAuditService journal, ApplicationEventPublisher evenements,
-            Clock clock) {
+            CatalogueClientService catalogue, EcheancierService echeancier, ContratService contrats,
+            ScoreService score, ParametreService parametres, JournalAuditService journal,
+            ApplicationEventPublisher evenements, Clock clock) {
+        this.contrats = contrats;
         this.journal = journal;
         this.demandes = demandes;
         this.clients = clients;
@@ -93,6 +98,7 @@ public class DemandeService {
      *
      * @param apportPropose apport choisi par le client ; vide pour l'apport minimum
      * @return la demande enregistrée, au statut EN_ANALYSE, avec son score
+     * @throws ClientEnRetardException       le client a une échéance impayée chez CIC
      * @throws DossierActifExistantException le client a déjà un dossier actif
      * @throws EmploiNonDeclareException     le client n'a pas déclaré son emploi
      * @throws ProduitNonProposeException    produit inconnu, indisponible ou non proposé
@@ -111,6 +117,9 @@ public class DemandeService {
 
         demandes.verrouillerClient(clientId);
         List<Demande> existantes = demandes.parClient(clientId);
+        if (existantes.stream().anyMatch(d -> d.statut().estEnRetard()) || contrats.clientAUneEcheanceEnRetard(clientId)) {
+            throw new ClientEnRetardException();
+        }
         List<Demande> actives = existantes.stream().filter(Demande::estActive).toList();
         if (actives.size() >= parametres.entier(CleParametre.DOSSIER_ACTIF_MAX)) {
             throw new DossierActifExistantException();

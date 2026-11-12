@@ -11,9 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
+import com.cic.contrat.domain.StatutEcheance;
+import com.cic.contrat.domain.Prix;
+import com.cic.contrat.domain.Echeance;
+import com.cic.contrat.domain.Contrat;
+import com.cic.contrat.application.ContratsEnMemoire;
+import com.cic.contrat.application.AutorisationsEnMemoire;
+import com.cic.contrat.application.ContratService;
 import com.cic.audit.application.JournalAuditService;
 import com.cic.audit.application.JournalEnMemoire;
 import com.cic.audit.domain.Acteur;
@@ -59,6 +67,7 @@ class DemandeServiceTest {
     private final ProduitsEnMemoire produits = new ProduitsEnMemoire();
     private final FournisseursEnMemoire fournisseurs = new FournisseursEnMemoire();
     private final DemandesEnMemoire demandes = new DemandesEnMemoire();
+    private final ContratsEnMemoire contrats = new ContratsEnMemoire();
     private final JournalEnMemoire journal = new JournalEnMemoire();
     private final List<Object> evenements = new ArrayList<>();
     private final DemandeService service;
@@ -78,7 +87,8 @@ class DemandeServiceTest {
                 new SimulationService(calculPrix, echeancier), parametres);
         ScoreService score = new ScoreService(parametres, new EligibiliteService(parametres, clock), clock);
         service = new DemandeService(demandes, new ClientService(clients),
-                new EmploiClientService(clients, emplois, clock), catalogue, echeancier, score, parametres,
+                new EmploiClientService(clients, emplois, clock), catalogue, echeancier,
+                new ContratService(contrats, new AutorisationsEnMemoire(), parametres, clock), score, parametres,
                 new JournalAuditService(journal), evenements::add, clock);
 
         client.verifierNni();
@@ -159,7 +169,31 @@ class DemandeServiceTest {
     void un_dossier_en_recouvrement_bloque_les_nouveaux_achats() {
         demandes.enregistrer(DemandesFixtures.demande(client.id(), StatutDossier.RECOUVREMENT));
 
-        assertThatThrownBy(this::soumettre).isInstanceOf(DossierActifExistantException.class);
+        assertThatThrownBy(this::soumettre).isInstanceOf(ClientEnRetardException.class)
+                .extracting("code").isEqualTo("demande.client.en.retard");
+    }
+
+    @Test
+    void un_dossier_en_retard_bloque_les_nouveaux_achats() {
+        demandes.enregistrer(DemandesFixtures.demande(client.id(), StatutDossier.EN_RETARD));
+
+        assertThatThrownBy(this::soumettre).isInstanceOf(ClientEnRetardException.class);
+        assertThat(demandes.parClient(client.id())).hasSize(1);
+    }
+
+    @Test
+    void une_echeance_en_retard_bloque_les_nouveaux_achats_meme_avant_la_livraison() {
+        Demande livree = DemandesFixtures.demande(client.id(), StatutDossier.LIVREE);
+        demandes.enregistrer(livree);
+        contrats.enregistrer(Contrat.reconstituer(UUID.randomUUID(), "CIC-2026-000001", livree.id(), client.id(),
+                UUID.randomUUID(), UUID.randomUUID(), "Galaxy A35",
+                new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
+                Montant.de(8_320), IntStream.rangeClosed(1, 6).mapToObj(rang -> Echeance.reconstituer(
+                        UUID.randomUUID(), rang, AUJOURD_HUI.minusDays(1).plusMonths(rang - 1), Montant.de(2_080),
+                        rang == 1 ? StatutEcheance.EN_RETARD : StatutEcheance.A_VENIR)).toList(),
+                clock.instant()));
+
+        assertThatThrownBy(this::soumettre).isInstanceOf(ClientEnRetardException.class);
     }
 
     @Test

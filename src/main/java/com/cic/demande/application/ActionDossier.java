@@ -16,5 +16,7 @@ public enum ActionDossier {
     /** Le client confirme avoir reçu son produit : le dossier passe à LIVREE. */
     CONFIRMATION_REMISE,
     /** Produit remis : le dossier passe à EN_REMBOURSEMENT, les échéances du contrat sont prélevées. */
-    DEBUT_REMBOURSEMENT
+    DEBUT_REMBOURSEMENT,
+    /** Échéance impayée à sa date, constatée par le traitement planifié : le dossier passe à EN_RETARD. */
+    PASSAGE_EN_RETARD
 }

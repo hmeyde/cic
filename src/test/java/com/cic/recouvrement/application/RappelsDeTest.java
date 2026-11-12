@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import org.springframework.context.support.ResourceBundleMessageSource;
 
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.application.JournalEnMemoire;
 import com.cic.commun.domain.Montant;
 import com.cic.contrat.application.AutorisationsEnMemoire;
 import com.cic.contrat.application.ContratService;
@@ -19,6 +21,7 @@ import com.cic.contrat.domain.Echeance;
 import com.cic.contrat.domain.Prix;
 import com.cic.contrat.domain.StatutEcheance;
 import com.cic.demande.application.DemandesEnMemoire;
+import com.cic.demande.application.RetardDossierService;
 import com.cic.demande.application.StatutDossierService;
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandesFixtures;
@@ -32,7 +35,8 @@ import com.cic.parametrage.application.ParametreService;
 
 /**
  * Le 12/11/2026 à Nouakchott : un client, son dossier et son contrat de l'exemple chiffré
- * (6 × 2 080 MRU) dont la première échéance tombe le 13/11/2026, la veille étant aujourd'hui.
+ * (6 × 2 080 MRU) dont la première échéance tombe, par exemple, le 13/11/2026, la veille étant
+ * aujourd'hui ; services de rappel et de retard branchés sur les mêmes stockages en mémoire.
  */
 public final class RappelsDeTest {
 
@@ -46,7 +50,10 @@ public final class RappelsDeTest {
     public final ClientsEnMemoire clients = new ClientsEnMemoire();
     public final RelancesEnMemoire relances = new RelancesEnMemoire();
     public final List<Message> envoyes = new ArrayList<>();
+    public final JournalEnMemoire journal = new JournalEnMemoire();
+    public final List<Object> evenements = new ArrayList<>();
     public final RappelPrelevementService service;
+    public final RetardEcheanceService retards;
     private long ordre;
 
     public RappelsDeTest() {
@@ -56,10 +63,13 @@ public final class RappelsDeTest {
         messages.setBasename("messages");
         messages.setDefaultEncoding("UTF-8");
         messages.setFallbackToSystemLocale(false);
+        ContratService contratService = new ContratService(contrats, new AutorisationsEnMemoire(), parametres, clock);
         service = new RappelPrelevementService(
-                new ContratService(contrats, new AutorisationsEnMemoire(), parametres, clock),
-                new StatutDossierService(demandes), new ClientService(clients), relances, envoyes::add, parametres,
-                messages, clock);
+                contratService, new StatutDossierService(demandes), new ClientService(clients), relances, envoyes::add,
+                parametres, messages, clock);
+        retards = new RetardEcheanceService(contratService, new StatutDossierService(demandes),
+                new RetardDossierService(demandes, new JournalAuditService(journal), evenements::add, clock),
+                new ClientService(clients), relances, envoyes::add, parametres, messages, clock);
     }
 
     public Client client(String telephone) {
