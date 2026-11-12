@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.cic.commun.domain.Montant;
+
 /** Stockage des paiements reçus (port de sortie). */
 public interface PaiementRepository {
 
@@ -26,4 +28,7 @@ public interface PaiementRepository {
      * montant différent de l'apport attendu. Les plus récemment reçus d'abord.
      */
     List<Paiement> ecarts(int limite);
+
+    /** Somme des paiements rapprochés du dossier ; zéro s'il n'en a aucun. */
+    Montant totalRapprochePourDossier(UUID demandeId);
 }

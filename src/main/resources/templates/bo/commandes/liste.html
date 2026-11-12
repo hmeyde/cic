@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.commandes.titre-page}">Commandes fournisseur — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-commandes">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <h1 id="titre-commandes" th:text="#{bo.commandes.titre}">Commandes fournisseur</h1>
+        <p class="texte-doux" th:text="#{bo.commandes.texte}">Le fournisseur n’est payé qu’une fois l’apport encaissé et l’autorisation de prélèvement acceptée. Le paiement est validé par une autre personne que l’analyste qui a décidé du dossier.</p>
+
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}(${numero})}">Paiement fournisseur validé : bon de commande BC-2026-000001 émis.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
+
+        <section class="fiche-bloc" aria-labelledby="titre-a-commander">
+            <h2 id="titre-a-commander" th:text="#{bo.commandes.a-commander}">Dossiers à commander</h2>
+            <p th:if="${#lists.isEmpty(aCommander)}" class="texte-doux" th:text="#{bo.commandes.a-commander.aucun}">Aucun dossier en attente de commande.</p>
+            <div th:unless="${#lists.isEmpty(aCommander)}" class="tableau-defilant">
+                <table class="tableau">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.autorisation.contrat}">Contrat</th>
+                        <th scope="col" th:text="#{bo.dossiers.produit}">Produit</th>
+                        <th scope="col" th:text="#{bo.commandes.fournisseur}">Fournisseur</th>
+                        <th scope="col" th:text="#{bo.commandes.montant}">Net à payer (MRU)</th>
+                        <th scope="col" th:text="#{bo.commandes.depuis}">Prêt depuis le</th>
+                        <th scope="col" th:text="#{bo.commandes.prealables}">Préalables</th>
+                        <th scope="col" th:text="#{bo.commandes.action}">Paiement fournisseur</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${aCommander}">
+                        <td dir="ltr" th:text="${d.numeroContrat()}">CIC-2026-000001</td>
+                        <td dir="auto" th:text="${d.designation()}">Galaxy A35</td>
+                        <td dir="auto" th:text="${d.fournisseur()}">Mauritel Store</td>
+                        <td dir="ltr" th:text="${#numbers.formatInteger(d.montant(), 1, 'WHITESPACE')}">18 400</td>
+                        <td dir="ltr" th:text="${d.depuis()}">12/11/2026 10:00</td>
+                        <td>
+                            <span class="etiquette etiquette--sans-marge"
+                                  th:text="${d.apportEncaisse()} ? #{bo.commandes.apport.ok} : #{bo.commandes.apport.manquant}">Apport encaissé</span>
+                            <span class="etiquette etiquette--sans-marge"
+                                  th:text="${d.autorisationAcceptee()} ? #{bo.commandes.autorisation.ok} : #{bo.commandes.autorisation.manquante}">Autorisation acceptée</span>
+                        </td>
+                        <td>
+                            <form th:if="${d.validable()}" method="post"
+                                  th:action="@{/bo/commandes/{id}/validation(id=${d.demandeId()})}">
+                                <button type="submit" class="bouton bouton--principal" th:text="#{bo.commandes.valider}">Valider le paiement et commander</button>
+                            </form>
+                            <p th:if="${d.decideParMoi()}" class="texte-doux" th:text="#{bo.commandes.decide-par-moi}">Vous avez décidé de ce dossier : une autre personne doit valider son paiement fournisseur.</p>
+                            <p th:if="${!d.validable() and !d.decideParMoi()}" class="texte-doux" th:text="#{bo.commandes.prealables.manquants}">Apport ou autorisation manquant.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="fiche-bloc" aria-labelledby="titre-commandes-validees">
+            <h2 id="titre-commandes-validees" th:text="#{bo.commandes.validees}">Commandes validées</h2>
+            <p class="texte-doux" th:text="#{bo.commandes.validees.texte(${limite})}">Les 50 dernières commandes, de la plus récente à la plus ancienne.</p>
+            <p th:if="${#lists.isEmpty(commandes)}" class="texte-doux" th:text="#{bo.commandes.validees.aucune}">Aucune commande.</p>
+            <div th:unless="${#lists.isEmpty(commandes)}" class="tableau-defilant">
+                <table class="tableau">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.commandes.numero}">Bon de commande</th>
+                        <th scope="col" th:text="#{bo.autorisation.contrat}">Contrat</th>
+                        <th scope="col" th:text="#{bo.dossiers.produit}">Produit</th>
+                        <th scope="col" th:text="#{bo.commandes.fournisseur}">Fournisseur</th>
+                        <th scope="col" th:text="#{bo.commandes.montant}">Net à payer (MRU)</th>
+                        <th scope="col" th:text="#{bo.commandes.validee-par}">Validé par</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${commandes}">
+                        <td dir="ltr"><a th:href="@{/bo/commandes/{id}/bon-de-commande.pdf(id=${c.demandeId()})}" target="_blank" rel="noopener"
+                                         th:text="${c.numero()}">BC-2026-000001</a></td>
+                        <td dir="ltr" th:text="${c.numeroContrat()}">CIC-2026-000001</td>
+                        <td dir="auto" th:text="${c.designation()}">Galaxy A35</td>
+                        <td dir="auto" th:text="${c.fournisseur()}">Mauritel Store</td>
+                        <td dir="ltr" th:text="${#numbers.formatInteger(c.montant(), 1, 'WHITESPACE')}">18 400</td>
+                        <td dir="ltr" th:text="${c.validePar() + ' — ' + c.valideLe()}">admin — 12/11/2026 10:00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

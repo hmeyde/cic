@@ -80,6 +80,12 @@ class PaiementPersistenceAdapter implements PaiementRepository {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Montant totalRapprochePourDossier(UUID demandeId) {
+        return Montant.de(paiements.sommeParDemande(demandeId));
+    }
+
     private static boolean violeUniciteReference(Throwable e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
             if (t instanceof ConstraintViolationException c && c.getConstraintName() != null

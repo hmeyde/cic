@@ -18,6 +18,7 @@
             <ul class="liens-bo">
                 <li th:if="${role == 'ANALYSTE'}"><a class="bouton bouton--principal" th:href="@{/bo/dossiers}" th:text="#{bo.dossiers.titre}">Dossiers à analyser</a></li>
                 <li th:if="${role == 'ANALYSTE'}"><a class="bouton bouton--contour" th:href="@{/bo/autorisations}" th:text="#{bo.autorisations.titre}">Autorisations de prélèvement</a></li>
+                <li th:if="${role == 'ADMIN' or role == 'ANALYSTE'}"><a class="bouton bouton--contour" th:href="@{/bo/commandes}" th:text="#{bo.commandes.titre}">Commandes fournisseur</a></li>
                 <li th:if="${role == 'ADMIN' or role == 'RECOUVREMENT'}"><a class="bouton bouton--contour" th:href="@{/bo/paiements}" th:text="#{bo.paiements.titre}">Paiements reçus</a></li>
                 <li th:if="${role == 'ADMIN' or role == 'ANALYSTE'}"><a class="bouton bouton--contour" th:href="@{/bo/justificatifs}" th:text="#{bo.justificatifs.titre}">Justificatifs reçus</a></li>
                 <li th:if="${role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/fournisseurs}" th:text="#{bo.fournisseurs.titre}">Fournisseurs</a></li>

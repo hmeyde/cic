@@ -44,4 +44,12 @@ public enum StatutAutorisation {
     public boolean accepteDocumentSigne() {
         return this == A_SIGNER || this == SIGNEE;
     }
+
+    /**
+     * La banque a accepté l'ordre (ACCEPTEE), éventuellement déjà utilisé (ACTIVE) : condition, avec
+     * l'apport encaissé, pour commander le produit au fournisseur.
+     */
+    public boolean estAcceptee() {
+        return this == ACCEPTEE || this == ACTIVE;
+    }
 }

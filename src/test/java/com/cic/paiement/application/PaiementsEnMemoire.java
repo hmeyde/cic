@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.cic.commun.domain.Montant;
+import com.cic.paiement.domain.ApportAttendu;
 import com.cic.paiement.domain.Paiement;
 import com.cic.paiement.domain.PaiementEnDoubleException;
 import com.cic.paiement.domain.PaiementRepository;
@@ -48,6 +50,13 @@ public class PaiementsEnMemoire implements PaiementRepository {
                 .toList());
         avecEcart.sort(Comparator.comparing(Paiement::recuLe).thenComparing(Paiement::saisiLe).reversed());
         return avecEcart.stream().limit(limite).toList();
+    }
+
+    @Override
+    public Montant totalRapprochePourDossier(UUID demandeId) {
+        return parReference.values().stream()
+                .filter(p -> p.apportAttendu().map(ApportAttendu::demandeId).filter(demandeId::equals).isPresent())
+                .map(Paiement::montant).reduce(Montant.ZERO, Montant::plus);
     }
 
     public List<Paiement> tous() {

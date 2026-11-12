@@ -36,6 +36,20 @@ public final class DemandesFixtures {
                 date), GrilleScoreV1.noter(dossier, regles, date));
     }
 
+    /** Termes de l'exemple chiffré pour un produit de ce fournisseur. */
+    public static TermesDemande termes(UUID fournisseurId) {
+        TermesDemande t = termes();
+        return new TermesDemande(t.produitId(), fournisseurId, t.designationProduit(), t.prixPublic(),
+                t.prixAchat(), t.prixVente(), t.apportMinimum(), t.apport(), t.nombreMois(), t.mensualite(),
+                t.derniereMensualite());
+    }
+
+    /** Dossier déjà accepté par {@code analyste}, au statut donné. */
+    public static Demande decidee(UUID clientId, TermesDemande termes, StatutDossier statut, String analyste) {
+        return Demande.reconstituer(UUID.randomUUID(), clientId, termes, score(), LE, statut, LE,
+                Optional.of(new Decision(analyste, LE, Optional.empty())));
+    }
+
     public static Demande demande(UUID clientId, StatutDossier statut) {
         return Demande.reconstituer(UUID.randomUUID(), clientId, termes(), score(), LE, statut, LE);
     }

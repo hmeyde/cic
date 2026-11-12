@@ -139,6 +139,47 @@ public final class Demande {
         return changement;
     }
 
+    /**
+     * ACCEPTEE → APPORT_ET_AUTORISATION : l'apport est encaissé et l'autorisation de prélèvement
+     * ACCEPTEE par la banque. Le produit peut être commandé.
+     *
+     * @throws TransitionInterditeException si la demande n'est pas ACCEPTEE
+     * @throws PrealablesManquantsException si l'apport ou l'autorisation manque
+     */
+    public ChangementStatut constaterApportEtAutorisation(PrealablesCommande prealables, Instant le) {
+        Objects.requireNonNull(prealables, "prealables");
+        ChangementStatut changement = statut.passerA(StatutDossier.APPORT_ET_AUTORISATION);
+        if (!prealables.sontReunis()) {
+            throw new PrealablesManquantsException(prealables);
+        }
+        appliquer(changement, le);
+        return changement;
+    }
+
+    /**
+     * APPORT_ET_AUTORISATION → COMMANDEE : le paiement fournisseur est validé et le bon de commande
+     * émis. Les préalables sont vérifiés de nouveau (une autorisation peut avoir été révoquée entre
+     * temps) ; la personne qui a décidé du dossier ne peut pas valider son paiement fournisseur.
+     *
+     * @param validateur identifiant de connexion du back-office
+     * @throws TransitionInterditeException si la demande n'est pas APPORT_ET_AUTORISATION
+     * @throws PrealablesManquantsException si l'apport ou l'autorisation manque
+     * @throws SeparationDesTachesException si le validateur est l'analyste qui a décidé du dossier
+     */
+    public ChangementStatut commander(String validateur, PrealablesCommande prealables, Instant le) {
+        Objects.requireNonNull(validateur, "validateur");
+        Objects.requireNonNull(prealables, "prealables");
+        ChangementStatut changement = statut.passerA(StatutDossier.COMMANDEE);
+        if (!prealables.sontReunis()) {
+            throw new PrealablesManquantsException(prealables);
+        }
+        if (decision == null || decision.prisePar(validateur)) {
+            throw new SeparationDesTachesException();
+        }
+        appliquer(changement, le);
+        return changement;
+    }
+
     private ChangementStatut passerA(StatutDossier cible, Instant le) {
         ChangementStatut changement = statut.passerA(cible);
         appliquer(changement, le);

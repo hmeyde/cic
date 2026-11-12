@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.cic.demande.application.ApportEtAutorisationService;
 import com.cic.demande.application.ExpirationDossiersService;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -17,6 +18,9 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
  * après le délai. Fréquence {@code cic.jobs.expiration-dossiers.cron} (toutes les 15 minutes par
  * défaut) ; verrou ShedLock pour qu'un seul nœud l'exécute à la fois. Un dossier en erreur est
  * journalisé et n'empêche pas de traiter les suivants ; il sera repris au passage suivant.
+ *
+ * <p>Avant d'annuler, le job vérifie que l'apport et l'autorisation ne sont pas tous deux arrivés
+ * (événement pas encore traité) : un tel dossier passe à APPORT_ET_AUTORISATION au lieu d'être annulé.
  */
 @Component
 class ExpirationDossiersJob {
@@ -24,9 +28,11 @@ class ExpirationDossiersJob {
     private static final Logger LOG = LoggerFactory.getLogger(ExpirationDossiersJob.class);
 
     private final ExpirationDossiersService expiration;
+    private final ApportEtAutorisationService apportEtAutorisation;
 
-    ExpirationDossiersJob(ExpirationDossiersService expiration) {
+    ExpirationDossiersJob(ExpirationDossiersService expiration, ApportEtAutorisationService apportEtAutorisation) {
         this.expiration = expiration;
+        this.apportEtAutorisation = apportEtAutorisation;
     }
 
     @Scheduled(cron = "${cic.jobs.expiration-dossiers.cron:0 */15 * * * *}", zone = "Africa/Nouakchott")
@@ -41,7 +47,7 @@ class ExpirationDossiersJob {
         int annules = 0;
         for (UUID id : candidats) {
             try {
-                if (expiration.annulerSiDelaiDepasse(id)) {
+                if (!apportEtAutorisation.constaterSiReunis(id) && expiration.annulerSiDelaiDepasse(id)) {
                     annules++;
                 }
             } catch (RuntimeException e) {

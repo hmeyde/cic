@@ -138,6 +138,16 @@ public class PaiementService {
         return paiements.parId(id);
     }
 
+    /**
+     * Total des paiements rattachés au dossier par sa référence d'apport ; zéro s'il n'en a reçu aucun.
+     * L'apport est encaissé quand ce total atteint l'apport fixé au contrat.
+     */
+    @Transactional(readOnly = true)
+    public Montant totalRecuPourDossier(UUID demandeId) {
+        Objects.requireNonNull(demandeId, "demandeId");
+        return paiements.totalRapprochePourDossier(demandeId);
+    }
+
     private Optional<ApportAttendu> apportAttendu(ReferencePaiement reference) {
         return reference.commeReferenceApport()
                 .flatMap(r -> contrats.parChiffresDuNumero(r.chiffresContrat()))

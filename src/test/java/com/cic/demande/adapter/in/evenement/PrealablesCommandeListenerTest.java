@@ -1,0 +1,66 @@
+package com.cic.demande.adapter.in.evenement;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+
+import com.cic.audit.application.JournalAuditService;
+import com.cic.audit.application.JournalEnMemoire;
+import com.cic.contrat.AutorisationPrelevementStatutChange;
+import com.cic.contrat.domain.AutorisationPrelevement;
+import com.cic.contrat.domain.Contrat;
+import com.cic.contrat.domain.StatutAutorisation;
+import com.cic.demande.application.ApportEtAutorisationService;
+import com.cic.demande.application.DemandesEnMemoire;
+import com.cic.demande.application.PrealablesDeTest;
+import com.cic.demande.domain.Demande;
+import com.cic.demande.domain.DemandesFixtures;
+import com.cic.demande.domain.StatutDossier;
+
+class PrealablesCommandeListenerTest {
+
+    private static final Instant MAINTENANT = Instant.parse("2026-11-14T10:00:00Z");
+
+    private final Clock clock = Clock.fixed(MAINTENANT, ZoneId.of("Africa/Nouakchott"));
+    private final DemandesEnMemoire demandes = new DemandesEnMemoire();
+    private final PrealablesDeTest prealables = new PrealablesDeTest(clock);
+    private final PrealablesCommandeListener listener = new PrealablesCommandeListener(
+            new ApportEtAutorisationService(demandes, prealables.service,
+                    new JournalAuditService(new JournalEnMemoire()), e -> { }, clock));
+
+    @Test
+    void le_second_des_deux_evenements_fait_passer_le_dossier() {
+        Demande d = DemandesFixtures.demande(UUID.randomUUID(), StatutDossier.ACCEPTEE);
+        demandes.enregistrer(d);
+        Contrat c = prealables.contrat(d);
+        AutorisationPrelevement a = prealables.autorisations.parContrat(c.id()).orElseThrow();
+
+        prealables.accepterAutorisation(c);
+        listener.autorisationChangee(new AutorisationPrelevementStatutChange(a.id(), d.id(), d.clientId(),
+                StatutAutorisation.TRANSMISE, StatutAutorisation.ACCEPTEE, MAINTENANT));
+        assertThat(demandes.parId(d.id()).orElseThrow().statut()).isEqualTo(StatutDossier.ACCEPTEE);
+
+        prealables.payerApport(c);
+        listener.paiementRapproche(new com.cic.paiement.PaiementRapproche(UUID.randomUUID(), d.id(), c.id(),
+                d.clientId(), c.apport(), c.apport(), MAINTENANT.atZone(clock.getZone()).toLocalDate(), MAINTENANT));
+        assertThat(demandes.parId(d.id()).orElseThrow().statut()).isEqualTo(StatutDossier.APPORT_ET_AUTORISATION);
+    }
+
+    @Test
+    void une_autorisation_seulement_signee_ne_declenche_rien() {
+        Demande d = DemandesFixtures.demande(UUID.randomUUID(), StatutDossier.ACCEPTEE);
+        demandes.enregistrer(d);
+        Contrat c = prealables.contrat(d);
+        prealables.payerApport(c);
+
+        listener.autorisationChangee(new AutorisationPrelevementStatutChange(UUID.randomUUID(), d.id(), d.clientId(),
+                StatutAutorisation.A_SIGNER, StatutAutorisation.SIGNEE, MAINTENANT));
+
+        assertThat(demandes.parId(d.id()).orElseThrow().statut()).isEqualTo(StatutDossier.ACCEPTEE);
+    }
+}
