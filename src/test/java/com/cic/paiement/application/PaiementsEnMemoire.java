@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.cic.commun.domain.Montant;
-import com.cic.paiement.domain.ApportAttendu;
+import com.cic.paiement.domain.Rattachement;
 import com.cic.paiement.domain.Paiement;
 import com.cic.paiement.domain.PaiementEnDoubleException;
 import com.cic.paiement.domain.PaiementRepository;
@@ -53,9 +53,10 @@ public class PaiementsEnMemoire implements PaiementRepository {
     }
 
     @Override
-    public Montant totalRapprochePourDossier(UUID demandeId) {
+    public Montant totalApportRecuPourDossier(UUID demandeId) {
         return parReference.values().stream()
-                .filter(p -> p.apportAttendu().map(ApportAttendu::demandeId).filter(demandeId::equals).isPresent())
+                .filter(p -> p.rattachement().filter(Rattachement::estApport).map(Rattachement::demandeId)
+                        .filter(demandeId::equals).isPresent())
                 .map(Paiement::montant).reduce(Montant.ZERO, Montant::plus);
     }
 

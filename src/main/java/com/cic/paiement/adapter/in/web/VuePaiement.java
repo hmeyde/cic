@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.cic.commun.domain.Montant;
-import com.cic.paiement.domain.ApportAttendu;
+import com.cic.paiement.domain.Rattachement;
 import com.cic.paiement.domain.Paiement;
 import com.cic.paiement.domain.StatutRapprochement;
 import com.cic.paiement.domain.TypeEcart;
@@ -28,13 +28,13 @@ record VuePaiement(UUID id, String reference, Montant montant, String recuLe, St
     private static final DateTimeFormatter DATE_HEURE = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     static VuePaiement depuis(Paiement p, Clock clock) {
-        Optional<Montant> attendu = p.apportAttendu().map(ApportAttendu::montant);
+        Optional<Montant> attendu = p.rattachement().map(Rattachement::montant);
         boolean tropPercu = attendu.map(a -> p.montant().estSuperieurA(a)).orElse(false);
         Optional<Montant> difference = p.ecartDeMontant()
                 ? attendu.map(a -> tropPercu ? p.montant().moins(a) : a.moins(p.montant()))
                 : Optional.empty();
         return new VuePaiement(p.id(), p.reference().valeur(), p.montant(), DATE.format(p.recuLe()), p.statut(),
-                p.apportAttendu().map(ApportAttendu::numeroContrat), attendu, p.ecartDeMontant(),
+                p.rattachement().map(Rattachement::numeroContrat), attendu, p.ecartDeMontant(),
                 DATE_HEURE.format(p.saisiLe().atZone(clock.getZone())), p.saisiPar(), p.ecart(), difference,
                 tropPercu);
     }

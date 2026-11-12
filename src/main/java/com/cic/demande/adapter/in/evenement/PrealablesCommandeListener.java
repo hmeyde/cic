@@ -10,7 +10,7 @@ import com.cic.demande.application.ApportEtAutorisationService;
 import com.cic.paiement.PaiementRapproche;
 
 /**
- * Écoute les modules paiement et contrat : quand un paiement est rattaché à un dossier ou que son
+ * Écoute les modules paiement et contrat : quand un paiement d'apport est rattaché à un dossier ou que son
  * autorisation de prélèvement est acceptée par la banque, vérifie si le dossier peut passer à
  * APPORT_ET_AUTORISATION. Les deux arrivent dans n'importe quel ordre : c'est le second qui fait
  * passer le dossier.
@@ -32,6 +32,9 @@ class PrealablesCommandeListener {
 
     @ApplicationModuleListener
     void paiementRapproche(PaiementRapproche evenement) {
+        if (!evenement.estApport()) {
+            return;
+        }
         LOG.debug("Paiement {} rattaché au dossier {}", evenement.paiementId(), evenement.demandeId());
         apportEtAutorisation.constaterSiReunis(evenement.demandeId());
     }

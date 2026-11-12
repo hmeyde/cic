@@ -60,6 +60,16 @@ class ContratPersistenceAdapter implements ContratRepository {
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
+    public void enregistrerStatut(UUID contratId, Echeance echeance) {
+        EcheanceEntity entite = entityManager.find(EcheanceEntity.class, echeance.id());
+        if (entite == null || !entite.getContratId().equals(contratId)) {
+            throw new IllegalStateException("Échéance introuvable : " + echeance);
+        }
+        entite.changerStatut(echeance.statut());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
     public long prochainNumeroOrdre() {
         return ((Number) entityManager.createNativeQuery("SELECT nextval('contrat_numero_seq')").getSingleResult())
                 .longValue();

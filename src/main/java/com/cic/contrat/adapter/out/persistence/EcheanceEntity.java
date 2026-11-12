@@ -79,4 +79,12 @@ class EcheanceEntity {
     StatutEcheance getStatut() {
         return statut;
     }
+
+    UUID getContratId() {
+        return contrat.getId();
+    }
+
+    void changerStatut(StatutEcheance nouveau) {
+        this.statut = nouveau;
+    }
 }

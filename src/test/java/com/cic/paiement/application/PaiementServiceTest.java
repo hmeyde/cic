@@ -24,10 +24,14 @@ import com.cic.contrat.application.ContratService;
 import com.cic.contrat.application.ContratsEnMemoire;
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.Prix;
+import com.cic.contrat.domain.StatutEcheance;
+import com.cic.paiement.ObjetPaiement;
+import com.cic.paiement.PaiementNonRapproche;
 import com.cic.paiement.PaiementRapproche;
 import com.cic.paiement.domain.Paiement;
 import com.cic.paiement.domain.PaiementEnDoubleException;
 import com.cic.paiement.domain.ReferenceApport;
+import com.cic.paiement.domain.ReferenceEcheance;
 import com.cic.paiement.domain.StatutRapprochement;
 import com.cic.parametrage.ParametresDeDepart;
 import com.cic.parametrage.application.ParametreService;
@@ -77,7 +81,7 @@ class PaiementServiceTest {
         Paiement p = service.saisir(new SaisiePaiement(reference(second), "8 320", "2026-11-13"), "admin");
 
         assertThat(p.statut()).isEqualTo(StatutRapprochement.RAPPROCHE);
-        assertThat(p.apportAttendu()).hasValueSatisfying(a -> {
+        assertThat(p.rattachement()).hasValueSatisfying(a -> {
             assertThat(a.demandeId()).isEqualTo(second.demandeId()).isNotEqualTo(premier.demandeId());
             assertThat(a.contratId()).isEqualTo(second.id());
             assertThat(a.clientId()).isEqualTo(second.clientId());
@@ -166,11 +170,64 @@ class PaiementServiceTest {
 
         assertThat(List.of(p1, p2, p3)).allSatisfy(p -> {
             assertThat(p.statut()).isEqualTo(StatutRapprochement.NON_RAPPROCHE);
-            assertThat(p.apportAttendu()).isEmpty();
+            assertThat(p.rattachement()).isEmpty();
         });
         assertThat(paiements.tous()).hasSize(3);
-        assertThat(evenements).isEmpty();
+        assertThat(evenements).hasSize(3).allSatisfy(e -> assertThat(e).isInstanceOf(PaiementNonRapproche.class));
+        assertThat(evenements).first().isInstanceOfSatisfying(PaiementNonRapproche.class, e -> {
+            assertThat(e.paiementId()).isEqualTo(p1.id());
+            assertThat(e.montant()).isEqualTo(Montant.de(8_320));
+        });
         assertThat(journalDe(p1)).singleElement().satisfies(e -> assertThat(e.apres()).contains("NON_RAPPROCHE"));
+    }
+
+    @Test
+    void un_paiement_d_echeance_est_rattache_a_l_echeance_qui_passe_payee() {
+        Contrat c = contrat();
+        String ref = ReferenceEcheance.pourEcheance(c.numero(), 2).valeur();
+
+        Paiement p = service.saisir(new SaisiePaiement(ref, "2080", "2026-11-13"), "admin");
+
+        assertThat(p.rattachement()).hasValueSatisfying(r -> {
+            assertThat(r.objet()).isEqualTo(ObjetPaiement.ECHEANCE);
+            assertThat(r.rangEcheance()).isEqualTo(2);
+            assertThat(r.montant()).isEqualTo(Montant.de(2_080));
+        });
+        assertThat(p.ecart()).isEmpty();
+        assertThat(contrats.parId(c.id()).orElseThrow().echeances()).extracting(e -> e.statut())
+                .containsExactly(StatutEcheance.A_VENIR, StatutEcheance.PAYEE, StatutEcheance.A_VENIR,
+                        StatutEcheance.A_VENIR, StatutEcheance.A_VENIR, StatutEcheance.A_VENIR);
+        assertThat(evenements).singleElement().isInstanceOfSatisfying(PaiementRapproche.class, e -> {
+            assertThat(e.objet()).isEqualTo(ObjetPaiement.ECHEANCE);
+            assertThat(e.rangEcheance()).isEqualTo(2);
+            assertThat(e.numeroContrat()).isEqualTo(c.numero());
+            assertThat(e.montant()).isEqualTo(Montant.de(2_080));
+        });
+        assertThat(service.totalRecuPourDossier(c.demandeId())).isEqualTo(Montant.ZERO);
+    }
+
+    @Test
+    void un_paiement_d_echeance_insuffisant_est_en_ecart_et_l_echeance_reste_due() {
+        Contrat c = contrat();
+        String ref = ReferenceEcheance.pourEcheance(c.numero(), 1).valeur();
+
+        Paiement p = service.saisir(new SaisiePaiement(ref, "2000", "2026-11-13"), "admin");
+
+        assertThat(p.ecartDeMontant()).isTrue();
+        assertThat(contrats.parId(c.id()).orElseThrow().echeance(1).orElseThrow().statut())
+                .isEqualTo(StatutEcheance.A_VENIR);
+        assertThat(evenements).singleElement().isInstanceOf(PaiementRapproche.class);
+    }
+
+    @Test
+    void une_reference_d_echeance_hors_echeancier_reste_non_rapprochee() {
+        Contrat c = contrat();
+        String ref = ReferenceEcheance.pourEcheance(c.numero(), 7).valeur();
+
+        Paiement p = service.saisir(new SaisiePaiement(ref, "2080", "2026-11-13"), "admin");
+
+        assertThat(p.estRapproche()).isFalse();
+        assertThat(evenements).singleElement().isInstanceOf(PaiementNonRapproche.class);
     }
 
     @Test

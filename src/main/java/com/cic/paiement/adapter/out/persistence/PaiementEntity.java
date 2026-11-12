@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.cic.paiement.ObjetPaiement;
 import com.cic.paiement.domain.StatutRapprochement;
 
 import jakarta.persistence.Column;
@@ -51,6 +52,13 @@ class PaiementEntity {
     @Column(name = "client_id", updatable = false)
     private UUID clientId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "objet", updatable = false, length = 10)
+    private ObjetPaiement objet;
+
+    @Column(name = "rang_echeance", updatable = false)
+    private Integer rangEcheance;
+
     @Column(name = "montant_attendu", updatable = false, precision = 14, scale = 0)
     private BigDecimal montantAttendu;
 
@@ -64,8 +72,8 @@ class PaiementEntity {
     }
 
     PaiementEntity(UUID id, String reference, BigDecimal montant, LocalDate recuLe, StatutRapprochement statut,
-            UUID contratId, String numeroContrat, UUID demandeId, UUID clientId, BigDecimal montantAttendu,
-            String saisiPar, Instant saisiLe) {
+            UUID contratId, String numeroContrat, UUID demandeId, UUID clientId, ObjetPaiement objet,
+            Integer rangEcheance, BigDecimal montantAttendu, String saisiPar, Instant saisiLe) {
         this.id = id;
         this.reference = reference;
         this.montant = montant;
@@ -75,6 +83,8 @@ class PaiementEntity {
         this.numeroContrat = numeroContrat;
         this.demandeId = demandeId;
         this.clientId = clientId;
+        this.objet = objet;
+        this.rangEcheance = rangEcheance;
         this.montantAttendu = montantAttendu;
         this.saisiPar = saisiPar;
         this.saisiLe = saisiLe;
@@ -114,6 +124,14 @@ class PaiementEntity {
 
     UUID getClientId() {
         return clientId;
+    }
+
+    ObjetPaiement getObjet() {
+        return objet;
+    }
+
+    Integer getRangEcheance() {
+        return rangEcheance;
     }
 
     BigDecimal getMontantAttendu() {

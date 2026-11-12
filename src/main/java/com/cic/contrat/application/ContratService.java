@@ -16,6 +16,7 @@ import com.cic.contrat.domain.AutorisationPrelevementRepository;
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratDejaEtabliException;
 import com.cic.contrat.domain.ContratRepository;
+import com.cic.contrat.domain.Echeance;
 import com.cic.contrat.domain.Echeancier;
 import com.cic.parametrage.application.ParametreService;
 import com.cic.parametrage.domain.CleParametre;
@@ -110,6 +111,30 @@ public class ContratService {
             return Optional.empty();
         }
         return contrats.parNumero(numero);
+    }
+
+    /**
+     * Constate le paiement de l'échéance de ce rang : A_VENIR ou EN_RETARD → PAYEE. Sans effet si
+     * elle est déjà payée (un second paiement reste visible dans les paiements, sans changer
+     * l'échéance).
+     *
+     * @return vrai si l'échéance vient de passer à PAYEE
+     * @throws IllegalArgumentException le contrat n'a pas d'échéance de ce rang
+     */
+    @Transactional
+    public boolean constaterEcheancePayee(UUID contratId, int rang) {
+        Objects.requireNonNull(contratId, "contratId");
+        Contrat contrat = contrats.parId(contratId)
+                .orElseThrow(() -> new IllegalArgumentException("Contrat introuvable : " + contratId));
+        Echeance echeance = contrat.echeance(rang)
+                .orElseThrow(() -> new IllegalArgumentException("Pas d'échéance " + rang + " pour " + contrat));
+        if (echeance.estPayee()) {
+            LOG.info("Échéance {} de {} déjà payée", rang, contrat);
+            return false;
+        }
+        contrats.enregistrerStatut(contratId, echeance.payee());
+        LOG.info("Échéance {} de {} payée", rang, contrat);
+        return true;
     }
 
     /** Numéro lisible du contrat, par exemple {@code CIC-2026-000042}. */

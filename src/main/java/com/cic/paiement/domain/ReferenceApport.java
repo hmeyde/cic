@@ -29,7 +29,7 @@ public record ReferenceApport(String valeur) {
         if (chiffres.isEmpty()) {
             throw new IllegalArgumentException("Numéro de contrat sans chiffres : " + numeroContrat);
         }
-        return new ReferenceApport(PREFIXE + chiffres + cleLuhn(chiffres));
+        return new ReferenceApport(PREFIXE + chiffres + CleLuhn.de(chiffres));
     }
 
     /** Chiffres du numéro de contrat dont la référence est tirée, sans le préfixe ni la clé. */
@@ -43,24 +43,7 @@ public record ReferenceApport(String valeur) {
             return false;
         }
         String chiffres = saisie.substring(PREFIXE.length(), saisie.length() - 1);
-        return saisie.charAt(saisie.length() - 1) - '0' == cleLuhn(chiffres);
-    }
-
-    private static int cleLuhn(String chiffres) {
-        int somme = 0;
-        boolean doubler = true;
-        for (int i = chiffres.length() - 1; i >= 0; i--) {
-            int c = chiffres.charAt(i) - '0';
-            if (doubler) {
-                c *= 2;
-                if (c > 9) {
-                    c -= 9;
-                }
-            }
-            somme += c;
-            doubler = !doubler;
-        }
-        return (10 - somme % 10) % 10;
+        return saisie.charAt(saisie.length() - 1) - '0' == CleLuhn.de(chiffres);
     }
 
     @Override

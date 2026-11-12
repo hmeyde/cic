@@ -62,6 +62,23 @@ public final class Echeance {
         return statut;
     }
 
+    /** L'échéance est réglée. */
+    public boolean estPayee() {
+        return statut == StatutEcheance.PAYEE;
+    }
+
+    /**
+     * Même échéance, réglée : A_VENIR ou EN_RETARD → PAYEE. Le montant ne change pas.
+     *
+     * @throws IllegalStateException l'échéance est déjà payée
+     */
+    public Echeance payee() {
+        if (estPayee()) {
+            throw new IllegalStateException("Échéance " + rang + " déjà payée");
+        }
+        return new Echeance(id, rang, date, montant, StatutEcheance.PAYEE);
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof Echeance e && id.equals(e.id);

@@ -11,7 +11,7 @@ import java.util.Optional;
  *
  * <p>Normalisée à la lecture : espaces, tirets et points retirés, lettres en majuscules ; puis
  * lettres latines et chiffres seulement, {@value #LONGUEUR_MAX} caractères au plus. Une référence
- * peut être bien formée sans être une référence d'apport valide : le paiement est alors enregistré
+ * peut être bien formée sans être une référence d'apport ou d'échéance valide : le paiement est alors enregistré
  * mais reste non rapproché.
  */
 public record ReferencePaiement(String valeur) {
@@ -37,6 +37,12 @@ public record ReferencePaiement(String valeur) {
     /** Référence d'apport d'un dossier si la référence en a la forme et la clé. */
     public Optional<ReferenceApport> commeReferenceApport() {
         return ReferenceApport.estValide(valeur) ? Optional.of(new ReferenceApport(valeur)) : Optional.empty();
+    }
+
+    /** Référence d'une échéance si la référence en a la forme et la clé. */
+    public Optional<ReferenceEcheance> commeReferenceEcheance() {
+        return ReferenceEcheance.estValide(valeur) ? Optional.of(new ReferenceEcheance(valeur))
+                : Optional.empty();
     }
 
     @Override

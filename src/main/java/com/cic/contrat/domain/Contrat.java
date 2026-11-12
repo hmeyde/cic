@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.cic.commun.domain.Montant;
@@ -149,6 +150,11 @@ public final class Contrat {
     /** Échéances par rang croissant. */
     public List<Echeance> echeances() {
         return echeances;
+    }
+
+    /** Échéance de ce rang, si le contrat en a une. */
+    public Optional<Echeance> echeance(int rang) {
+        return echeances.stream().filter(e -> e.rang() == rang).findFirst();
     }
 
     public Instant etabliLe() {

@@ -23,7 +23,10 @@ interface PaiementJpaRepository extends JpaRepository<PaiementEntity, UUID> {
             """)
     List<PaiementEntity> findEcarts(Pageable page);
 
-    /** Somme des paiements rattachés au dossier ; zéro s'il n'en a aucun. */
-    @Query("select coalesce(sum(p.montant), 0) from PaiementEntity p where p.demandeId = :demandeId")
+    /** Somme des paiements de l'apport rattachés au dossier ; zéro s'il n'en a aucun. */
+    @Query("""
+            select coalesce(sum(p.montant), 0) from PaiementEntity p
+            where p.demandeId = :demandeId and p.objet = com.cic.paiement.ObjetPaiement.APPORT
+            """)
     BigDecimal sommeParDemande(@Param("demandeId") UUID demandeId);
 }

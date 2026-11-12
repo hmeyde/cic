@@ -26,17 +26,17 @@ public final class Paiement {
     private final ReferencePaiement reference;
     private final Montant montant;
     private final LocalDate recuLe;
-    private final ApportAttendu apportAttendu;
+    private final Rattachement rattachement;
     private final String saisiPar;
     private final Instant saisiLe;
 
     private Paiement(UUID id, ReferencePaiement reference, Montant montant, LocalDate recuLe,
-            ApportAttendu apportAttendu, String saisiPar, Instant saisiLe) {
+            Rattachement rattachement, String saisiPar, Instant saisiLe) {
         this.id = Objects.requireNonNull(id, "id");
         this.reference = Objects.requireNonNull(reference, "reference");
         this.montant = Objects.requireNonNull(montant, "montant");
         this.recuLe = Objects.requireNonNull(recuLe, "recuLe");
-        this.apportAttendu = apportAttendu;
+        this.rattachement = rattachement;
         this.saisiPar = Objects.requireNonNull(saisiPar, "saisiPar");
         this.saisiLe = Objects.requireNonNull(saisiLe, "saisiLe");
         if (!montant.estSuperieurA(Montant.ZERO)) {
@@ -50,36 +50,36 @@ public final class Paiement {
     /**
      * Paiement saisi au back-office, rapproché par sa référence.
      *
-     * @param apportAttendu dossier désigné par la référence ; vide si elle n'en désigne aucun
+     * @param rattachement dossier désigné par la référence ; vide si elle n'en désigne aucun
      */
     public static Paiement saisir(ReferencePaiement reference, Montant montant, LocalDate recuLe,
-            Optional<ApportAttendu> apportAttendu, String saisiPar, Instant saisiLe) {
-        Objects.requireNonNull(apportAttendu, "apportAttendu");
-        return new Paiement(UUID.randomUUID(), reference, montant, recuLe, apportAttendu.orElse(null), saisiPar,
+            Optional<Rattachement> rattachement, String saisiPar, Instant saisiLe) {
+        Objects.requireNonNull(rattachement, "rattachement");
+        return new Paiement(UUID.randomUUID(), reference, montant, recuLe, rattachement.orElse(null), saisiPar,
                 saisiLe);
     }
 
     public static Paiement reconstituer(UUID id, ReferencePaiement reference, Montant montant, LocalDate recuLe,
-            Optional<ApportAttendu> apportAttendu, String saisiPar, Instant saisiLe) {
-        return new Paiement(id, reference, montant, recuLe, apportAttendu.orElse(null), saisiPar, saisiLe);
+            Optional<Rattachement> rattachement, String saisiPar, Instant saisiLe) {
+        return new Paiement(id, reference, montant, recuLe, rattachement.orElse(null), saisiPar, saisiLe);
     }
 
     public StatutRapprochement statut() {
-        return apportAttendu == null ? StatutRapprochement.NON_RAPPROCHE : StatutRapprochement.RAPPROCHE;
+        return rattachement == null ? StatutRapprochement.NON_RAPPROCHE : StatutRapprochement.RAPPROCHE;
     }
 
     public boolean estRapproche() {
-        return apportAttendu != null;
+        return rattachement != null;
     }
 
     /** Rapproché mais d'un montant différent de l'apport fixé au contrat. */
     public boolean ecartDeMontant() {
-        return apportAttendu != null && montant.compareTo(apportAttendu.montant()) != 0;
+        return rattachement != null && montant.compareTo(rattachement.montant()) != 0;
     }
 
     /** Écart à traiter : référence inconnue ou montant différent de l'apport ; vide si le paiement est conforme. */
     public Optional<TypeEcart> ecart() {
-        if (apportAttendu == null) {
+        if (rattachement == null) {
             return Optional.of(TypeEcart.REFERENCE_INCONNUE);
         }
         return ecartDeMontant() ? Optional.of(TypeEcart.MONTANT_DIFFERENT) : Optional.empty();
@@ -103,8 +103,8 @@ public final class Paiement {
     }
 
     /** Dossier auquel le paiement est rattaché ; vide s'il n'est pas rapproché. */
-    public Optional<ApportAttendu> apportAttendu() {
-        return Optional.ofNullable(apportAttendu);
+    public Optional<Rattachement> rattachement() {
+        return Optional.ofNullable(rattachement);
     }
 
     /** Identifiant de connexion du membre du back-office qui a saisi le paiement. */
@@ -130,6 +130,6 @@ public final class Paiement {
     @Override
     public String toString() {
         return "Paiement[" + id + ", " + statut()
-                + (apportAttendu == null ? "" : ", contrat " + apportAttendu.numeroContrat()) + "]";
+                + (rattachement == null ? "" : ", contrat " + rattachement.numeroContrat()) + "]";
     }
 }

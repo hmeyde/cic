@@ -47,7 +47,8 @@ class PrealablesCommandeListenerTest {
 
         prealables.payerApport(c);
         listener.paiementRapproche(new com.cic.paiement.PaiementRapproche(UUID.randomUUID(), d.id(), c.id(),
-                d.clientId(), c.apport(), c.apport(), MAINTENANT.atZone(clock.getZone()).toLocalDate(), MAINTENANT));
+                c.numero(), d.clientId(), com.cic.paiement.ObjetPaiement.APPORT, null, c.apport(), c.apport(),
+                MAINTENANT.atZone(clock.getZone()).toLocalDate(), MAINTENANT));
         assertThat(demandes.parId(d.id()).orElseThrow().statut()).isEqualTo(StatutDossier.APPORT_ET_AUTORISATION);
     }
 

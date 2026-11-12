@@ -78,7 +78,7 @@ class PaiementsBackOfficeControllerTest {
         });
         assertThat(r.getFlashAttributes()).doesNotContainKey("erreur");
         assertThat(paiements.tous()).singleElement()
-                .satisfies(p -> assertThat(p.apportAttendu().orElseThrow().demandeId()).isEqualTo(c.demandeId()));
+                .satisfies(p -> assertThat(p.rattachement().orElseThrow().demandeId()).isEqualTo(c.demandeId()));
 
         ExtendedModelMap model = new ExtendedModelMap();
         assertThat(controller.page(model)).isEqualTo("bo/paiements/page");

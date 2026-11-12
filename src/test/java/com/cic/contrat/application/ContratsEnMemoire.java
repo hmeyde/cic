@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratRepository;
+import com.cic.contrat.domain.Echeance;
 
 public class ContratsEnMemoire implements ContratRepository {
 
@@ -34,6 +35,15 @@ public class ContratsEnMemoire implements ContratRepository {
     @Override
     public Optional<Contrat> parNumero(String numero) {
         return parDemande.values().stream().filter(c -> c.numero().equals(numero)).findFirst();
+    }
+
+    @Override
+    public void enregistrerStatut(UUID contratId, Echeance echeance) {
+        Contrat c = parId(contratId).orElseThrow();
+        parDemande.put(c.demandeId(), Contrat.reconstituer(c.id(), c.numero(), c.demandeId(), c.clientId(),
+                c.produitId(), c.fournisseurId(), c.designationProduit(), c.prix(), c.apport(),
+                c.echeances().stream().map(e -> e.id().equals(echeance.id()) ? echeance : e).toList(),
+                c.etabliLe()));
     }
 
     @Override

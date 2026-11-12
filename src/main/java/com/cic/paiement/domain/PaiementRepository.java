@@ -29,6 +29,6 @@ public interface PaiementRepository {
      */
     List<Paiement> ecarts(int limite);
 
-    /** Somme des paiements rapprochés du dossier ; zéro s'il n'en a aucun. */
-    Montant totalRapprochePourDossier(UUID demandeId);
+    /** Somme des paiements de l'apport rattachés au dossier (hors échéances) ; zéro s'il n'en a aucun. */
+    Montant totalApportRecuPourDossier(UUID demandeId);
 }

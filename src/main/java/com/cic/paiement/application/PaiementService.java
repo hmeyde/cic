@@ -21,12 +21,14 @@ import com.cic.audit.domain.EntreeJournal;
 import com.cic.audit.domain.ObjetAudite;
 import com.cic.commun.domain.Montant;
 import com.cic.contrat.application.ContratService;
+import com.cic.paiement.PaiementNonRapproche;
 import com.cic.paiement.PaiementRapproche;
-import com.cic.paiement.domain.ApportAttendu;
+import com.cic.paiement.domain.Rattachement;
 import com.cic.paiement.domain.Paiement;
 import com.cic.paiement.domain.PaiementEnDoubleException;
 import com.cic.paiement.domain.PaiementRepository;
 import com.cic.paiement.domain.ReferenceApport;
+import com.cic.paiement.domain.ReferenceEcheance;
 import com.cic.paiement.domain.ReferencePaiement;
 
 /**
@@ -37,9 +39,11 @@ import com.cic.paiement.domain.ReferencePaiement;
  * idempotente. Une contrainte d'unicité en base couvre deux saisies simultanées.
  *
  * <p>Rapprochement : une référence d'apport valide ({@link ReferenceApport}, clé juste) désigne le
- * contrat dont elle est tirée, donc son dossier ; le paiement lui est rattaché et l'événement
- * {@link PaiementRapproche} est publié. Une référence qui ne désigne aucun dossier n'empêche pas
- * d'enregistrer l'argent reçu : le paiement reste NON_RAPPROCHE. Chaque saisie est journalisée
+ * contrat dont elle est tirée, donc son dossier ; une référence d'échéance valide
+ * ({@link ReferenceEcheance}) désigne de même une échéance du contrat, qui passe à PAYEE si le montant
+ * reçu la couvre. Le paiement est rattaché et l'événement {@link PaiementRapproche} est publié. Une
+ * référence qui ne désigne aucun dossier n'empêche pas d'enregistrer l'argent reçu : le paiement reste
+ * NON_RAPPROCHE et l'événement {@link PaiementNonRapproche} est publié. Chaque saisie est journalisée
  * (objet {@value #TYPE_OBJET}), dans la même transaction.
  */
 @Service
@@ -109,13 +113,19 @@ public class PaiementService {
             throw new PaiementEnDoubleException(existant.get().id());
         }
         Instant maintenant = clock.instant();
-        Paiement paiement = Paiement.saisir(reference, montant, recuLe, apportAttendu(reference), auteur, maintenant);
+        Paiement paiement = Paiement.saisir(reference, montant, recuLe, rattachement(reference), auteur, maintenant);
         paiements.enregistrer(paiement);
         journal.journaliser(EntreeJournal.transition(maintenant, Acteur.backOffice(auteur), action,
                 objet(paiement.id()), null, paiement.statut().name(),
-                paiement.apportAttendu().map(a -> "Apport du contrat " + a.numeroContrat()).orElse(null)));
-        paiement.apportAttendu().ifPresent(a -> evenements.publishEvent(new PaiementRapproche(paiement.id(),
-                a.demandeId(), a.contratId(), a.clientId(), montant, a.montant(), recuLe, maintenant)));
+                paiement.rattachement().map(Rattachement::libelle).orElse(null)));
+        paiement.rattachement().ifPresentOrElse(a -> {
+            if (!a.estApport() && montant.estSuperieurOuEgalA(a.montant())) {
+                contrats.constaterEcheancePayee(a.contratId(), a.rangEcheance());
+            }
+            evenements.publishEvent(new PaiementRapproche(paiement.id(), a.demandeId(), a.contratId(),
+                    a.numeroContrat(), a.clientId(), a.objet(), a.rangEcheance(), montant, a.montant(), recuLe,
+                    maintenant));
+        }, () -> evenements.publishEvent(new PaiementNonRapproche(paiement.id(), montant, recuLe, maintenant)));
         LOG.info("Paiement saisi : {}", paiement);
         return paiement;
     }
@@ -145,13 +155,20 @@ public class PaiementService {
     @Transactional(readOnly = true)
     public Montant totalRecuPourDossier(UUID demandeId) {
         Objects.requireNonNull(demandeId, "demandeId");
-        return paiements.totalRapprochePourDossier(demandeId);
+        return paiements.totalApportRecuPourDossier(demandeId);
     }
 
-    private Optional<ApportAttendu> apportAttendu(ReferencePaiement reference) {
-        return reference.commeReferenceApport()
+    private Optional<Rattachement> rattachement(ReferencePaiement reference) {
+        Optional<Rattachement> apport = reference.commeReferenceApport()
                 .flatMap(r -> contrats.parChiffresDuNumero(r.chiffresContrat()))
-                .map(c -> new ApportAttendu(c.id(), c.numero(), c.demandeId(), c.clientId(), c.apport()));
+                .map(c -> Rattachement.apport(c.id(), c.numero(), c.demandeId(), c.clientId(), c.apport()));
+        if (apport.isPresent()) {
+            return apport;
+        }
+        return reference.commeReferenceEcheance()
+                .flatMap(r -> contrats.parChiffresDuNumero(r.chiffresContrat())
+                        .flatMap(c -> c.echeance(r.rang()).map(e -> Rattachement.echeance(c.id(), c.numero(),
+                                c.demandeId(), c.clientId(), e.rang(), e.montant()))));
     }
 
     private static ReferencePaiement reference(String saisie) {

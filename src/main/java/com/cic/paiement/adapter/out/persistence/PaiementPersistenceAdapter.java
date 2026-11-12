@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cic.commun.domain.Montant;
-import com.cic.paiement.domain.ApportAttendu;
+import com.cic.paiement.domain.Rattachement;
 import com.cic.paiement.domain.Paiement;
 import com.cic.paiement.domain.PaiementEnDoubleException;
 import com.cic.paiement.domain.PaiementRepository;
@@ -38,12 +38,13 @@ class PaiementPersistenceAdapter implements PaiementRepository {
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public void enregistrer(Paiement p) {
-        Optional<ApportAttendu> a = p.apportAttendu();
+        Optional<Rattachement> a = p.rattachement();
         try {
             entityManager.persist(new PaiementEntity(p.id(), p.reference().valeur(), p.montant().valeur(), p.recuLe(),
-                    p.statut(), a.map(ApportAttendu::contratId).orElse(null),
-                    a.map(ApportAttendu::numeroContrat).orElse(null), a.map(ApportAttendu::demandeId).orElse(null),
-                    a.map(ApportAttendu::clientId).orElse(null), a.map(x -> x.montant().valeur()).orElse(null),
+                    p.statut(), a.map(Rattachement::contratId).orElse(null),
+                    a.map(Rattachement::numeroContrat).orElse(null), a.map(Rattachement::demandeId).orElse(null),
+                    a.map(Rattachement::clientId).orElse(null), a.map(Rattachement::objet).orElse(null),
+                    a.map(Rattachement::rangEcheance).orElse(null), a.map(x -> x.montant().valeur()).orElse(null),
                     p.saisiPar(), p.saisiLe()));
             entityManager.flush();
         } catch (PersistenceException e) {
@@ -82,7 +83,7 @@ class PaiementPersistenceAdapter implements PaiementRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Montant totalRapprochePourDossier(UUID demandeId) {
+    public Montant totalApportRecuPourDossier(UUID demandeId) {
         return Montant.de(paiements.sommeParDemande(demandeId));
     }
 
@@ -97,9 +98,9 @@ class PaiementPersistenceAdapter implements PaiementRepository {
     }
 
     private static Paiement versDomaine(PaiementEntity e) {
-        Optional<ApportAttendu> attendu = e.getContratId() == null ? Optional.empty()
-                : Optional.of(new ApportAttendu(e.getContratId(), e.getNumeroContrat(), e.getDemandeId(),
-                        e.getClientId(), Montant.de(e.getMontantAttendu())));
+        Optional<Rattachement> attendu = e.getContratId() == null ? Optional.empty()
+                : Optional.of(new Rattachement(e.getContratId(), e.getNumeroContrat(), e.getDemandeId(),
+                        e.getClientId(), e.getObjet(), e.getRangEcheance(), Montant.de(e.getMontantAttendu())));
         return Paiement.reconstituer(e.getId(), new ReferencePaiement(e.getReference()), Montant.de(e.getMontant()),
                 e.getRecuLe(), attendu, e.getSaisiPar(), e.getSaisiLe());
     }
