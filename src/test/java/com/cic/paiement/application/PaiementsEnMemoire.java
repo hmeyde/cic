@@ -42,6 +42,14 @@ public class PaiementsEnMemoire implements PaiementRepository {
         return tous.stream().limit(limite).toList();
     }
 
+    @Override
+    public List<Paiement> ecarts(int limite) {
+        List<Paiement> avecEcart = new ArrayList<>(parReference.values().stream().filter(p -> p.ecart().isPresent())
+                .toList());
+        avecEcart.sort(Comparator.comparing(Paiement::recuLe).thenComparing(Paiement::saisiLe).reversed());
+        return avecEcart.stream().limit(limite).toList();
+    }
+
     public List<Paiement> tous() {
         return List.copyOf(parReference.values());
     }

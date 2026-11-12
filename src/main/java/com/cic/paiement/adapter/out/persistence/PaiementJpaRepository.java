@@ -6,10 +6,18 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 interface PaiementJpaRepository extends JpaRepository<PaiementEntity, UUID> {
 
     Optional<PaiementEntity> findByReference(String reference);
 
     List<PaiementEntity> findAllByOrderBySaisiLeDesc(Pageable page);
+
+    @Query("""
+            select p from PaiementEntity p
+            where p.contratId is null or p.montant <> p.montantAttendu
+            order by p.recuLe desc, p.saisiLe desc
+            """)
+    List<PaiementEntity> findEcarts(Pageable page);
 }

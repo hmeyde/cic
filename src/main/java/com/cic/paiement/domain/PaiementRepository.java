@@ -20,4 +20,10 @@ public interface PaiementRepository {
 
     /** Paiements les plus récemment saisis d'abord. */
     List<Paiement> derniers(int limite);
+
+    /**
+     * Paiements présentant un écart ({@link Paiement#ecart()}) : non rapprochés, ou rapprochés d'un
+     * montant différent de l'apport attendu. Les plus récemment reçus d'abord.
+     */
+    List<Paiement> ecarts(int limite);
 }

@@ -73,6 +73,13 @@ class PaiementPersistenceAdapter implements PaiementRepository {
                 .map(PaiementPersistenceAdapter::versDomaine).toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Paiement> ecarts(int limite) {
+        return paiements.findEcarts(PageRequest.of(0, limite)).stream().map(PaiementPersistenceAdapter::versDomaine)
+                .toList();
+    }
+
     private static boolean violeUniciteReference(Throwable e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
             if (t instanceof ConstraintViolationException c && c.getConstraintName() != null

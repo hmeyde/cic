@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.import.titre-page}">Importer des paiements — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-import">
+        <p><a th:href="@{/bo/paiements}" th:text="#{bo.import.retour}">Retour aux paiements reçus</a></p>
+        <h1 id="titre-import" th:text="#{bo.import.titre}">Importer des paiements (CSV)</h1>
+        <p class="texte-doux" th:text="#{bo.import.texte}">Chaque ligne est enregistrée comme une saisie et rattachée au dossier par sa référence.</p>
+
+        <div th:if="${erreur != null}" role="alert">
+            <p class="alerte alerte--erreur" th:text="#{${erreur}}">Le fichier est vide.</p>
+        </div>
+
+        <div th:if="${resultat != null}" th:with="r=${resultat}" role="status">
+            <p class="alerte alerte--info"
+               th:text="#{bo.import.bilan(${r.lignes()}, ${r.enregistres()}, ${r.conformes()}, ${#lists.size(r.ecarts())}, ${r.dejaEnregistres()}, ${r.invalides()})}">12 lignes lues : 10 paiements enregistrés, dont 8 conformes et 2 en écart ; 1 déjà enregistré, 1 invalide.</p>
+
+            <h2 th:text="#{bo.import.ecarts}">Écarts de cet import</h2>
+            <p th:if="${#lists.isEmpty(r.ecarts())}" class="texte-doux" th:text="#{bo.import.ecarts.aucun}">Aucun écart dans ce fichier.</p>
+            <div th:unless="${#lists.isEmpty(r.ecarts())}" class="tableau-defilant">
+                <table class="tableau">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.import.ligne}">Ligne</th>
+                        <th scope="col" th:text="#{bo.paiement.reference.courte}">Référence</th>
+                        <th scope="col" th:text="#{bo.ecarts.type}">Écart</th>
+                        <th scope="col" th:text="#{bo.paiement.montant.court}">Montant</th>
+                        <th scope="col" th:text="#{bo.paiement.attendu}">Apport attendu</th>
+                        <th scope="col" th:text="#{bo.autorisation.contrat}">Contrat</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="l : ${r.ecarts()}" th:with="p=${l.paiement().get()}">
+                        <td th:text="${l.numero()}">3</td>
+                        <td dir="ltr" th:text="${p.reference()}">AP20260000011</td>
+                        <td><span class="etiquette etiquette--sans-marge" th:text="#{'bo.ecarts.type.' + ${p.ecart().get().name()}}">Montant différent</span></td>
+                        <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 000 MRU</td>
+                        <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
+                        <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">CIC-2026-000001</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <th:block th:unless="${#lists.isEmpty(r.ignorees())}">
+                <h2 th:text="#{bo.import.ignorees}">Lignes non enregistrées</h2>
+                <div class="tableau-defilant">
+                    <table class="tableau">
+                        <thead>
+                        <tr>
+                            <th scope="col" th:text="#{bo.import.ligne}">Ligne</th>
+                            <th scope="col" th:text="#{bo.paiement.reference.courte}">Référence</th>
+                            <th scope="col" th:text="#{bo.paiement.montant.court}">Montant</th>
+                            <th scope="col" th:text="#{bo.paiement.recu-le}">Date du paiement</th>
+                            <th scope="col" th:text="#{bo.import.motif}">Motif</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="l : ${r.ignorees()}">
+                            <td th:text="${l.numero()}">5</td>
+                            <td dir="ltr" th:text="${l.reference()}">AP20260000011</td>
+                            <td dir="ltr" th:text="${l.montant()}">8320</td>
+                            <td dir="ltr" th:text="${l.recuLe()}">2026-11-12</td>
+                            <td th:text="${l.erreur().isPresent()} ? #{${l.erreur().get()}(${longueurReferenceMax})} : #{'bo.import.issue.' + ${l.issue().name()}}">Déjà enregistré.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+            <p><a th:href="@{/bo/paiements/ecarts}" th:text="#{bo.ecarts.voir}">Voir tous les écarts</a></p>
+        </div>
+
+        <form class="formulaire carte" method="post" enctype="multipart/form-data" novalidate
+              th:action="@{/bo/paiements/import}" aria-labelledby="titre-fichier">
+            <h2 id="titre-fichier" th:text="#{bo.import.fichier}">Fichier à importer</h2>
+            <div class="champ">
+                <label for="fichier" th:text="#{bo.import.fichier.libelle}">Fichier CSV des paiements</label>
+                <input id="fichier" name="fichier" type="file" required accept=".csv,text/csv" aria-describedby="fichier-aide">
+                <p id="fichier-aide" class="champ__aide texte-doux" th:text="#{bo.import.fichier.aide(${lignesMax})}">Trois colonnes : référence, montant en ouguiyas, date.</p>
+            </div>
+            <pre class="texte-doux" dir="ltr">reference;montant;date
+AP20260000011;8320;2026-11-12
+AP20260000029;12 480;13/11/2026</pre>
+            <div class="actions-formulaire">
+                <button type="submit" class="bouton bouton--principal" th:text="#{bo.import.envoyer}">Importer le fichier</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

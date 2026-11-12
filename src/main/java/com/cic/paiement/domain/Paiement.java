@@ -77,6 +77,14 @@ public final class Paiement {
         return apportAttendu != null && montant.compareTo(apportAttendu.montant()) != 0;
     }
 
+    /** Écart à traiter : référence inconnue ou montant différent de l'apport ; vide si le paiement est conforme. */
+    public Optional<TypeEcart> ecart() {
+        if (apportAttendu == null) {
+            return Optional.of(TypeEcart.REFERENCE_INCONNUE);
+        }
+        return ecartDeMontant() ? Optional.of(TypeEcart.MONTANT_DIFFERENT) : Optional.empty();
+    }
+
     public UUID id() {
         return id;
     }

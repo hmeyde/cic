@@ -47,6 +47,7 @@ public class PaiementService {
 
     static final String TYPE_OBJET = "PAIEMENT";
     static final String ACTION_SAISIE = "SAISIE_PAIEMENT";
+    static final String ACTION_IMPORT = "IMPORT_PAIEMENT_CSV";
 
     /** Montant le plus élevé accepté à la saisie, contre une faute de frappe grossière. */
     static final int CHIFFRES_MONTANT_MAX = 9;
@@ -81,6 +82,22 @@ public class PaiementService {
      */
     @Transactional
     public Paiement saisir(SaisiePaiement saisie, String auteur) {
+        return enregistrer(saisie, auteur, ACTION_SAISIE);
+    }
+
+    /**
+     * Enregistre un paiement lu dans un fichier CSV importé : mêmes contrôles et même rapprochement
+     * qu'une saisie manuelle, journalisé sous l'action {@value #ACTION_IMPORT}.
+     *
+     * @throws SaisiePaiementInvalideException référence, montant ou date invalide
+     * @throws PaiementEnDoubleException       un paiement porte déjà cette référence
+     */
+    @Transactional
+    public Paiement importer(SaisiePaiement saisie, String auteur) {
+        return enregistrer(saisie, auteur, ACTION_IMPORT);
+    }
+
+    private Paiement enregistrer(SaisiePaiement saisie, String auteur, String action) {
         Objects.requireNonNull(saisie, "saisie");
         Objects.requireNonNull(auteur, "auteur");
         ReferencePaiement reference = reference(saisie.reference());
@@ -94,13 +111,19 @@ public class PaiementService {
         Instant maintenant = clock.instant();
         Paiement paiement = Paiement.saisir(reference, montant, recuLe, apportAttendu(reference), auteur, maintenant);
         paiements.enregistrer(paiement);
-        journal.journaliser(EntreeJournal.transition(maintenant, Acteur.backOffice(auteur), ACTION_SAISIE,
+        journal.journaliser(EntreeJournal.transition(maintenant, Acteur.backOffice(auteur), action,
                 objet(paiement.id()), null, paiement.statut().name(),
                 paiement.apportAttendu().map(a -> "Apport du contrat " + a.numeroContrat()).orElse(null)));
         paiement.apportAttendu().ifPresent(a -> evenements.publishEvent(new PaiementRapproche(paiement.id(),
                 a.demandeId(), a.contratId(), a.clientId(), montant, a.montant(), recuLe, maintenant)));
         LOG.info("Paiement saisi : {}", paiement);
         return paiement;
+    }
+
+    /** Paiements en écart (référence inconnue, montant différent de l'apport), les plus récents d'abord. */
+    @Transactional(readOnly = true)
+    public List<Paiement> ecarts(int limite) {
+        return paiements.ecarts(limite);
     }
 
     /** Paiements les plus récemment saisis d'abord. */

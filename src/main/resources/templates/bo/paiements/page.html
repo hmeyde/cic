@@ -10,6 +10,10 @@
         <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
         <h1 id="titre-paiements" th:text="#{bo.paiements.titre}">Paiements reçus</h1>
         <p class="texte-doux" th:text="#{bo.paiements.texte}">Saisissez chaque paiement Masrvi reçu : il est rattaché au dossier par sa référence.</p>
+        <p class="actions-formulaire">
+            <a class="bouton bouton--contour" th:href="@{/bo/paiements/import}" th:text="#{bo.import.titre}">Importer des paiements (CSV)</a>
+            <a class="bouton bouton--contour" th:href="@{/bo/paiements/ecarts}" th:text="#{bo.ecarts.titre}">Écarts de paiement</a>
+        </p>
 
         <div th:if="${resultat != null}" th:with="r=${resultat}" role="status">
             <p th:if="${r.numeroContrat().isPresent()}" class="alerte alerte--info"
