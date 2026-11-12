@@ -30,7 +30,9 @@ import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.application.DossierActifExistantException;
 import com.cic.demande.application.EligibiliteService;
 import com.cic.demande.application.ScoreService;
+import com.cic.demande.domain.ProchaineEtape;
 import com.cic.demande.domain.StatutDossier;
+import com.cic.demande.domain.SuiviDossier;
 import com.cic.identite.application.ClientService;
 import com.cic.identite.application.ClientsEnMemoire;
 import com.cic.identite.application.EmploiClientService;
@@ -93,7 +95,7 @@ class DemandeClientControllerTest {
 
         String vue = controller.soumettre(principal, telephone.id(), 6, "", redirection);
 
-        assertThat(vue).isEqualTo("redirect:/client/demandes");
+        assertThat(vue).isEqualTo("redirect:/client/dossier");
         assertThat(redirection.getFlashAttributes().get("succes")).isEqualTo("client.demande.soumise");
         assertThat(lignes()).singleElement().satisfies(l -> {
             assertThat(l.designation()).isEqualTo("Galaxy A35");
@@ -142,5 +144,28 @@ class DemandeClientControllerTest {
 
         assertThat(redirection.getFlashAttributes().get("erreur")).isEqualTo(ApportInvalideException.CODE);
         assertThat(lignes()).isEmpty();
+    }
+
+    @Test
+    void le_client_suit_son_dossier() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        assertThat(controller.suivi(principal, model)).isEqualTo("client/dossier/suivi");
+
+        assertThat(model.get("suivi")).isInstanceOfSatisfying(SuiviDossier.class, s -> {
+            assertThat(s.statut()).isEqualTo(StatutDossier.EN_ANALYSE);
+            assertThat(s.prochaine()).isEqualTo(ProchaineEtape.ATTENDRE_DECISION);
+        });
+        assertThat(model.get("demande")).isInstanceOfSatisfying(LigneDemande.class,
+                l -> assertThat(l.designation()).isEqualTo("Galaxy A35"));
+    }
+
+    @Test
+    void suivi_sans_dossier() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        assertThat(controller.suivi(principal, model)).isEqualTo("client/dossier/suivi");
+        assertThat(model.containsAttribute("suivi")).isFalse();
     }
 }

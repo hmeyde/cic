@@ -22,7 +22,8 @@ import com.cic.demande.application.ApportInvalideException;
 import com.cic.demande.application.DemandeService;
 
 /**
- * Demandes du client connecté : soumission depuis la page d'un produit et liste de ses demandes.
+ * Demandes du client connecté : soumission depuis la page d'un produit, liste de ses demandes et
+ * suivi de son dossier en cours.
  * Le client est celui de la session (principal = identifiant du client), jamais un identifiant passé
  * dans la requête. Une règle de gestion non respectée ramène sur la page du produit avec son message.
  */
@@ -31,6 +32,8 @@ class DemandeClientController {
 
     static final String CHEMIN = "/client/demandes";
     static final String VUE_LISTE = "client/demandes/liste";
+    static final String CHEMIN_SUIVI = "/client/dossier";
+    static final String VUE_SUIVI = "client/dossier/suivi";
     static final String CHEMIN_PRODUIT = "/client/catalogue/{id}";
 
     private static final Logger LOG = LoggerFactory.getLogger(DemandeClientController.class);
@@ -51,6 +54,19 @@ class DemandeClientController {
     }
 
     /**
+     * Suivi du dossier en cours : statut, étapes du parcours et prochaine étape. Aucun identifiant
+     * dans l'URL : le dossier est celui du client connecté.
+     */
+    @GetMapping(CHEMIN_SUIVI)
+    String suivi(Principal principal, Model model) {
+        demandes.suiviDossierCourant(clientId(principal)).ifPresent(s -> {
+            model.addAttribute("suivi", s);
+            model.addAttribute("demande", LigneDemande.depuis(s.demande(), fuseau));
+        });
+        return VUE_SUIVI;
+    }
+
+    /**
      * @param apport apport choisi en ouguiyas entières ; vide pour l'apport minimum
      */
     @PostMapping(CHEMIN)
@@ -59,7 +75,7 @@ class DemandeClientController {
         try {
             demandes.soumettre(clientId(principal), produitId, duree, lireApport(apport));
             redirection.addFlashAttribute("succes", "client.demande.soumise");
-            return "redirect:" + CHEMIN;
+            return "redirect:" + CHEMIN_SUIVI;
         } catch (ErreurMetier e) {
             LOG.debug("Demande non soumise : {}", e.code());
             redirection.addFlashAttribute("erreur", e.code());

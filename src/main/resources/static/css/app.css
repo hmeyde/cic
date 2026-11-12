@@ -295,3 +295,33 @@ html { scroll-behavior: smooth; }
 
 /* Demande depuis la page produit */
 .formulaire-demande { margin-block-start: 1.5rem; padding-block-start: 1rem; border-block-start: 1px solid var(--couleur-bordure); }
+
+/* Espace client : suivi du dossier */
+.suivi-statut, .prochaine-etape { margin-block-end: 1rem; }
+.suivi-statut p, .prochaine-etape p { margin-block: .25rem; }
+.suivi-statut__libelle { font-size: 1.15rem; }
+.prochaine-etape { border-inline-start: 4px solid var(--couleur-bordure); }
+.prochaine-etape h2 { margin-block: 0 .5rem; font-size: 1.15rem; }
+.prochaine-etape--client { border-inline-start-color: var(--couleur-accent); }
+.prochaine-etape__limite { font-weight: 700; }
+.frise { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: .5rem; counter-reset: frise; }
+.frise__etape {
+    counter-increment: frise;
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem .75rem;
+    padding: .6rem .75rem .6rem 0; padding-inline-start: 3rem; position: relative;
+    border: 1px solid var(--couleur-bordure); border-radius: var(--rayon);
+}
+.frise__etape::before {
+    content: counter(frise);
+    position: absolute; inset-inline-start: .6rem; inset-block-start: .55rem;
+    width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%;
+    background: var(--couleur-fond-doux); border: 1px solid var(--couleur-bordure); font-weight: 700; font-size: .9rem;
+}
+.frise__nom { font-weight: 600; }
+.frise__etat { color: var(--couleur-texte-doux); font-size: .9rem; }
+.frise__etape--faite::before { content: "✓"; background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: #fff; }
+.frise__etape--en_cours { border-color: var(--couleur-primaire); background: var(--couleur-fond-doux); }
+.frise__etape--en_cours::before { background: var(--couleur-accent); border-color: var(--couleur-accent); color: #1d1a00; }
+.frise__etape--arretee { border-color: #b42318; }
+.frise__etape--arretee::before { content: "✕"; background: #b42318; border-color: #b42318; color: #fff; }
+.frise__etape--a_venir .frise__nom { color: var(--couleur-texte-doux); font-weight: 400; }

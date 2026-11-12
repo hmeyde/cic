@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.dossier.titre-page}">Suivi de mon dossier — Espace client CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-dossier">
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre demande est enregistrée.</p>
+        <h1 id="titre-dossier" th:text="#{client.dossier.titre}">Suivi de mon dossier</h1>
+
+        <p th:if="${suivi == null}" class="texte-doux" th:text="#{client.dossier.aucun}">Vous n’avez pas encore de dossier.</p>
+
+        <th:block th:if="${suivi != null}">
+            <div class="carte suivi-statut">
+                <p class="texte-doux suivi-statut__produit" th:text="${demande.designation()}">Galaxy A35</p>
+                <p class="suivi-statut__libelle">
+                    <span th:text="#{client.dossier.statut}">Statut :</span>
+                    <strong th:text="#{'client.demande.statut.' + ${suivi.statut().name()}}">En cours d’étude</strong>
+                </p>
+                <p class="texte-doux" th:text="#{client.dossier.depuis(${#temporals.format(suivi.statutDepuis(), 'dd/MM/yyyy')})}">Depuis le 12/11/2026</p>
+            </div>
+
+            <section class="carte prochaine-etape" th:classappend="${suivi.prochaine().parClient()} ? 'prochaine-etape--client'"
+                 aria-labelledby="titre-prochaine">
+                <h2 id="titre-prochaine" th:text="#{client.dossier.prochaine}">Prochaine étape</h2>
+                <p class="etiquette etiquette--sans-marge"
+                   th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-cic}">À faire par CIC</p>
+                <p th:text="#{'client.dossier.prochaine.' + ${suivi.prochaine().name()}}">L’équipe CIC étudie votre demande.</p>
+                <p th:if="${suivi.dateLimite().isPresent()}" class="prochaine-etape__limite"
+                   th:text="#{client.dossier.date-limite(${#temporals.format(suivi.dateLimite().get(), 'dd/MM/yyyy')})}">Avant le 19/11/2026</p>
+                <a th:if="${suivi.prochaine().name() == 'NOUVELLE_DEMANDE_POSSIBLE'}" class="bouton bouton--principal"
+                   th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a>
+            </section>
+
+            <h2 th:text="#{client.dossier.parcours}">Les étapes de mon dossier</h2>
+            <ol class="frise">
+                <li th:each="e : ${suivi.etapes()}" class="frise__etape" th:classappend="'frise__etape--' + ${#strings.toLowerCase(e.etat().name())}"
+                    th:attr="aria-current=${e.etat().name() == 'EN_COURS'} ? 'step' : null">
+                    <span class="frise__nom" th:text="#{'client.dossier.etape.' + ${e.etape().name()}}">Étude de la demande</span>
+                    <span class="frise__etat" th:text="#{'client.dossier.etat.' + ${e.etat().name()}}">En cours</span>
+                </li>
+            </ol>
+
+            <h2 th:text="#{client.dossier.conditions}">Mes conditions</h2>
+            <dl class="conditions">
+                <div>
+                    <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                </div>
+                <div class="conditions__principale">
+                    <dt th:text="#{client.simulation.mensualite(${demande.nombreMois()})}">Mensualité sur 6 mois</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                </div>
+                <div th:if="${demande.derniereDiffere()}">
+                    <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+                </div>
+            </dl>
+        </th:block>
+
+        <ul class="liens-bo">
+            <li th:if="${suivi == null}"><a class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a></li>
+            <li><a class="bouton bouton--contour" th:href="@{/client/demandes}" th:text="#{client.accueil.demandes}">Mes demandes</a></li>
+            <li><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>

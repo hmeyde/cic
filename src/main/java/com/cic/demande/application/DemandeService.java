@@ -29,6 +29,7 @@ import com.cic.demande.domain.DossierScore;
 import com.cic.demande.domain.ModeRemboursement;
 import com.cic.demande.domain.Score;
 import com.cic.demande.domain.StatutDossier;
+import com.cic.demande.domain.SuiviDossier;
 import com.cic.demande.domain.TermesDemande;
 import com.cic.demande.domain.TypeContrat;
 import com.cic.identite.application.ClientService;
@@ -158,6 +159,20 @@ public class DemandeService {
     public List<Demande> parClient(UUID clientId) {
         Objects.requireNonNull(clientId, "clientId");
         return demandes.parClient(clientId);
+    }
+
+    /**
+     * Suivi du dossier en cours du client : son dossier actif s'il en a un, sinon sa demande la plus
+     * récente (refusée, annulée ou soldée) ; vide s'il n'a jamais fait de demande.
+     */
+    @Transactional(readOnly = true)
+    public Optional<SuiviDossier> suiviDossierCourant(UUID clientId) {
+        Objects.requireNonNull(clientId, "clientId");
+        List<Demande> existantes = demandes.parClient(clientId);
+        return existantes.stream().filter(Demande::estActive).findFirst()
+                .or(() -> existantes.stream().findFirst())
+                .map(d -> SuiviDossier.de(d, clock.getZone(),
+                        parametres.entier(CleParametre.DELAI_APPORT_AUTORISATION_JOURS)));
     }
 
     private static DossierEligibilite eligibilite(Client client, Emploi emploi, Montant mensualitesEnCours,

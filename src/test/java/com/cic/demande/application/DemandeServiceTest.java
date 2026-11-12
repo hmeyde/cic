@@ -33,6 +33,7 @@ import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandesFixtures;
 import com.cic.demande.domain.Recommandation;
 import com.cic.demande.domain.StatutDossier;
+import com.cic.demande.domain.ProchaineEtape;
 import com.cic.identite.application.ClientService;
 import com.cic.identite.application.ClientsEnMemoire;
 import com.cic.identite.application.EmploiClientService;
@@ -238,5 +239,44 @@ class DemandeServiceTest {
         assertThat(demande.score().eligibilite().resultat(ConditionEliminatoire.IDENTITE_VERIFIEE).satisfaite())
                 .isFalse();
         assertThat(demande.score().recommandation()).isEqualTo(Recommandation.DEFAVORABLE);
+    }
+
+    @Test
+    void suivi_aucun_dossier() {
+        assertThat(service.suiviDossierCourant(client.id())).isEmpty();
+    }
+
+    @Test
+    void suivi_du_dossier_en_analyse() {
+        Demande demande = soumettre();
+
+        assertThat(service.suiviDossierCourant(client.id())).hasValueSatisfying(s -> {
+            assertThat(s.demande()).isEqualTo(demande);
+            assertThat(s.statutDepuis()).isEqualTo(AUJOURD_HUI);
+            assertThat(s.prochaine()).isEqualTo(ProchaineEtape.ATTENDRE_DECISION);
+        });
+    }
+
+    @Test
+    void suivi_prefere_le_dossier_actif_a_une_demande_plus_recente_close() {
+        Demande active = Demande.reconstituer(UUID.randomUUID(), client.id(), DemandesFixtures.termes(),
+                DemandesFixtures.score(), clock.instant().minusSeconds(3_600), StatutDossier.ACCEPTEE,
+                clock.instant());
+        demandes.enregistrer(active);
+        demandes.enregistrer(Demande.reconstituer(UUID.randomUUID(), client.id(), DemandesFixtures.termes(),
+                DemandesFixtures.score(), clock.instant(), StatutDossier.REFUSEE, clock.instant()));
+
+        assertThat(service.suiviDossierCourant(client.id())).hasValueSatisfying(s -> {
+            assertThat(s.demande()).isEqualTo(active);
+            assertThat(s.dateLimite()).contains(AUJOURD_HUI.plusDays(7));
+        });
+    }
+
+    @Test
+    void suivi_de_la_derniere_demande_close_sans_dossier_actif() {
+        Demande refusee = DemandesFixtures.demande(client.id(), StatutDossier.REFUSEE);
+        demandes.enregistrer(refusee);
+
+        assertThat(service.suiviDossierCourant(client.id())).map(s -> s.demande()).contains(refusee);
     }
 }
