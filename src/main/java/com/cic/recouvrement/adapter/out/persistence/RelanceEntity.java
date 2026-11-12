@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import com.cic.recouvrement.domain.Relance;
 import com.cic.recouvrement.domain.TypeRelance;
 
 /** Relance envoyée ; échéance et contrat référencés par identifiant (module contrat, sans relation JPA). */
@@ -49,5 +50,9 @@ class RelanceEntity {
         this.type = type;
         this.dateEcheance = dateEcheance;
         this.envoyeeLe = envoyeeLe;
+    }
+
+    Relance versDomaine() {
+        return new Relance(id, echeanceId, contratId, type, dateEcheance, envoyeeLe);
     }
 }

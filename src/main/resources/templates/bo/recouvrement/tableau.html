@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.recouvrement.titre-page}">Recouvrement — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-recouvrement">
+        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
+        <h1 id="titre-recouvrement" th:text="#{bo.recouvrement.titre}">Recouvrement</h1>
+        <p class="texte-doux" th:text="#{bo.recouvrement.texte}">Suivez les prélèvements des mensualités et les dossiers en retard. Aucune pénalité : le prix ne change jamais après la signature.</p>
+        <p class="actions-formulaire">
+            <a class="bouton bouton--contour" th:href="@{/bo/paiements}" th:text="#{bo.paiements.titre}">Paiements reçus</a>
+        </p>
+
+        <th:block th:each="bloc : ${ {'enEchec', 'aVenir', 'reussis'} }"
+                  th:with="lignes=${bloc == 'enEchec'} ? ${enEchec} : (${bloc == 'aVenir'} ? ${aVenir} : ${reussis})">
+            <h2 th:id="'titre-' + ${bloc}" th:text="#{'bo.recouvrement.' + ${bloc}}">Prélèvements en échec</h2>
+            <p class="texte-doux" th:text="#{'bo.recouvrement.' + ${bloc} + '.texte'(${aVenirJusquAu}, ${reussisDepuis})}">Échéances impayées à leur date, de la plus ancienne à la plus récente.</p>
+            <p th:if="${#lists.isEmpty(lignes)}" class="texte-doux" th:text="#{bo.recouvrement.aucun}">Aucun prélèvement.</p>
+            <div th:unless="${#lists.isEmpty(lignes)}" class="tableau-defilant">
+                <table class="tableau" th:attr="aria-labelledby='titre-' + ${bloc}">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.recouvrement.date}">Date</th>
+                        <th scope="col" th:text="#{bo.autorisation.contrat}">Contrat</th>
+                        <th scope="col" th:text="#{bo.recouvrement.echeance}">Échéance</th>
+                        <th scope="col" class="nombre" th:text="#{bo.paiement.montant.court}">Montant</th>
+                        <th scope="col" th:text="#{bo.recouvrement.dossier}">Dossier</th>
+                        <th scope="col"><span class="visuellement-cache" th:text="#{bo.recouvrement.ouvrir}">Ouvrir</span></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${lignes}" th:classappend="${bloc == 'enEchec'} ? 'ligne--echec'">
+                        <td dir="ltr" th:text="${p.date()}">09/11/2026</td>
+                        <td dir="ltr" th:text="${p.numeroContrat()}">CIC-2026-000001</td>
+                        <td th:text="#{bo.recouvrement.rang(${p.rang()}, ${p.nombreEcheances()})}">1 / 6</td>
+                        <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${p.statutDossier().name()}}">Échéance en retard</span></td>
+                        <td><a th:href="@{/bo/recouvrement/dossiers/{id}(id=${p.demandeId()})}" th:text="#{bo.recouvrement.ouvrir}">Ouvrir</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </th:block>
+    </section>
+</main>
+</body>
+</html>

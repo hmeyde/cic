@@ -31,6 +31,8 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * validation du paiement fournisseur est refusée à la personne qui a décidé du dossier (règle du domaine).
  * La saisie des paiements reçus et leur rapprochement ({@code /bo/paiements/**}) sont réservés aux rôles
  * RECOUVREMENT et ADMIN : l'encaissement est tenu par d'autres personnes que l'analyste qui décide.
+ * L'écran du recouvrement ({@code /bo/recouvrement/**}) : prélèvements, notes datées, régularisation,
+ * passage en recouvrement et solde des dossiers, est réservé aux mêmes rôles RECOUVREMENT et ADMIN.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
  * <p>Les autres pages restent publiques. CSRF actif partout ; en-têtes de sécurité par défaut de
@@ -83,6 +85,7 @@ public class SecurityConfig {
                 .requestMatchers("/bo/autorisations", "/bo/autorisations/**").hasRole("ANALYSTE")
                 .requestMatchers("/bo/commandes", "/bo/commandes/**").hasAnyRole("ANALYSTE", "ADMIN")
                 .requestMatchers("/bo/paiements", "/bo/paiements/**").hasAnyRole("RECOUVREMENT", "ADMIN")
+                .requestMatchers("/bo/recouvrement", "/bo/recouvrement/**").hasAnyRole("RECOUVREMENT", "ADMIN")
                 .requestMatchers("/bo", "/bo/**").hasAnyRole(ROLES_BACK_OFFICE)
                 .anyRequest().permitAll()
             )

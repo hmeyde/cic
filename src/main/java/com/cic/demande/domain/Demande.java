@@ -209,6 +209,60 @@ public final class Demande {
         return passerA(StatutDossier.EN_RETARD, le);
     }
 
+    /**
+     * EN_RETARD → EN_REMBOURSEMENT : les échéances en retard sont payées, les prélèvements suivants
+     * reprennent à leurs dates. Le prix ne change pas.
+     *
+     * @throws TransitionInterditeException      si la demande n'est pas EN_RETARD
+     * @throws RegularisationImpossibleException si une échéance est encore EN_RETARD
+     */
+    public ChangementStatut regulariser(SituationEcheances situation, Instant le) {
+        Objects.requireNonNull(situation, "situation");
+        if (statut != StatutDossier.EN_RETARD) {
+            // LIVREE → EN_REMBOURSEMENT est permis, mais c'est le démarrage du remboursement, pas une régularisation.
+            throw new TransitionInterditeException(statut, StatutDossier.EN_REMBOURSEMENT);
+        }
+        ChangementStatut changement = statut.passerA(StatutDossier.EN_REMBOURSEMENT);
+        if (!situation.aucunRetard()) {
+            throw new RegularisationImpossibleException();
+        }
+        appliquer(changement, le);
+        return changement;
+    }
+
+    /**
+     * EN_RETARD → RECOUVREMENT : le retard n'est pas rattrapé à l'amiable, le dossier passe au
+     * recouvrement. Le client reste redevable du prix fixé au contrat, sans pénalité.
+     *
+     * @throws TransitionInterditeException       si la demande n'est pas EN_RETARD
+     * @throws MotifRecouvrementInvalideException motif vide ou de plus de {@link #LONGUEUR_MOTIF_MAX} caractères
+     */
+    public ChangementStatut passerEnRecouvrement(String motif, Instant le) {
+        ChangementStatut changement = statut.passerA(StatutDossier.RECOUVREMENT);
+        if (motif == null || motif.isBlank() || motif.strip().length() > LONGUEUR_MOTIF_MAX) {
+            throw new MotifRecouvrementInvalideException();
+        }
+        appliquer(changement, le);
+        return changement;
+    }
+
+    /**
+     * EN_REMBOURSEMENT → SOLDEE : toutes les échéances sont payées. Le dossier n'est plus actif, le
+     * client peut faire une nouvelle demande.
+     *
+     * @throws TransitionInterditeException si la demande n'est pas EN_REMBOURSEMENT
+     * @throws SoldeImpossibleException     si une échéance reste à payer
+     */
+    public ChangementStatut solder(SituationEcheances situation, Instant le) {
+        Objects.requireNonNull(situation, "situation");
+        ChangementStatut changement = statut.passerA(StatutDossier.SOLDEE);
+        if (!situation.toutPaye()) {
+            throw new SoldeImpossibleException();
+        }
+        appliquer(changement, le);
+        return changement;
+    }
+
     private ChangementStatut passerA(StatutDossier cible, Instant le) {
         ChangementStatut changement = statut.passerA(cible);
         appliquer(changement, le);

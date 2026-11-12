@@ -119,6 +119,14 @@ public class ContratService {
         return contrats.echeancesEntre(StatutEcheance.EN_RETARD, du, au);
     }
 
+    /** Échéances PAYEE dont la date est comprise entre ces deux dates incluses : prélèvements réussis. */
+    @Transactional(readOnly = true)
+    public List<EcheanceAPrelever> echeancesPayeesEntre(LocalDate du, LocalDate au) {
+        Objects.requireNonNull(du, "du");
+        Objects.requireNonNull(au, "au");
+        return contrats.echeancesEntre(StatutEcheance.PAYEE, du, au);
+    }
+
     /** Le client a au moins une échéance EN_RETARD : ses nouveaux achats sont bloqués. */
     @Transactional(readOnly = true)
     public boolean clientAUneEcheanceEnRetard(UUID clientId) {

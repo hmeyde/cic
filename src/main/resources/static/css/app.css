@@ -340,3 +340,9 @@ html { scroll-behavior: smooth; }
 .paiement-apport h2 { margin-block: 0 .75rem; font-size: 1.15rem; }
 .paiement-apport__code { font-family: ui-monospace, monospace; font-size: 1.1rem; letter-spacing: .05em; user-select: all; }
 .paiement-apport__etapes { padding-inline-start: 1.25rem; margin-block: 1rem .5rem; }
+
+/* Recouvrement : notes datées */
+.liste-notes { list-style: none; padding: 0; margin: 1rem 0 0; }
+.liste-notes li { border-top: 1px solid #e3e3e3; padding: .5rem 0; }
+.liste-notes p { margin: 0; }
+.note__texte { white-space: pre-line; }

@@ -1,5 +1,6 @@
 package com.cic.recouvrement.adapter.out.persistence;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -36,5 +37,11 @@ class RelancePersistenceAdapter implements RelanceRepository {
         entityManager.persist(new RelanceEntity(r.id(), r.echeanceId(), r.contratId(), r.type(), r.dateEcheance(),
                 r.envoyeeLe()));
         entityManager.flush();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Relance> parContrat(UUID contratId) {
+        return relances.findByContratIdOrderByEnvoyeeLeDesc(contratId).stream().map(RelanceEntity::versDomaine).toList();
     }
 }

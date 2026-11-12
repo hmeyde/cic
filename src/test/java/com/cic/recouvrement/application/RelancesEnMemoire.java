@@ -1,6 +1,7 @@
 package com.cic.recouvrement.application;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,12 @@ public class RelancesEnMemoire implements RelanceRepository {
             throw new IllegalStateException("relance_echeance_type_uk");
         }
         relances.add(relance);
+    }
+
+    @Override
+    public List<Relance> parContrat(UUID contratId) {
+        return relances.stream().filter(r -> r.contratId().equals(contratId))
+                .sorted(Comparator.comparing(Relance::envoyeeLe).reversed()).toList();
     }
 
     public List<Relance> toutes() {

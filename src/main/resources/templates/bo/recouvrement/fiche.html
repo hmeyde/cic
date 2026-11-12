@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.recouvrement.fiche.titre-page}">Dossier en recouvrement — Back-office CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-fiche" th:with="f=${fiche}">
+        <p><a th:href="@{/bo/recouvrement}" th:text="#{bo.recouvrement.retour}">Retour au recouvrement</a></p>
+        <h1 id="titre-fiche" th:text="#{bo.recouvrement.fiche.titre(${f.numeroContrat()})}">Contrat CIC-2026-000001</h1>
+        <p>
+            <span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${f.statut().name()}}">Échéance en retard</span>
+            <span dir="auto" th:text="${f.designation()}">Galaxy A35</span>
+        </p>
+
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Dossier régularisé.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
+
+        <!-- Client et situation -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-situation">
+            <h2 id="titre-situation" th:text="#{bo.recouvrement.situation}">Situation</h2>
+            <dl>
+                <dt th:text="#{bo.recouvrement.client}">Client</dt>
+                <dd dir="auto" th:text="${f.client().orElse('—')}">Mohamed Ould Ahmed</dd>
+                <dt th:text="#{bo.recouvrement.telephone}">Téléphone</dt>
+                <dd dir="ltr" th:text="${f.telephone().orElse('—')}">36123456</dd>
+                <dt th:text="#{bo.recouvrement.prix-vente}">Prix de vente</dt>
+                <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(f.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                <dt th:text="#{bo.recouvrement.restant-du}">Restant dû</dt>
+                <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(f.restantDu().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                <dt th:text="#{bo.recouvrement.en-retard}">Échéances en retard</dt>
+                <dd th:text="${f.echeancesEnRetard()}">1</dd>
+            </dl>
+        </section>
+
+        <!-- Décisions -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-decisions">
+            <h2 id="titre-decisions" th:text="#{bo.recouvrement.decisions}">Décisions</h2>
+            <p th:unless="${f.peutRegulariser() or f.peutPasserEnRecouvrement() or f.peutSolder()}" class="texte-doux"
+               th:text="#{bo.recouvrement.aucune-decision}">Aucune décision possible au stade actuel du dossier.</p>
+            <th:block th:if="${f.statut().name() == 'EN_RETARD'}">
+                <form method="post" th:action="@{/bo/recouvrement/dossiers/{id}/regularisation(id=${f.demandeId()})}">
+                    <p class="texte-doux" th:text="${f.peutRegulariser()} ? #{bo.recouvrement.regulariser.aide} : #{bo.recouvrement.regulariser.attente}">Les échéances en retard sont payées : les prélèvements reprennent.</p>
+                    <button type="submit" class="bouton bouton--principal" th:disabled="${!f.peutRegulariser()}"
+                            th:text="#{bo.recouvrement.regulariser}">Régulariser le dossier</button>
+                </form>
+                <form class="formulaire" method="post" novalidate th:action="@{/bo/recouvrement/dossiers/{id}/recouvrement(id=${f.demandeId()})}">
+                    <div class="champ">
+                        <label for="motif" th:text="#{bo.recouvrement.motif}">Motif du passage en recouvrement</label>
+                        <textarea id="motif" name="motif" rows="3" required dir="auto" th:maxlength="${longueurMotifMax}"></textarea>
+                    </div>
+                    <div class="actions-formulaire">
+                        <button type="submit" class="bouton bouton--contour" th:text="#{bo.recouvrement.passer}">Passer en recouvrement</button>
+                    </div>
+                </form>
+            </th:block>
+            <form th:if="${f.peutSolder()}" method="post" th:action="@{/bo/recouvrement/dossiers/{id}/solde(id=${f.demandeId()})}">
+                <p class="texte-doux" th:text="#{bo.recouvrement.solder.aide}">Toutes les échéances sont payées.</p>
+                <button type="submit" class="bouton bouton--principal" th:text="#{bo.recouvrement.solder}">Solder le dossier</button>
+            </form>
+        </section>
+
+        <!-- Échéancier -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-echeancier">
+            <h2 id="titre-echeancier" th:text="#{bo.recouvrement.echeancier}">Échéancier</h2>
+            <div class="tableau-defilant">
+                <table class="tableau tableau--retour">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.recouvrement.echeance}">Échéance</th>
+                        <th scope="col" th:text="#{bo.recouvrement.date}">Date</th>
+                        <th scope="col" class="nombre" th:text="#{bo.paiement.montant.court}">Montant</th>
+                        <th scope="col" th:text="#{client.offre.echeance.statut}">Statut</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${f.echeances()}" th:classappend="${e.statut().name() == 'EN_RETARD'} ? 'ligne--echec'">
+                        <th scope="row" th:text="${e.rang()}">1</th>
+                        <td dir="ltr" th:text="${e.date()}">09/11/2026</td>
+                        <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                        <td th:text="#{'client.offre.echeance.statut.' + ${e.statut().name()}}">En retard</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Relances -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-relances">
+            <h2 id="titre-relances" th:text="#{bo.recouvrement.relances}">Messages envoyés au client</h2>
+            <p th:if="${#lists.isEmpty(f.relances())}" class="texte-doux" th:text="#{bo.recouvrement.relances.aucune}">Aucun message envoyé.</p>
+            <div th:unless="${#lists.isEmpty(f.relances())}" class="tableau-defilant">
+                <table class="tableau tableau--retour">
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{bo.recouvrement.envoye-le}">Envoyé le</th>
+                        <th scope="col" th:text="#{bo.recouvrement.type}">Message</th>
+                        <th scope="col" th:text="#{bo.recouvrement.echeance}">Échéance</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${f.relances()}">
+                        <td dir="ltr" th:text="${r.envoyeeLe()}">12/11/2026 08:00</td>
+                        <td th:text="#{'bo.recouvrement.relance.' + ${r.type().name()}}">1re relance après échec</td>
+                        <td th:text="#{bo.recouvrement.echeance.valeur(${r.rang()}, ${r.dateEcheance()})}">1, du 09/11/2026</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Notes -->
+        <section class="carte fiche-bloc" aria-labelledby="titre-notes">
+            <h2 id="titre-notes" th:text="#{bo.recouvrement.notes}">Notes</h2>
+            <form class="formulaire" method="post" novalidate th:action="@{/bo/recouvrement/dossiers/{id}/notes(id=${f.demandeId()})}">
+                <div class="champ">
+                    <label for="texte" th:text="#{bo.recouvrement.note}">Nouvelle note</label>
+                    <textarea id="texte" name="texte" rows="3" required dir="auto" th:maxlength="${longueurNoteMax}"
+                              aria-describedby="texte-aide"></textarea>
+                    <p id="texte-aide" class="champ__aide texte-doux" th:text="#{bo.recouvrement.note.aide}">Appel au client, promesse de paiement… Une note n’est jamais modifiée.</p>
+                </div>
+                <div class="actions-formulaire">
+                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.recouvrement.note.ajouter}">Ajouter la note</button>
+                </div>
+            </form>
+            <p th:if="${#lists.isEmpty(f.notes())}" class="texte-doux" th:text="#{bo.recouvrement.notes.aucune}">Aucune note.</p>
+            <ul th:unless="${#lists.isEmpty(f.notes())}" class="liste-notes">
+                <li th:each="n : ${f.notes()}">
+                    <p class="texte-doux" dir="auto" th:text="#{bo.recouvrement.note.par(${n.ecriteLe()}, ${n.auteur()})}">12/11/2026 10:00, recouvrement</p>
+                    <p class="note__texte" dir="auto" th:text="${n.texte()}">Client joint, paiera vendredi.</p>
+                </li>
+            </ul>
+        </section>
+    </section>
+</main>
+</body>
+</html>

@@ -23,6 +23,7 @@ import com.cic.contrat.domain.StatutEcheance;
 import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.application.RetardDossierService;
 import com.cic.demande.application.StatutDossierService;
+import com.cic.demande.application.SuiviRemboursementService;
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandesFixtures;
 import com.cic.demande.domain.StatutDossier;
@@ -54,6 +55,9 @@ public final class RappelsDeTest {
     public final List<Object> evenements = new ArrayList<>();
     public final RappelPrelevementService service;
     public final RetardEcheanceService retards;
+    public final NotesEnMemoire notes = new NotesEnMemoire();
+    public final SuiviRemboursementService remboursements;
+    public final SuiviRecouvrementService suivi;
     private long ordre;
 
     public RappelsDeTest() {
@@ -70,6 +74,10 @@ public final class RappelsDeTest {
         retards = new RetardEcheanceService(contratService, new StatutDossierService(demandes),
                 new RetardDossierService(demandes, new JournalAuditService(journal), evenements::add, clock),
                 new ClientService(clients), relances, envoyes::add, parametres, messages, clock);
+        remboursements = new SuiviRemboursementService(demandes, contratService, new JournalAuditService(journal),
+                evenements::add, clock);
+        suivi = new SuiviRecouvrementService(contratService, new StatutDossierService(demandes), remboursements,
+                new ClientService(clients), relances, notes, clock);
     }
 
     public Client client(String telephone) {
