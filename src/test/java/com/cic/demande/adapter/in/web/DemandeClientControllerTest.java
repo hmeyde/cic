@@ -54,6 +54,8 @@ import com.cic.identite.domain.Client;
 import com.cic.identite.domain.Emploi;
 import com.cic.identite.domain.ModeRemboursement;
 import com.cic.identite.domain.TypeContrat;
+import com.cic.paiement.application.InstructionsApportService;
+import com.cic.paiement.domain.InstructionsApport;
 import com.cic.parametrage.ParametresDeDepart;
 import com.cic.parametrage.application.ParametreService;
 
@@ -97,7 +99,7 @@ class DemandeClientControllerTest {
                         new EmploiClientService(clients, emplois, clock), parametres,
                         contenu -> ("%PDF ordre " + contenu.contrat().numero()).getBytes(StandardCharsets.US_ASCII),
                         clock),
-                clock);
+                new InstructionsApportService(parametres), clock);
 
         clients.enregistrer(client);
         fournisseurs.enregistrer(fournisseur);
@@ -220,6 +222,31 @@ class DemandeClientControllerTest {
             assertThat(o.echeances()).extracting(Echeance::montant).containsOnly(Montant.de(2_080));
             assertThat(o.echeances()).extracting(Echeance::statut).containsOnly(StatutEcheance.A_VENIR);
         });
+    }
+
+    @Test
+    void apres_l_acceptation_le_client_voit_comment_payer_son_apport_par_masrvi() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        decisions.service.accepter(lignes().getFirst().id(), "analyste");
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.suivi(principal, model);
+
+        assertThat(model.get("paiementApport")).isInstanceOfSatisfying(InstructionsApport.class, i -> {
+            assertThat(i.montant()).isEqualTo(Montant.de(8_320));
+            assertThat(i.codeMarchand()).isEqualTo("012345");
+            assertThat(i.reference().valeur()).isEqualTo("AP20260000011");
+        });
+    }
+
+    @Test
+    void pas_d_instructions_de_paiement_avant_l_acceptation() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.suivi(principal, model);
+
+        assertThat(model.containsAttribute("paiementApport")).isFalse();
     }
 
     @Test

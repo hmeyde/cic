@@ -31,6 +31,7 @@ import com.cic.contrat.application.ContratService;
 import com.cic.demande.application.ApportInvalideException;
 import com.cic.demande.application.DemandeService;
 import com.cic.demande.domain.StatutDossier;
+import com.cic.paiement.application.InstructionsApportService;
 
 /**
  * Demandes du client connecté : soumission depuis la page d'un produit, liste de ses demandes et
@@ -55,14 +56,16 @@ class DemandeClientController {
     private final ContratService contrats;
     private final ContratPdfService contratsPdf;
     private final AutorisationPdfService autorisationsPdf;
+    private final InstructionsApportService instructionsApport;
     private final ZoneId fuseau;
 
     DemandeClientController(DemandeService demandes, ContratService contrats, ContratPdfService contratsPdf,
-            AutorisationPdfService autorisationsPdf, Clock clock) {
+            AutorisationPdfService autorisationsPdf, InstructionsApportService instructionsApport, Clock clock) {
         this.demandes = demandes;
         this.contrats = contrats;
         this.contratsPdf = contratsPdf;
         this.autorisationsPdf = autorisationsPdf;
+        this.instructionsApport = instructionsApport;
         this.fuseau = clock.getZone();
     }
 
@@ -76,7 +79,8 @@ class DemandeClientController {
     /**
      * Suivi du dossier en cours : statut, étapes du parcours et prochaine étape ; une fois le dossier
      * accepté, l'offre (prix fixé, apport) et l'échéancier du contrat. Une offre annulée faute d'apport
-     * n'est plus montrée. Aucun identifiant dans l'URL : le dossier est celui du client connecté.
+     * n'est plus montrée. Tant que le dossier attend son apport (ACCEPTEE), les instructions de paiement
+     * Masrvi : montant, code marchand de CIC et référence du dossier. Aucun identifiant dans l'URL : le dossier est celui du client connecté.
      */
     @GetMapping(CHEMIN_SUIVI)
     String suivi(Principal principal, Model model) {
@@ -84,8 +88,12 @@ class DemandeClientController {
             model.addAttribute("suivi", s);
             model.addAttribute("demande", LigneDemande.depuis(s.demande(), fuseau));
             if (s.statut() != StatutDossier.ANNULEE) {
-                contrats.parDemande(s.demande().id())
-                        .ifPresent(c -> model.addAttribute("offre", OffreClient.depuis(c, fuseau)));
+                contrats.parDemande(s.demande().id()).ifPresent(c -> {
+                    model.addAttribute("offre", OffreClient.depuis(c, fuseau));
+                    if (s.statut() == StatutDossier.ACCEPTEE) {
+                        model.addAttribute("paiementApport", instructionsApport.pour(c.numero(), c.apport()));
+                    }
+                });
             }
         });
         return VUE_SUIVI;

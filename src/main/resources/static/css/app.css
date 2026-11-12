@@ -336,3 +336,7 @@ html { scroll-behavior: smooth; }
 .tableau--retour td, .tableau--retour th { white-space: normal; }
 .tableau tfoot th, .tableau tfoot td { border-block-start: 2px solid var(--couleur-bordure); border-block-end: 0; }
 .ligne--echec th, .ligne--echec td { background: #fdecec; color: #7a1a12; }
+.paiement-apport { margin-block-end: 1rem; border-inline-start: 4px solid var(--couleur-primaire); }
+.paiement-apport h2 { margin-block: 0 .75rem; font-size: 1.15rem; }
+.paiement-apport__code { font-family: ui-monospace, monospace; font-size: 1.1rem; letter-spacing: .05em; user-select: all; }
+.paiement-apport__etapes { padding-inline-start: 1.25rem; margin-block: 1rem .5rem; }

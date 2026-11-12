@@ -7,7 +7,7 @@ import java.util.Map;
 import com.cic.parametrage.domain.CleParametre;
 import com.cic.parametrage.domain.Parametre;
 
-/** Valeurs de départ de CLAUDE.md, identiques aux migrations V2 et V7. */
+/** Valeurs de départ de CLAUDE.md, identiques aux migrations (V2, V7, V15, V18). */
 public final class ParametresDeDepart {
 
     private static final Map<CleParametre, String> VALEURS = Map.ofEntries(
@@ -40,7 +40,8 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.CONNEXION_CODE_RENVOI_SECONDES, "60"),
             Map.entry(CleParametre.CIC_COMPTE_TITULAIRE, "CIC SARL"),
             Map.entry(CleParametre.CIC_COMPTE_BANQUE, "BMCI"),
-            Map.entry(CleParametre.CIC_COMPTE_NUMERO, "00020 00101 00001234567 53"));
+            Map.entry(CleParametre.CIC_COMPTE_NUMERO, "00020 00101 00001234567 53"),
+            Map.entry(CleParametre.MASRVI_CODE_MARCHAND, "012345"));
 
     private ParametresDeDepart() {
     }

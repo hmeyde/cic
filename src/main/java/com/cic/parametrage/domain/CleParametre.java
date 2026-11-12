@@ -47,7 +47,9 @@ public enum CleParametre {
 
     CIC_COMPTE_TITULAIRE("cic.compte.titulaire", TEXTE),
     CIC_COMPTE_BANQUE("cic.compte.banque", TEXTE),
-    CIC_COMPTE_NUMERO("cic.compte.numero", TEXTE);
+    CIC_COMPTE_NUMERO("cic.compte.numero", TEXTE),
+
+    MASRVI_CODE_MARCHAND("masrvi.code.marchand", TEXTE);
 
     private final String cle;
     private final TypeParametre type;

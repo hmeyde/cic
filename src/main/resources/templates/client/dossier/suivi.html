@@ -34,6 +34,30 @@
                    th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a>
             </section>
 
+            <section th:if="${paiementApport != null}" class="carte paiement-apport" aria-labelledby="titre-paiement-apport">
+                <h2 id="titre-paiement-apport" th:text="#{client.apport.titre}">Payer mon apport par Masrvi</h2>
+                <dl class="conditions">
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.apport.montant}">Montant à payer</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(paiementApport.montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.apport.code-marchand}">Code marchand CIC</dt>
+                        <dd class="paiement-apport__code" dir="ltr" th:text="${paiementApport.codeMarchand()}">012345</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.apport.reference}">Référence de mon dossier</dt>
+                        <dd class="paiement-apport__code" dir="ltr" th:text="${paiementApport.reference().valeur()}">AP20260000011</dd>
+                    </div>
+                </dl>
+                <ol class="paiement-apport__etapes">
+                    <li th:text="#{client.apport.etape1}">Ouvrez Masrvi et choisissez le paiement marchand.</li>
+                    <li th:text="#{client.apport.etape2}">Saisissez le code marchand CIC et le montant exact.</li>
+                    <li th:text="#{client.apport.etape3}">Indiquez la référence de votre dossier dans le motif du paiement.</li>
+                </ol>
+                <p class="texte-doux" th:text="#{client.apport.aide}">Sans la bonne référence, nous ne pourrons pas rattacher votre paiement à votre dossier.</p>
+            </section>
+
             <h2 th:text="#{client.dossier.parcours}">Les étapes de mon dossier</h2>
             <ol class="frise">
                 <li th:each="e : ${suivi.etapes()}" class="frise__etape" th:classappend="'frise__etape--' + ${#strings.toLowerCase(e.etat().name())}"

@@ -112,7 +112,7 @@ class ParametresTest {
     void chaque_cle_est_inseree_par_la_migration() throws Exception {
         StringBuilder migrations = new StringBuilder();
         for (String fichier : new String[] {"V2__parametre_regles_de_gestion.sql", "V7__code_connexion_client.sql",
-                "V15__autorisation_prelevement.sql"}) {
+                "V15__autorisation_prelevement.sql", "V18__masrvi_code_marchand.sql"}) {
             try (var in = getClass().getResourceAsStream("/db/migration/" + fichier)) {
                 assertThat(in).as(fichier).isNotNull();
                 migrations.append(new String(in.readAllBytes(), StandardCharsets.UTF_8));
