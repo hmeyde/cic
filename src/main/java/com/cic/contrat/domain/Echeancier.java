@@ -56,6 +56,25 @@ public record Echeancier(List<EcheancePrevue> echeances) {
             throw new IllegalArgumentException("Durée de " + nombreMois + " mois hors bornes ["
                     + duree.minMois() + " ; " + duree.maxMois() + "]");
         }
+        return planifier(resteAFinancer, nombreMois, dateDepart, jourPaie, finContrat);
+    }
+
+    /**
+     * Comme {@link #etablir} mais sans contrôle des bornes de durée : sert à fixer au contrat une
+     * durée déjà acceptée à la soumission, même si les paramètres ont changé depuis.
+     *
+     * @throws IllegalArgumentException si la durée n'est pas positive, si le jour de paie est
+     *         invalide ou si le reste est trop petit pour être réparti
+     * @throws FinContratDepasseeException si la dernière échéance ne tombe pas avant la fin du CDD
+     */
+    public static Echeancier planifier(Montant resteAFinancer, int nombreMois, LocalDate dateDepart, int jourPaie,
+            Optional<LocalDate> finContrat) {
+        Objects.requireNonNull(resteAFinancer, "resteAFinancer");
+        Objects.requireNonNull(dateDepart, "dateDepart");
+        Objects.requireNonNull(finContrat, "finContrat");
+        if (nombreMois <= 0) {
+            throw new IllegalArgumentException("Nombre de mensualités invalide : " + nombreMois);
+        }
         if (jourPaie < 1 || jourPaie > 31) {
             throw new IllegalArgumentException("Jour de paie invalide : " + jourPaie);
         }

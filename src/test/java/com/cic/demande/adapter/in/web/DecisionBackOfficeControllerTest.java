@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import com.cic.audit.application.JournalAuditService;
 import com.cic.audit.application.JournalEnMemoire;
-import com.cic.demande.application.DecisionService;
+import com.cic.demande.application.DecisionsDeTest;
 import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandesFixtures;
@@ -31,14 +31,15 @@ class DecisionBackOfficeControllerTest {
 
     private final DemandesEnMemoire demandes = new DemandesEnMemoire();
     private final JournalEnMemoire journal = new JournalEnMemoire();
-    private final DecisionBackOfficeController controller = new DecisionBackOfficeController(
-            new DecisionService(demandes, new JournalAuditService(journal), evenement -> { },
-                    Clock.fixed(Instant.parse("2026-11-12T10:00:00Z"), ZoneOffset.UTC)));
+    private final DecisionsDeTest decisions = new DecisionsDeTest(demandes, new JournalAuditService(journal),
+            evenement -> { }, Clock.fixed(Instant.parse("2026-11-12T10:00:00Z"), ZoneOffset.UTC));
+    private final DecisionBackOfficeController controller = new DecisionBackOfficeController(decisions.service);
     private final RedirectAttributesModelMap redirection = new RedirectAttributesModelMap();
 
     private Demande enAnalyse() {
         Demande d = DemandesFixtures.demande(UUID.randomUUID(), StatutDossier.EN_ANALYSE);
         demandes.enregistrer(d);
+        decisions.emploiCdi(d.clientId());
         return d;
     }
 

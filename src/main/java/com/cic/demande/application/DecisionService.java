@@ -13,11 +13,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cic.audit.application.JournalAuditService;
 import com.cic.audit.domain.Acteur;
+import com.cic.contrat.application.ContratAEtablir;
+import com.cic.contrat.application.ContratService;
+import com.cic.contrat.domain.Contrat;
+import com.cic.contrat.domain.Prix;
 import com.cic.demande.JustificatifDemande;
 import com.cic.demande.StatutDossierChange;
 import com.cic.demande.domain.ChangementStatut;
 import com.cic.demande.domain.Demande;
 import com.cic.demande.domain.DemandeRepository;
+import com.cic.demande.domain.TermesDemande;
+import com.cic.identite.application.EmploiClientService;
+import com.cic.identite.domain.Emploi;
 import com.cic.identite.domain.TypeDocument;
 
 /**
@@ -27,7 +34,9 @@ import com.cic.identite.domain.TypeDocument;
  *
  * <p>Chaque décision, dans une seule transaction : dossier verrouillé (deux analystes ne décident
  * pas en même temps), règle appliquée par la machine à états du domaine, dossier enregistré,
- * entrée au journal d'audit, événement publié.
+ * entrée au journal d'audit, événement publié. L'acceptation établit en plus, dans la même
+ * transaction, l'offre et le contrat du client (prix fixé, apport, échéances générées) ; si le contrat
+ * ne peut pas être établi (CDD terminé avant la dernière échéance), le dossier reste EN_ANALYSE.
  */
 @Service
 public class DecisionService {
@@ -39,31 +48,49 @@ public class DecisionService {
 
     private final DemandeRepository demandes;
     private final JournalAuditService journal;
+    private final EmploiClientService emplois;
+    private final ContratService contrats;
     private final ApplicationEventPublisher evenements;
     private final Clock clock;
 
-    public DecisionService(DemandeRepository demandes, JournalAuditService journal,
-            ApplicationEventPublisher evenements, Clock clock) {
+    public DecisionService(DemandeRepository demandes, JournalAuditService journal, EmploiClientService emplois,
+            ContratService contrats, ApplicationEventPublisher evenements, Clock clock) {
         this.demandes = demandes;
         this.journal = journal;
+        this.emplois = emplois;
+        this.contrats = contrats;
         this.evenements = evenements;
         this.clock = clock;
     }
 
     /**
-     * EN_ANALYSE → ACCEPTEE.
+     * EN_ANALYSE → ACCEPTEE, avec l'offre et le contrat du client.
      *
      * @param analyste identifiant de connexion du back-office
      * @throws DossierIntrouvableException dossier inconnu
      * @throws com.cic.demande.domain.TransitionInterditeException dossier pas EN_ANALYSE
+     * @throws EmploiNonDeclareException  le client n'a plus d'emploi déclaré
+     * @throws com.cic.contrat.domain.FinContratDepasseeException la dernière échéance tomberait après la
+     *         fin du CDD du client
      */
     @Transactional
     public Demande accepter(UUID demandeId, String analyste) {
         Demande demande = charger(demandeId);
         Instant maintenant = clock.instant();
         ChangementStatut changement = demande.accepter(analyste, maintenant);
-        transitionEnregistree(demande, changement, analyste, ActionDossier.ACCEPTATION, null, maintenant);
+        Contrat contrat = contrats.etablir(contratAEtablir(demande, maintenant));
+        transitionEnregistree(demande, changement, analyste, ActionDossier.ACCEPTATION,
+                "Contrat " + contrat.numero(), maintenant);
         return demande;
+    }
+
+    /** Conditions figées à la soumission et calendrier de paie actuel du client. */
+    private ContratAEtablir contratAEtablir(Demande demande, Instant le) {
+        Emploi emploi = emplois.parClient(demande.clientId()).orElseThrow(EmploiNonDeclareException::new);
+        TermesDemande t = demande.termes();
+        return new ContratAEtablir(demande.id(), demande.clientId(), t.produitId(), t.fournisseurId(),
+                t.designationProduit(), new Prix(t.prixPublic(), t.prixAchat(), t.prixVente(), t.apportMinimum()),
+                t.apport(), t.nombreMois(), emploi.jourPaie(), emploi.dateFin(), le);
     }
 
     /**

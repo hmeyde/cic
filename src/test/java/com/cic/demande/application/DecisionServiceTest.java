@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,8 @@ import com.cic.audit.application.JournalAuditService;
 import com.cic.audit.application.JournalEnMemoire;
 import com.cic.audit.domain.EntreeJournal;
 import com.cic.audit.domain.TypeActeur;
+import com.cic.commun.domain.Montant;
+import com.cic.contrat.domain.StatutEcheance;
 import com.cic.demande.JustificatifDemande;
 import com.cic.demande.StatutDossierChange;
 import com.cic.demande.domain.DecisionImpossibleException;
@@ -34,12 +37,14 @@ class DecisionServiceTest {
     private final JournalEnMemoire entrees = new JournalEnMemoire();
     private final JournalAuditService journal = new JournalAuditService(entrees);
     private final List<Object> evenements = new ArrayList<>();
-    private final DecisionService service = new DecisionService(demandes, journal, evenements::add,
+    private final DecisionsDeTest decisions = new DecisionsDeTest(demandes, journal, evenements::add,
             Clock.fixed(MAINTENANT, ZoneOffset.UTC));
+    private final DecisionService service = decisions.service;
 
     private Demande enAnalyse() {
         Demande d = DemandesFixtures.demande(UUID.randomUUID(), StatutDossier.EN_ANALYSE);
         demandes.enregistrer(d);
+        decisions.emploiCdi(d.clientId());
         return d;
     }
 
@@ -69,6 +74,49 @@ class DecisionServiceTest {
         });
         assertThat(evenements).containsExactly(new StatutDossierChange(d.id(), d.clientId(), StatutDossier.EN_ANALYSE,
                 StatutDossier.ACCEPTEE, MAINTENANT));
+    }
+
+    @Test
+    void accepter_etablit_l_offre_et_le_contrat_avec_ses_echeances() {
+        Demande d = enAnalyse();
+
+        service.accepter(d.id(), "analyste");
+
+        assertThat(decisions.contratService.parDemande(d.id())).hasValueSatisfying(c -> {
+            assertThat(c.clientId()).isEqualTo(d.clientId());
+            assertThat(c.prix().prixVente()).isEqualTo(Montant.de(20_800));
+            assertThat(c.apport()).isEqualTo(Montant.de(8_320));
+            assertThat(c.etabliLe()).isEqualTo(MAINTENANT);
+            assertThat(c.echeances()).hasSize(6).allSatisfy(e -> {
+                assertThat(e.montant()).isEqualTo(Montant.de(2_080));
+                assertThat(e.statut()).isEqualTo(StatutEcheance.A_VENIR);
+            });
+            // Acceptée le 13/11, apport attendu avant le 20/11 : première paie suivante le 25/11.
+            assertThat(c.echeances().getFirst().date()).isEqualTo(LocalDate.of(2026, 11, 25));
+            assertThat(journalDe(d)).singleElement()
+                    .satisfies(e -> assertThat(e.detail()).contains("Contrat " + c.numero()));
+        });
+    }
+
+    @Test
+    void sans_emploi_le_contrat_ne_peut_pas_etre_etabli() {
+        Demande d = DemandesFixtures.demande(UUID.randomUUID(), StatutDossier.EN_ANALYSE);
+        demandes.enregistrer(d);
+
+        assertThatThrownBy(() -> service.accepter(d.id(), "analyste"))
+                .isInstanceOf(EmploiNonDeclareException.class);
+        assertThat(decisions.contrats.tous()).isEmpty();
+        assertThat(journalDe(d)).isEmpty();
+        assertThat(evenements).isEmpty();
+    }
+
+    @Test
+    void refuser_n_etablit_pas_de_contrat() {
+        Demande d = enAnalyse();
+
+        service.refuser(d.id(), "analyste", "Ancienneté trop faible");
+
+        assertThat(decisions.contrats.tous()).isEmpty();
     }
 
     @Test

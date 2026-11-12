@@ -43,25 +43,81 @@
                 </li>
             </ol>
 
-            <h2 th:text="#{client.dossier.conditions}">Mes conditions</h2>
-            <dl class="conditions">
-                <div>
-                    <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+            <th:block th:if="${offre == null}">
+                <h2 th:text="#{client.dossier.conditions}">Mes conditions</h2>
+                <dl class="conditions">
+                    <div>
+                        <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    </div>
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.simulation.mensualite(${demande.nombreMois()})}">Mensualité sur 6 mois</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                    </div>
+                    <div th:if="${demande.derniereDiffere()}">
+                        <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+                    </div>
+                </dl>
+            </th:block>
+
+            <section th:if="${offre != null}" class="offre" aria-labelledby="titre-offre">
+                <h2 id="titre-offre" th:text="#{client.offre.titre}">Mon offre</h2>
+                <p class="texte-doux" th:text="#{client.offre.reference(${offre.numero()}, ${#temporals.format(offre.etablieLe(), 'dd/MM/yyyy')})}">Contrat CIC-2026-000001 du 13/11/2026</p>
+                <p th:text="#{client.offre.prix-fixe}">Prix fixé : il ne changera plus, sans intérêt ni pénalité.</p>
+                <dl class="conditions">
+                    <div>
+                        <dt th:text="#{client.offre.produit}">Produit</dt>
+                        <dd th:text="${offre.designation()}">Galaxy A35</dd>
+                    </div>
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.offre.reste(${offre.nombreMois()})}">Reste à rembourser en 6 mensualités</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                    </div>
+                </dl>
+
+                <h3 th:text="#{client.offre.echeancier}">Mon échéancier</h3>
+                <p class="texte-doux" th:text="#{client.offre.echeancier.aide}">Chaque mensualité est prélevée le jour de votre paie.</p>
+                <div class="tableau-defilant">
+                    <table class="tableau">
+                        <thead>
+                        <tr>
+                            <th scope="col" th:text="#{client.offre.echeance.rang}">N°</th>
+                            <th scope="col" th:text="#{client.offre.echeance.date}">Date</th>
+                            <th scope="col" class="nombre" th:text="#{client.offre.echeance.montant}">Montant</th>
+                            <th scope="col" th:text="#{client.offre.echeance.statut}">Statut</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="e : ${offre.echeances()}">
+                            <td th:text="${e.rang()}">1</td>
+                            <td th:text="${#temporals.format(e.date(), 'dd/MM/yyyy')}">25/12/2026</td>
+                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                            <td th:text="#{'client.offre.echeance.statut.' + ${e.statut().name()}}">À venir</td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th scope="row" colspan="2" th:text="#{client.offre.echeance.total}">Total</th>
+                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</td>
+                            <td></td>
+                        </tr>
+                        </tfoot>
+                    </table>
                 </div>
-                <div>
-                    <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
-                </div>
-                <div class="conditions__principale">
-                    <dt th:text="#{client.simulation.mensualite(${demande.nombreMois()})}">Mensualité sur 6 mois</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
-                </div>
-                <div th:if="${demande.derniereDiffere()}">
-                    <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
-                </div>
-            </dl>
+            </section>
         </th:block>
 
         <ul class="liens-bo">

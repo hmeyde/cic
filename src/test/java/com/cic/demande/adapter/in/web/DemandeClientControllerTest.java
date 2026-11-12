@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
@@ -26,8 +27,11 @@ import com.cic.commun.domain.Montant;
 import com.cic.contrat.application.CalculPrixService;
 import com.cic.contrat.application.EcheancierService;
 import com.cic.contrat.application.SimulationService;
+import com.cic.contrat.domain.Echeance;
+import com.cic.contrat.domain.StatutEcheance;
 import com.cic.demande.application.ApportInvalideException;
 import com.cic.demande.application.DemandeService;
+import com.cic.demande.application.DecisionsDeTest;
 import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.application.DossierActifExistantException;
 import com.cic.demande.application.EligibiliteService;
@@ -62,6 +66,8 @@ class DemandeClientControllerTest {
     private final Fournisseur fournisseur = Fournisseur.nouveau("Mauritel", new BigDecimal("8"));
     private final Produit telephone = Produit.nouveau("TEL-001", "Galaxy A35", "Samsung", CategorieProduit.TELEPHONE,
             fournisseur.id(), Montant.de(20_000));
+    private final DemandesEnMemoire demandes = new DemandesEnMemoire();
+    private final DecisionsDeTest decisions;
     private final DemandeClientController controller;
 
     DemandeClientControllerTest() {
@@ -69,13 +75,15 @@ class DemandeClientControllerTest {
         parametres.afterSingletonsInstantiated();
         CalculPrixService calculPrix = new CalculPrixService(parametres);
         EcheancierService echeancier = new EcheancierService(parametres);
-        DemandeService service = new DemandeService(new DemandesEnMemoire(), new ClientService(clients),
+        DemandeService service = new DemandeService(demandes, new ClientService(clients),
                 new EmploiClientService(clients, emplois, clock),
                 new CatalogueClientService(produits, fournisseurs, calculPrix,
                         new SimulationService(calculPrix, echeancier), parametres),
                 echeancier, new ScoreService(parametres, new EligibiliteService(parametres, clock), clock),
                 parametres, new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
-        controller = new DemandeClientController(service, clock);
+        decisions = new DecisionsDeTest(demandes, new JournalAuditService(new JournalEnMemoire()), emplois,
+                evenement -> { }, clock);
+        controller = new DemandeClientController(service, decisions.contratService, clock);
 
         clients.enregistrer(client);
         fournisseurs.enregistrer(fournisseur);
@@ -161,6 +169,43 @@ class DemandeClientControllerTest {
         });
         assertThat(model.get("demande")).isInstanceOfSatisfying(LigneDemande.class,
                 l -> assertThat(l.designation()).isEqualTo("Galaxy A35"));
+    }
+
+    @Test
+    void pas_d_offre_tant_que_le_dossier_n_est_pas_accepte() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.suivi(principal, model);
+
+        assertThat(model.containsAttribute("offre")).isFalse();
+    }
+
+    @Test
+    void apres_l_acceptation_le_client_voit_son_offre_et_son_echeancier() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        UUID demandeId = lignes().getFirst().id();
+        decisions.service.accepter(demandeId, "analyste");
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.suivi(principal, model);
+
+        assertThat(model.get("suivi")).isInstanceOfSatisfying(SuiviDossier.class,
+                s -> assertThat(s.statut()).isEqualTo(StatutDossier.ACCEPTEE));
+        assertThat(model.get("offre")).isInstanceOfSatisfying(OffreClient.class, o -> {
+            assertThat(o.numero()).isEqualTo("CIC-2026-000001");
+            assertThat(o.designation()).isEqualTo("Galaxy A35");
+            assertThat(o.etablieLe()).isEqualTo(LocalDate.of(2026, 11, 12));
+            assertThat(o.prixTotal()).isEqualTo(Montant.de(20_800));
+            assertThat(o.apport()).isEqualTo(Montant.de(8_320));
+            assertThat(o.resteAFinancer()).isEqualTo(Montant.de(12_480));
+            assertThat(o.nombreMois()).isEqualTo(6);
+            assertThat(o.echeances()).extracting(Echeance::date).containsExactly(LocalDate.of(2026, 11, 25),
+                    LocalDate.of(2026, 12, 25), LocalDate.of(2027, 1, 25), LocalDate.of(2027, 2, 25),
+                    LocalDate.of(2027, 3, 25), LocalDate.of(2027, 4, 25));
+            assertThat(o.echeances()).extracting(Echeance::montant).containsOnly(Montant.de(2_080));
+            assertThat(o.echeances()).extracting(Echeance::statut).containsOnly(StatutEcheance.A_VENIR);
+        });
     }
 
     @Test

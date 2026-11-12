@@ -19,6 +19,7 @@ import com.cic.audit.application.JournalEnMemoire;
 import com.cic.audit.domain.TypeActeur;
 import com.cic.commun.domain.Montant;
 import com.cic.demande.application.DecisionService;
+import com.cic.demande.application.DecisionsDeTest;
 import com.cic.demande.application.DemandesEnMemoire;
 import com.cic.demande.application.FicheDossierService;
 import com.cic.demande.domain.ConditionEliminatoire;
@@ -148,8 +149,8 @@ class FicheDossierBackOfficeControllerTest {
     @Test
     void la_fiche_montre_la_decision_et_le_journal_du_dossier() {
         Demande demande = demande(UUID.randomUUID());
-        DecisionService decisions = new DecisionService(demandes, new JournalAuditService(journal), evenement -> { },
-                clock);
+        DecisionService decisions = new DecisionsDeTest(demandes, new JournalAuditService(journal), evenement -> { },
+                clock).service;
         assertThat(ouvrir(demande.id()).decisionPossible()).isTrue();
 
         decisions.demanderJustificatif(demande.id(), "analyste", TypeDocument.RIB, null);
