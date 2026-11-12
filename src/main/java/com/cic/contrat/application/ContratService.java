@@ -2,6 +2,7 @@ package com.cic.contrat.application;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratDejaEtabliException;
 import com.cic.contrat.domain.ContratRepository;
 import com.cic.contrat.domain.Echeance;
+import com.cic.contrat.domain.EcheanceAPrelever;
 import com.cic.contrat.domain.Echeancier;
 import com.cic.parametrage.application.ParametreService;
 import com.cic.parametrage.domain.CleParametre;
@@ -85,6 +87,17 @@ public class ContratService {
     public Optional<Contrat> parDemande(UUID demandeId) {
         Objects.requireNonNull(demandeId, "demandeId");
         return contrats.parDemande(demandeId);
+    }
+
+    /**
+     * Échéances A_VENIR à prélever entre ces deux dates incluses, par date puis numéro de contrat :
+     * sert aux rappels envoyés avant chaque prélèvement.
+     */
+    @Transactional(readOnly = true)
+    public List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au) {
+        Objects.requireNonNull(du, "du");
+        Objects.requireNonNull(au, "au");
+        return contrats.echeancesAVenirEntre(du, au);
     }
 
     /** Autorisation de prélèvement d'un contrat ; une par contrat, émise avec lui. */

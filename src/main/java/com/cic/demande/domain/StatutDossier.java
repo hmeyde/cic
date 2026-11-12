@@ -91,6 +91,17 @@ public enum StatutDossier {
     }
 
     /**
+     * Les mensualités sont prélevées à leur date : apport encaissé et autorisation ACCEPTEE
+     * (APPORT_ET_AUTORISATION et au-delà), dossier pas encore soldé.
+     */
+    public boolean estEnPrelevement() {
+        return switch (this) {
+            case APPORT_ET_AUTORISATION, COMMANDEE, LIVREE, EN_REMBOURSEMENT, EN_RETARD, RECOUVREMENT -> true;
+            default -> false;
+        };
+    }
+
+    /**
      * Vérifie la transition et la décrit pour le journal d'audit.
      *
      * @throws TransitionInterditeException si la transition n'est pas permise

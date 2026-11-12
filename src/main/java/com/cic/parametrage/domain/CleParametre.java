@@ -49,7 +49,9 @@ public enum CleParametre {
     CIC_COMPTE_BANQUE("cic.compte.banque", TEXTE),
     CIC_COMPTE_NUMERO("cic.compte.numero", TEXTE),
 
-    MASRVI_CODE_MARCHAND("masrvi.code.marchand", TEXTE);
+    MASRVI_CODE_MARCHAND("masrvi.code.marchand", TEXTE),
+
+    CIC_WHATSAPP_NUMERO("cic.whatsapp.numero", TEXTE);
 
     private final String cle;
     private final TypeParametre type;

@@ -1,5 +1,7 @@
 package com.cic.contrat.application;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,8 @@ import java.util.UUID;
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratRepository;
 import com.cic.contrat.domain.Echeance;
+import com.cic.contrat.domain.EcheanceAPrelever;
+import com.cic.contrat.domain.StatutEcheance;
 
 public class ContratsEnMemoire implements ContratRepository {
 
@@ -44,6 +48,18 @@ public class ContratsEnMemoire implements ContratRepository {
                 c.produitId(), c.fournisseurId(), c.designationProduit(), c.prix(), c.apport(),
                 c.echeances().stream().map(e -> e.id().equals(echeance.id()) ? echeance : e).toList(),
                 c.etabliLe()));
+    }
+
+    @Override
+    public List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au) {
+        return parDemande.values().stream()
+                .flatMap(c -> c.echeances().stream()
+                        .filter(e -> e.statut() == StatutEcheance.A_VENIR && !e.date().isBefore(du)
+                                && !e.date().isAfter(au))
+                        .map(e -> EcheanceAPrelever.de(c, e)))
+                .sorted(Comparator.comparing((EcheanceAPrelever e) -> e.echeance().date())
+                        .thenComparing(EcheanceAPrelever::numeroContrat))
+                .toList();
     }
 
     @Override

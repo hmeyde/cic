@@ -1,5 +1,8 @@
 package com.cic.contrat.adapter.out.persistence;
 
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,7 +14,9 @@ import com.cic.commun.domain.Montant;
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratRepository;
 import com.cic.contrat.domain.Echeance;
+import com.cic.contrat.domain.EcheanceAPrelever;
 import com.cic.contrat.domain.Prix;
+import com.cic.contrat.domain.StatutEcheance;
 
 import jakarta.persistence.EntityManager;
 
@@ -66,6 +71,20 @@ class ContratPersistenceAdapter implements ContratRepository {
             throw new IllegalStateException("Échéance introuvable : " + echeance);
         }
         entite.changerStatut(echeance.statut());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au) {
+        return contrats.findAvecEcheanceEntre(StatutEcheance.A_VENIR, du, au).stream()
+                .map(ContratPersistenceAdapter::versDomaine)
+                .flatMap(c -> c.echeances().stream()
+                        .filter(e -> e.statut() == StatutEcheance.A_VENIR && !e.date().isBefore(du)
+                                && !e.date().isAfter(au))
+                        .map(e -> EcheanceAPrelever.de(c, e)))
+                .sorted(Comparator.comparing((EcheanceAPrelever e) -> e.echeance().date())
+                        .thenComparing(EcheanceAPrelever::numeroContrat))
+                .toList();
     }
 
     @Override

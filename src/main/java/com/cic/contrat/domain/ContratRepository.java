@@ -1,5 +1,7 @@
 package com.cic.contrat.domain;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +22,9 @@ public interface ContratRepository {
 
     /** Enregistre le nouveau statut d'une échéance du contrat ; seul le statut change après la signature. */
     void enregistrerStatut(UUID contratId, Echeance echeance);
+
+    /** Échéances A_VENIR dont la date est comprise entre {@code du} et {@code au} inclus, par date puis contrat. */
+    List<EcheanceAPrelever> echeancesAVenirEntre(LocalDate du, LocalDate au);
 
     /** Numéro d'ordre suivant, unique et croissant, pour numéroter les contrats. */
     long prochainNumeroOrdre();

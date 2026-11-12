@@ -7,7 +7,7 @@ import java.util.Map;
 import com.cic.parametrage.domain.CleParametre;
 import com.cic.parametrage.domain.Parametre;
 
-/** Valeurs de départ de CLAUDE.md, identiques aux migrations (V2, V7, V15, V18). */
+/** Valeurs de départ de CLAUDE.md, identiques aux migrations (V2, V7, V15, V18, V24). */
 public final class ParametresDeDepart {
 
     private static final Map<CleParametre, String> VALEURS = Map.ofEntries(
@@ -21,7 +21,7 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.DOSSIER_ACTIF_MAX, "1"),
             Map.entry(CleParametre.AGE_MINIMUM_ANS, "18"),
             Map.entry(CleParametre.DELAI_APPORT_AUTORISATION_JOURS, "7"),
-            Map.entry(CleParametre.RELANCE_AVANT_PRELEVEMENT_JOURS, "2"),
+            Map.entry(CleParametre.RELANCE_AVANT_PRELEVEMENT_JOURS, "1"),
             Map.entry(CleParametre.RELANCE_ECHEC_PREMIERE_JOURS, "3"),
             Map.entry(CleParametre.RELANCE_ECHEC_SECONDE_JOURS, "7"),
             Map.entry(CleParametre.RISQUE_EMPLOYEUR_MAX_PCT, "20"),
@@ -41,7 +41,8 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.CIC_COMPTE_TITULAIRE, "CIC SARL"),
             Map.entry(CleParametre.CIC_COMPTE_BANQUE, "BMCI"),
             Map.entry(CleParametre.CIC_COMPTE_NUMERO, "00020 00101 00001234567 53"),
-            Map.entry(CleParametre.MASRVI_CODE_MARCHAND, "012345"));
+            Map.entry(CleParametre.MASRVI_CODE_MARCHAND, "012345"),
+            Map.entry(CleParametre.CIC_WHATSAPP_NUMERO, "20000000"));
 
     private ParametresDeDepart() {
     }
