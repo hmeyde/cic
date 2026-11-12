@@ -104,4 +104,6 @@ Séparation des tâches : la personne qui décide d'un dossier ne valide pas le 
 - `docker compose up -d` : PostgreSQL local
 - `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`
 - `./mvnw test`
+- `docs/CARTE.md` : carte du projet (modules, routes, migrations, profils, jobs). La lire avant d'explorer le code ; la régénérer avec `bash scripts/carte.sh` après avoir ajouté un module, une route ou une migration.
+- Vérifications : pendant le travail, lancer seulement les tests concernés (`./mvnw -q test -Dtest=NomDuTest`) ; la suite complète une seule fois, juste avant le commit. Démarrer l'application en profil dev une seule fois, et seulement si le code Java, les gabarits ou la configuration ont changé.
 - Dans le conteneur Claude, PostgreSQL est déjà disponible sur `db:5432` (variables `SPRING_DATASOURCE_*`) : ne pas lancer docker compose, vérifier le démarrage avec `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`.
