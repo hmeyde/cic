@@ -281,6 +281,7 @@ html { scroll-behavior: smooth; }
 .conditions { display: grid; gap: .75rem; margin: 0; }
 .conditions > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; border-block-end: 1px solid var(--couleur-bordure); padding-block-end: .5rem; }
 .conditions > div:last-child { border-block-end: 0; padding-block-end: 0; }
+.conditions + h2, .conditions + h3 { margin-block-start: 1.5rem; }
 .conditions dt { color: var(--couleur-texte-doux); }
 .conditions dd { margin: 0; font-weight: 700; }
 
@@ -310,7 +311,7 @@ html { scroll-behavior: smooth; }
 .frise__etape {
     counter-increment: frise;
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem .75rem;
-    padding: .6rem .75rem .6rem 0; padding-inline-start: 3rem; position: relative;
+    padding-block: .6rem; padding-inline: 3rem .75rem; position: relative;
     border: 1px solid var(--couleur-bordure); border-radius: var(--rayon);
 }
 .frise__etape::before {
