@@ -149,6 +149,16 @@ docker compose down -v && docker compose up -d
 Un compte back-office déjà créé garde son mot de passe : changer la variable ne le modifie pas (repartir d'une
 base vide ou réinitialiser la démonstration).
 
+### Captures d'écran
+
+`bash scripts/captures.sh` capture en PNG les écrans clés (pages publiques, parcours client, back-office par rôle),
+en français et en arabe, dans `docs/captures/fr/` et `docs/captures/ar/`. L'application doit tourner en profil
+`demo` sur une base fraîche ou réinitialisée (URL : `CIC_CAPTURES_URL`, défaut `http://localhost:8080`).
+L'outil est un petit projet Maven séparé (`scripts/captures/`, Playwright pour Java : ni Node ni dépendance
+ajoutée à l'application) ; au premier lancement, il télécharge Chromium dans `~/.cache/ms-playwright`.
+Chromium a besoin des bibliothèques système habituelles (paquets `libnss3`, `libgbm1`, `libasound2t64`…) et
+d'une police arabe (`fonts-noto-core`).
+
 ---
 
 ## 3. Déploiement sur un VPS
