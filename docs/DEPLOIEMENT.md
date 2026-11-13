@@ -27,6 +27,11 @@ Budget de départ : environ **20 €** (domaine pour un an + premier mois de ser
   4 Go, la compilation peut échouer. C'est aussi largement suffisant pour la démonstration.
 - **GitHub privé** : le serveur y récupère le code ; privé, car le dépôt contient le code complet du projet.
 
+> **VPS-1 indisponible ?** OVHcloud affiche parfois « VPS-1 est actuellement indisponible ». Essayez d'abord
+> une **autre localisation en Europe** (Gravelines, Roubaix, Strasbourg, Francfort, Varsovie, Londres…) ;
+> sinon prenez le **VPS-2** (4 vCores, 8 Go de RAM, 75 Go NVMe, ~7 € HT / mois) : le reste du guide est
+> identique. Évitez tout modèle à moins de 4 Go de RAM et les localisations hors d'Europe.
+
 > Ne prenez **pas** d'option payante supplémentaire (Plesk, cPanel, sauvegarde avancée, IP additionnelle) :
 > l'application n'en a pas besoin.
 
