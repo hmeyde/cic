@@ -29,8 +29,11 @@ Budget de départ : environ **20 €** (domaine pour un an + premier mois de ser
 
 > **VPS-1 indisponible ?** OVHcloud affiche parfois « VPS-1 est actuellement indisponible ». Essayez d'abord
 > une **autre localisation en Europe** (Gravelines, Roubaix, Strasbourg, Francfort, Varsovie, Londres…) ;
-> sinon prenez le **VPS-2** (4 vCores, 8 Go de RAM, 75 Go NVMe, ~7 € HT / mois) : le reste du guide est
-> identique. Évitez tout modèle à moins de 4 Go de RAM et les localisations hors d'Europe.
+> sinon le **VPS-2** (4 vCores, 8 Go de RAM, 75 Go NVMe, ~7 € HT / mois) : le reste du guide est identique.
+> Évitez tout modèle à moins de 4 Go de RAM et les localisations hors d'Europe.
+>
+> **Si toutes les offres VPS d'OVHcloud sont désactivées**, prenez le serveur chez **Contabo** (section 1 bis)
+> et gardez **le domaine chez OVHcloud** : seule l'étape de commande du serveur change.
 
 > Ne prenez **pas** d'option payante supplémentaire (Plesk, cPanel, sauvegarde avancée, IP additionnelle) :
 > l'application n'en a pas besoin.
@@ -61,6 +64,46 @@ Budget de départ : environ **20 €** (domaine pour un an + premier mois de ser
 > Vous vous connecterez ensuite sans mot de passe.
 
 Notez l'**adresse IP** du serveur, par exemple `51.75.12.34` : elle sert plusieurs fois ensuite.
+
+---
+
+## 1 bis. Serveur de remplacement : Contabo (si OVHcloud est en rupture)
+
+| Quoi | Offre | Lien | Prix indicatif* |
+|---|---|---|---|
+| **Serveur** | Contabo — **Cloud VPS 4** : 4 vCPU, 8 Go de RAM, 100 Go SSD, trafic illimité | https://contabo.com/fr/vps/ | ~5,50 € TTC / mois, plus des frais d'installation uniques en paiement mensuel (de l'ordre de 5 €, à vérifier) |
+
+Plus fiable mais plus cher : **DigitalOcean**, Droplet 4 Go (2 vCPU, 80 Go) à 24 $ / mois, facturé à l'heure,
+régions Francfort, Amsterdam ou Londres — https://www.digitalocean.com/pricing/droplets.
+
+**Commande Contabo**
+
+1. https://contabo.com/fr/vps/ → **Cloud VPS 4** → « Sélectionner ».
+2. Durée **1 mois** ; région **European Union** ; image **Ubuntu 24.04** ; un **mot de passe root** solide ;
+   aucune option payante.
+3. Créez le compte et payez. L'e-mail de livraison donne l'**adresse IP** (souvent sous quelques heures ;
+   une vérification d'identité peut être demandée pour une première commande).
+
+**Créer l'utilisateur `ubuntu`** (le reste du guide l'utilise ; chez Contabo on reçoit seulement `root`).
+Depuis PowerShell :
+
+```powershell
+ssh root@<IP-du-serveur>
+```
+
+puis, sur le serveur :
+
+```bash
+adduser --gecos "" ubuntu            # choisir un mot de passe
+usermod -aG sudo ubuntu
+mkdir -p /home/ubuntu/.ssh
+cp ~/.ssh/authorized_keys /home/ubuntu/.ssh/ 2>/dev/null || true
+chown -R ubuntu:ubuntu /home/ubuntu/.ssh
+exit
+```
+
+Ensuite, suivez le guide normalement à partir de l'étape 2 (le domaine reste chez OVHcloud : l'enregistrement
+**A** pointe simplement vers l'IP Contabo), en vous connectant avec `ssh ubuntu@<IP-du-serveur>`.
 
 ---
 
