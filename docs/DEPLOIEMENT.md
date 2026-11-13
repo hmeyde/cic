@@ -57,7 +57,7 @@ de pointe) et support moins réactif que les grands hébergeurs.
    Pour une première commande, une **vérification d'identité** peut être demandée : répondez vite, le serveur
    n'est livré qu'après.
 
-Notez l'**adresse IP**, par exemple `51.75.12.34` : elle sert plusieurs fois ensuite.
+Notez l'**adresse IP** (dans l'e-mail Contabo ou sur https://my.contabo.com) : partout dans ce guide, remplacez `VOTRE_IP` par cette adresse (par exemple `ssh root@185.123.45.67`).
 
 ### 1.2 Le domaine
 
@@ -70,7 +70,7 @@ Contabo ne fournit que le compte `root` ; la suite du guide utilise un utilisate
 PowerShell sur votre PC :
 
 ```powershell
-ssh root@51.75.12.34
+ssh root@VOTRE_IP
 ```
 
 (Répondez `yes` à la question sur l'empreinte, puis saisissez le mot de passe root.) Sur le serveur :
@@ -84,7 +84,7 @@ exit
 > **Clé SSH (conseillé, pour ne plus taper de mot de passe)** — dans PowerShell :
 > ```powershell
 > ssh-keygen -t ed25519          # Entrée trois fois
-> type $HOME\.ssh\id_ed25519.pub | ssh ubuntu@51.75.12.34 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+> type $HOME\.ssh\id_ed25519.pub | ssh ubuntu@VOTRE_IP "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
 > ```
 
 ---
@@ -142,7 +142,7 @@ HTTPS ne peut pas être obtenu.
 Connectez-vous depuis PowerShell (remplacez par votre IP) :
 
 ```powershell
-ssh ubuntu@51.75.12.34
+ssh ubuntu@VOTRE_IP
 ```
 
 Toutes les commandes suivantes se tapent **sur le serveur**.
@@ -164,7 +164,7 @@ sudo ufw --force enable
 exit
 ```
 
-Reconnectez-vous (`ssh ubuntu@51.75.12.34`) pour que le groupe `docker` soit pris en compte, puis
+Reconnectez-vous (`ssh ubuntu@VOTRE_IP`) pour que le groupe `docker` soit pris en compte, puis
 vérifiez : `docker ps` doit répondre sans erreur.
 
 ### 4.2 Autoriser le serveur à lire le dépôt GitHub (clé de déploiement)
@@ -316,7 +316,7 @@ docker compose cp sauvegarde:/sauvegardes ./sauvegardes
 
 ```powershell
 # sur votre PC
-scp -r ubuntu@51.75.12.34:cic/sauvegardes .
+scp -r ubuntu@VOTRE_IP:cic/sauvegardes .
 ```
 
 ### Commandes utiles

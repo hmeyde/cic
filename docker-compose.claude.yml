@@ -1,0 +1,27 @@
+# Lance Claude Code dans un conteneur isolé, avec une base PostgreSQL à côté.
+# Claude ne voit que ce dossier : ni tes fichiers Windows, ni Docker.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: cic
+      POSTGRES_USER: cic
+      POSTGRES_PASSWORD: cic
+
+  claude:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace          # le projet, et rien d'autre
+      - claude-home:/home/dev  # connexion Claude, config git, cache Maven
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/cic
+      SPRING_DATASOURCE_USERNAME: cic
+      SPRING_DATASOURCE_PASSWORD: cic
+    depends_on:
+      - db
+
+volumes:
+  claude-home:

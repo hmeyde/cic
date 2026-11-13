@@ -1,0 +1,18 @@
+# Conteneur isolé pour faire tourner Claude Code sur le projet CIC.
+# Il ne voit que le dossier du projet (monté dans /workspace).
+FROM eclipse-temurin:25-jdk
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Utilisateur non root : Claude Code refuse le mode sans permission en root.
+RUN useradd -m dev
+USER dev
+
+# Installateur officiel de Claude Code
+RUN curl -fsSL https://claude.ai/install.sh | bash
+ENV PATH="/home/dev/.local/bin:${PATH}"
+
+WORKDIR /workspace
+CMD ["sleep", "infinity"]
