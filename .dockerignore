@@ -1,0 +1,19 @@
+# Contexte de build minimal : ni secrets, ni artefacts locaux, ni outillage.
+.git
+.gitignore
+.idea
+.vscode
+.claude
+.prompts
+target
+docs
+scripts
+.env
+*.env
+.env.*
+Dockerfile*
+docker-compose*.yml
+Caddyfile
+*.md
+*.log
+run-prompts.sh

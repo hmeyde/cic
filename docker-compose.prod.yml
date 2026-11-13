@@ -1,0 +1,82 @@
+# Déploiement de CIC : application + PostgreSQL + Caddy (HTTPS).
+# Aucun secret ici : tout vient du fichier .env (non versionné), à créer depuis .env.example.
+#   cp .env.example .env   # puis remplacer chaque valeur A_CHANGER
+#   docker compose up -d --build
+# (.env fixe COMPOSE_FILE=docker-compose.prod.yml ; docker-compose.yml reste la base locale de développement.)
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-cic}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME manquant dans .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD manquant dans .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [interne]
+
+  app:
+    build: .
+    image: cic:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-cic}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      # Variables lues par le profil prod (mêmes valeurs).
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-cic}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Derrière Caddy : HTTPS vu par l'application, cookie de session sécurisé, journaux JSON.
+      SERVER_FORWARD_HEADERS_STRATEGY: native
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "true"
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+      CIC_BO_ADMIN_IDENTIFIANT: ${CIC_BO_ADMIN_IDENTIFIANT:-admin}
+      CIC_BO_ADMIN_MOT_DE_PASSE: ${CIC_BO_ADMIN_MOT_DE_PASSE:?CIC_BO_ADMIN_MOT_DE_PASSE manquant dans .env}
+      CIC_BO_ANALYSTE_IDENTIFIANT: ${CIC_BO_ANALYSTE_IDENTIFIANT:-analyste}
+      CIC_BO_ANALYSTE_MOT_DE_PASSE: ${CIC_BO_ANALYSTE_MOT_DE_PASSE:?CIC_BO_ANALYSTE_MOT_DE_PASSE manquant dans .env}
+      CIC_BO_RECOUVREMENT_IDENTIFIANT: ${CIC_BO_RECOUVREMENT_IDENTIFIANT:-recouvrement}
+      CIC_BO_RECOUVREMENT_MOT_DE_PASSE: ${CIC_BO_RECOUVREMENT_MOT_DE_PASSE:?CIC_BO_RECOUVREMENT_MOT_DE_PASSE manquant dans .env}
+      CIC_BO_ASSOCIE_IDENTIFIANT: ${CIC_BO_ASSOCIE_IDENTIFIANT:-associe}
+      CIC_BO_ASSOCIE_MOT_DE_PASSE: ${CIC_BO_ASSOCIE_MOT_DE_PASSE:?CIC_BO_ASSOCIE_MOT_DE_PASSE manquant dans .env}
+    volumes:
+      - justificatifs:/data   # justificatifs et autorisations signées, hors de l'image
+    expose:
+      - "8080"                # joignable par Caddy seulement, jamais publié sur l'hôte
+    networks: [interne]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      CIC_DOMAINE: ${CIC_DOMAINE:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data      # certificats : à conserver pour éviter les limites de Let's Encrypt
+      - caddy_config:/config
+    networks: [interne]
+
+volumes:
+  pgdata:
+  justificatifs:
+  caddy_data:
+  caddy_config:
+
+networks:
+  interne:

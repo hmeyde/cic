@@ -1,0 +1,22 @@
+# Caddy : terminaison HTTPS devant l'application.
+# CIC_DOMAINE = nom de domaine public -> certificat Let's Encrypt automatique (ports 80 et 443 ouverts).
+# CIC_DOMAINE = localhost (par défaut) -> certificat de l'autorité interne de Caddy, pour un essai local.
+{$CIC_DOMAINE:localhost} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Les métriques restent internes ; seule la santé est exposée.
+	@actuator {
+		path /actuator/*
+		not path /actuator/health
+	}
+	respond @actuator 404
+
+	reverse_proxy app:8080
+}
