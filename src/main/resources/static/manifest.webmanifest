@@ -1,15 +1,26 @@
 {
+  "id": "/",
   "name": "CIC — Crédit Instantané à la Consommation",
   "short_name": "CIC",
   "description": "Téléphones et électroménager à crédit, remboursés sur le salaire, sans intérêt.",
   "lang": "fr",
   "dir": "auto",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#0b6e4f",
+  "categories": ["finance", "shopping"],
   "icons": [
-    { "src": "/img/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "/img/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icone-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/img/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/img/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Espace client", "short_name": "Client", "url": "/client", "icons": [{ "src": "/img/icone-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Catalogue", "url": "/client/catalogue", "icons": [{ "src": "/img/icone-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }

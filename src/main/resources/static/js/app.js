@@ -6,3 +6,10 @@ document.addEventListener("htmx:configRequest", function (event) {
         event.detail.headers[header.content] = token.content;
     }
 });
+
+// Service worker : nécessaire pour l'installation de l'application (PWA) et la page hors ligne.
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    });
+}
