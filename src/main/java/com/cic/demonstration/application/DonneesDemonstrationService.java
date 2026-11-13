@@ -74,14 +74,14 @@ public class DonneesDemonstrationService {
         this.taches = taches;
     }
 
-    /** Charge les données de démonstration si elles ne le sont pas déjà. */
-    public void chargerSiAbsentes() {
+    /** Charge les données de démonstration si elles ne le sont pas déjà ; {@code false} si le chargement a échoué. */
+    public boolean chargerSiAbsentes() {
         Simulation simulation = new Simulation(horloge);
         LocalDate j = simulation.aujourdhui();
         List<ProfilClient> profils = profils(j);
         if (parcours.clientExiste(profils.getFirst())) {
             LOG.info("Données de démonstration déjà chargées");
-            return;
+            return true;
         }
         LOG.info("Chargement des données de démonstration : {} jours d'historique rejoués", JOURS_D_HISTORIQUE);
         long debut = System.nanoTime();
@@ -90,11 +90,12 @@ public class DonneesDemonstrationService {
             taches.planifier(simulation, j.minusDays(JOURS_D_HISTORIQUE));
             simulation.derouler();
         } catch (RuntimeException e) {
-            LOG.error("Chargement des données de démonstration interrompu : recréer la base pour recommencer", e);
-            return;
+            LOG.error("Chargement des données de démonstration interrompu : réinitialiser la démonstration pour recommencer", e);
+            return false;
         }
         LOG.info("Données de démonstration chargées en {} s : {} clients fictifs", (System.nanoTime() - debut) / 1_000_000_000,
                 profils.size());
+        return true;
     }
 
     // --- Clients fictifs -----------------------------------------------------------------------------

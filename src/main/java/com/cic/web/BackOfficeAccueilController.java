@@ -1,5 +1,6 @@
 package com.cic.web;
 
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,12 @@ class BackOfficeAccueilController {
 
     private static final String PREFIXE_ROLE = "ROLE_";
 
+    private final boolean demonstration;
+
+    BackOfficeAccueilController(Environment environment) {
+        this.demonstration = environment.matchesProfiles("demo");
+    }
+
     @GetMapping({"/bo", "/bo/"})
     String accueil(Authentication authentication, Model model) {
         model.addAttribute("identifiant", authentication.getName());
@@ -21,6 +28,7 @@ class BackOfficeAccueilController {
                 .map(a -> a.substring(PREFIXE_ROLE.length()))
                 .findFirst()
                 .orElse(""));
+        model.addAttribute("demonstration", demonstration);
         return "bo/accueil";
     }
 }

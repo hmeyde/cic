@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{bo.demonstration.titre-page}">Réinitialiser la démo — CIC</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-reinitialisation">
+        <h1 id="titre-reinitialisation" th:text="#{bo.demonstration.titre}">Réinitialiser la démo</h1>
+        <p class="alerte alerte--erreur" role="alert" th:text="#{bo.demonstration.avertissement}">
+            Toutes les données saisies depuis le chargement de la démonstration seront effacées.</p>
+        <p th:text="#{bo.demonstration.explication}">La base revient à son état initial.</p>
+        <form method="post" th:action="@{/bo/demonstration/reinitialisation}">
+            <button type="submit" class="bouton bouton--principal" th:text="#{bo.demonstration.confirmer}">Réinitialiser maintenant</button>
+            <a class="bouton bouton--contour" th:href="@{/bo}" th:text="#{bo.demonstration.annuler}">Annuler</a>
+        </form>
+    </section>
+</main>
+</body>
+</html>

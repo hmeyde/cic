@@ -98,6 +98,7 @@ public class SecurityConfig {
                 .requestMatchers("/bo/pilotage", "/bo/pilotage/**").hasAnyRole("ASSOCIE", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/bo/inscriptions").hasAnyRole("ASSOCIE", "ADMIN")
                 .requestMatchers("/bo/inscriptions", "/bo/inscriptions/**").hasRole("ADMIN")
+                .requestMatchers("/bo/demonstration", "/bo/demonstration/**").hasRole("ADMIN")
                 .requestMatchers("/bo", "/bo/**").hasAnyRole(ROLES_BACK_OFFICE)
                 .anyRequest().permitAll()
             )

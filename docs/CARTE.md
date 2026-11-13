@@ -1,6 +1,6 @@
 # Carte du projet CIC
 
-Générée automatiquement depuis le code (`e1de6e2`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`f4a2422`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.cic.*`)
 
@@ -13,7 +13,7 @@ Générée automatiquement depuis le code (`e1de6e2`). Sert à se repérer vite 
 | `config` (5) | - | - |
 | `contrat` (60) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
 | `demande` (100) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
-| `demonstration` (14) | adapter.in adapter.in.demarrage adapter.out adapter.out.horloge adapter.out.image application domain | DonneesDemonstrationService, Simulation |
+| `demonstration` (21) | adapter.in adapter.in.demarrage adapter.in.web adapter.out adapter.out.base adapter.out.demarrage adapter.out.horloge adapter.out.image application domain | DonneesDemonstrationService, ReinitialisationDemonstrationController, ReinitialisationDemonstrationService, Simulation |
 | `identite` (77) | adapter.in adapter.in.web adapter.out adapter.out.code adapter.out.persistence adapter.out.stockage application domain | Client, ClientJpaRepository, ClientPersistenceAdapter, ClientRepository, ClientService, CodeConnexionJpaRepository, CodeConnexionPersistenceAdapter, CodeConnexionRepository, CompteBackOfficeService, ConnexionBackOfficeController, ConnexionClientController, ConnexionClientService |
 | `inscription` (17) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | Inscription, InscriptionController, InscriptionJpaRepository, InscriptionPersistenceAdapter, InscriptionRepository, InscriptionsBackOfficeController, InscriptionService |
 | `notification` (6) | adapter.out adapter.out.journal domain | Canal, Message, Notification |
@@ -51,6 +51,7 @@ Générée automatiquement depuis le code (`e1de6e2`). Sert à se repérer vite 
 | `PaiementsBackOfficeController` (paiement) | `GET /bo/paiements`, `POST /bo/paiements` |
 | `ProduitBackOfficeController` (catalogue) | `GET /bo/produits`, `GET /bo/produits/nouveau`, `POST /bo/produits`, `GET /bo/produits/{id}`, `POST /bo/produits/{id}`, `POST /bo/produits/{id}/disponibilite` |
 | `RecouvrementBackOfficeController` (recouvrement) | `GET /bo/recouvrement`, `GET /bo/recouvrement/dossiers/{id}`, `POST /bo/recouvrement/dossiers/{id}/notes`, `POST /bo/recouvrement/dossiers/{id}/regularisation`, `POST /bo/recouvrement/dossiers/{id}/recouvrement`, `POST /bo/recouvrement/dossiers/{id}/solde` |
+| `ReinitialisationDemonstrationController` (demonstration) | `GET /bo/demonstration/reinitialisation`, `POST /bo/demonstration/reinitialisation` |
 | `TableauDeBordController` (pilotage) | `GET /bo/pilotage` |
 
 ## Migrations Flyway
@@ -103,4 +104,4 @@ Générée automatiquement depuis le code (`e1de6e2`). Sert à se repérer vite 
 
 ## Tests
 
-- 114 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 116 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

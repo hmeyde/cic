@@ -13,6 +13,8 @@
             <span th:if="${!#strings.isEmpty(role)}" class="etiquette"
                   th:text="#{'bo.role.' + ${role}}">Administrateur</span>
         </p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Démonstration réinitialisée.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
         <nav th:if="${role == 'ADMIN' or role == 'ANALYSTE' or role == 'RECOUVREMENT' or role == 'ASSOCIE'}" aria-labelledby="titre-menu-bo">
             <h2 id="titre-menu-bo" th:text="#{bo.menu.titre}">Gestion</h2>
             <ul class="liens-bo">
@@ -29,6 +31,9 @@
                 <li th:if="${role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/produits}" th:text="#{bo.produits.titre}">Produits</a></li>
             </ul>
         </nav>
+        <p th:if="${demonstration and role == 'ADMIN'}">
+            <a class="bouton bouton--contour" th:href="@{/bo/demonstration/reinitialisation}" th:text="#{bo.demonstration.titre}">Réinitialiser la démo</a>
+        </p>
         <form method="post" th:action="@{/bo/logout}">
             <button type="submit" class="bouton bouton--contour" th:text="#{bo.accueil.deconnexion}">Se déconnecter</button>
         </form>
