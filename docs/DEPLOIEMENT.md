@@ -3,127 +3,109 @@
 Ce guide part de zéro : rien n'est acheté, rien n'est installé. À la fin, l'application tourne sur
 `https://<votre-domaine>` en HTTPS, avec les données de démonstration pour le jury.
 
-Durée : environ **1 h 30** la première fois, dont une bonne partie d'attente (activation du serveur,
+Durée : environ **1 h 30** la première fois, dont une bonne partie d'attente (livraison du serveur,
 propagation du domaine, première compilation).
 
 ---
 
 ## 0. Ce qu'il faut acheter (mon choix pour vous)
 
-| Quoi | Fournisseur et offre | Lien | Prix indicatif* |
-|---|---|---|---|
-| **Serveur (VPS)** | OVHcloud — **VPS-1** : 2 vCores, 4 Go de RAM, 40 Go SSD NVMe, trafic illimité, sauvegarde quotidienne incluse | https://www.ovhcloud.com/fr/vps/ | ~4 € HT / mois |
-| **Nom de domaine** | OVHcloud — un `.com` (par exemple `cic-credit.com`) | https://www.ovhcloud.com/fr/domains/ | ~10 à 15 € / an |
-| **Dépôt du code** | GitHub — dépôt **privé** | https://github.com/new | gratuit |
-
-\* Prix relevés en novembre 2026 sur les pages publiques ; **vérifiez le montant exact au moment de la commande**.
-Budget de départ : environ **20 €** (domaine pour un an + premier mois de serveur).
-
-**Pourquoi ces choix**
-
-- **OVHcloud** : hébergeur français, interface et support en français, serveur et domaine sur le même compte
-  (une seule facture, réglage DNS au même endroit). Paiement par carte bancaire internationale.
-- **VPS-1 avec 4 Go de RAM** : le serveur compile lui-même l'application (Maven dans Docker) ; avec moins de
-  4 Go, la compilation peut échouer. C'est aussi largement suffisant pour la démonstration.
-- **GitHub privé** : le serveur y récupère le code ; privé, car le dépôt contient le code complet du projet.
-
-> **VPS-1 indisponible ?** OVHcloud affiche parfois « VPS-1 est actuellement indisponible ». Essayez d'abord
-> une **autre localisation en Europe** (Gravelines, Roubaix, Strasbourg, Francfort, Varsovie, Londres…) ;
-> sinon le **VPS-2** (4 vCores, 8 Go de RAM, 75 Go NVMe, ~7 € HT / mois) : le reste du guide est identique.
-> Évitez tout modèle à moins de 4 Go de RAM et les localisations hors d'Europe.
->
-> **Si toutes les offres VPS d'OVHcloud sont désactivées**, prenez le serveur chez **Contabo** (section 1 bis)
-> et gardez **le domaine chez OVHcloud** : seule l'étape de commande du serveur change.
-
-> Ne prenez **pas** d'option payante supplémentaire (Plesk, cPanel, sauvegarde avancée, IP additionnelle) :
-> l'application n'en a pas besoin.
-
----
-
-## 1. Créer le compte OVHcloud et commander
-
-1. Créez un compte sur https://www.ovhcloud.com/fr/ (bouton « Mon compte » → « Créer un compte »).
-2. **Commandez le VPS** sur https://www.ovhcloud.com/fr/vps/ :
-   - modèle : **VPS-1** ;
-   - localisation : **France** (Gravelines, Roubaix ou Strasbourg — la plus proche de la Mauritanie parmi
-     les centres européens) ;
-   - système : **Ubuntu 24.04** (sans application préinstallée) ;
-   - clé SSH : facultatif mais conseillé, voir l'encadré ci-dessous ;
-   - durée : **sans engagement** (mensuel).
-3. **Commandez le domaine** sur https://www.ovhcloud.com/fr/domains/ : cherchez le nom voulu, ajoutez le
-   `.com` au panier, sans option (pas d'hébergement web ni d'e-mail).
-4. Payez. Le VPS est livré en quelques minutes à une heure : OVHcloud envoie un **e-mail avec l'adresse IP**
-   du serveur, l'utilisateur (**`ubuntu`**) et un lien pour définir le mot de passe.
-
-> **Clé SSH (conseillé)** — dans PowerShell sur votre PC Windows :
-> ```powershell
-> ssh-keygen -t ed25519          # Entrée trois fois
-> Get-Content $HOME\.ssh\id_ed25519.pub
-> ```
-> Copiez la ligne affichée (`ssh-ed25519 AAAA…`) dans le champ « clé SSH » de la commande du VPS.
-> Vous vous connecterez ensuite sans mot de passe.
-
-Notez l'**adresse IP** du serveur, par exemple `51.75.12.34` : elle sert plusieurs fois ensuite.
-
----
-
-## 1 bis. Serveur de remplacement : Contabo (si OVHcloud est en rupture)
+Tout chez **Contabo** : serveur, domaine et DNS sur **un seul compte**, une seule facture, un seul espace client.
 
 | Quoi | Offre | Lien | Prix indicatif* |
 |---|---|---|---|
-| **Serveur** | Contabo — **Cloud VPS 4** : 4 vCPU, 8 Go de RAM, 100 Go SSD, trafic illimité | https://contabo.com/fr/vps/ | ~5,50 € TTC / mois, plus des frais d'installation uniques en paiement mensuel (de l'ordre de 5 €, à vérifier) |
+| **Serveur (VPS)** | **Cloud VPS 4** : 4 vCPU, 8 Go de RAM, 100 Go SSD, trafic illimité, Europe (Allemagne) | https://contabo.com/fr/vps/ | ~5,50 € TTC / mois + frais d'installation uniques en paiement mensuel (de l'ordre de 5 €) |
+| **Nom de domaine** | un `.com` (par exemple `cic-credit.com`), DNS gratuit inclus | https://contabo.com/fr/domains/ | ~1,99 € / mois (~24 € / an) |
+| **Dépôt du code** | GitHub — dépôt **privé** | https://github.com/new | gratuit |
 
-Plus fiable mais plus cher : **DigitalOcean**, Droplet 4 Go (2 vCPU, 80 Go) à 24 $ / mois, facturé à l'heure,
-régions Francfort, Amsterdam ou Londres — https://www.digitalocean.com/pricing/droplets.
+\* Prix relevés en novembre 2026 sur les pages publiques ; **vérifiez le montant exact au moment de la commande**.
+Budget du premier mois : environ **15 €**.
 
-**Commande Contabo**
+**Pourquoi ces choix**
 
-1. https://contabo.com/fr/vps/ → **Cloud VPS 4** → « Sélectionner ».
-2. Durée **1 mois** ; région **European Union** ; image **Ubuntu 24.04** ; un **mot de passe root** solide ;
-   aucune option payante.
-3. Créez le compte et payez. L'e-mail de livraison donne l'**adresse IP** (souvent sous quelques heures ;
-   une vérification d'identité peut être demandée pour une première commande).
+- **Contabo** : le moins cher pour 8 Go de RAM, centre de données en Europe, offres disponibles. Le domaine
+  ne peut s'y acheter qu'avec un autre produit Contabo : on commande donc le serveur d'abord.
+- **8 Go de RAM** : le serveur compile lui-même l'application (Maven dans Docker) ; en dessous de 4 Go,
+  la compilation peut échouer.
+- **GitHub privé** : le serveur y récupère le code ; privé, car le dépôt contient le code complet du projet.
 
-**Créer l'utilisateur `ubuntu`** (le reste du guide l'utilise ; chez Contabo on reçoit seulement `root`).
-Depuis PowerShell :
+Limites de Contabo, sans gravité pour une démonstration : processeur partagé (parfois plus lent aux heures
+de pointe) et support moins réactif que les grands hébergeurs.
+
+> Plus fiable mais plus cher : **DigitalOcean**, Droplet 4 Go (2 vCPU, 80 Go) à 24 $ / mois, **facturé à
+> l'heure** (on peut ne l'allumer que pendant le challenge), régions Francfort, Amsterdam ou Londres —
+> https://www.digitalocean.com/pricing/droplets. Le reste du guide s'applique aussi.
+
+> Ne prenez **pas** d'option payante supplémentaire (panneau de contrôle, IP additionnelle, sauvegarde
+> automatique, stockage objet) : l'application n'en a pas besoin.
+
+---
+
+## 1. Créer le compte Contabo et commander
+
+### 1.1 Le serveur
+
+1. Allez sur https://contabo.com/fr/vps/ → **Cloud VPS 4** → **« Sélectionner »**.
+2. Choisissez :
+   - durée : **1 mois** ;
+   - région : **European Union** ;
+   - image : **Ubuntu 24.04** ;
+   - **mot de passe root** : un mot de passe solide, à garder dans un gestionnaire de mots de passe ;
+   - aucune option payante.
+3. Créez le compte (e-mail, coordonnées, **pays : Mauritanie**) et payez par carte bancaire internationale.
+4. Contabo envoie un **e-mail de livraison avec l'adresse IP** du serveur, souvent sous quelques heures.
+   Pour une première commande, une **vérification d'identité** peut être demandée : répondez vite, le serveur
+   n'est livré qu'après.
+
+Notez l'**adresse IP**, par exemple `51.75.12.34` : elle sert plusieurs fois ensuite.
+
+### 1.2 Le domaine
+
+Une fois le serveur commandé : https://contabo.com/fr/domains/ (ou, dans l'espace client, la rubrique
+**Domaines**). Cherchez le nom voulu, commandez le `.com`, sans option.
+
+### 1.3 Créer l'utilisateur `ubuntu` sur le serveur
+
+Contabo ne fournit que le compte `root` ; la suite du guide utilise un utilisateur `ubuntu`. Depuis
+PowerShell sur votre PC :
 
 ```powershell
-ssh root@<IP-du-serveur>
+ssh root@51.75.12.34
 ```
 
-puis, sur le serveur :
+(Répondez `yes` à la question sur l'empreinte, puis saisissez le mot de passe root.) Sur le serveur :
 
 ```bash
 adduser --gecos "" ubuntu            # choisir un mot de passe
 usermod -aG sudo ubuntu
-mkdir -p /home/ubuntu/.ssh
-cp ~/.ssh/authorized_keys /home/ubuntu/.ssh/ 2>/dev/null || true
-chown -R ubuntu:ubuntu /home/ubuntu/.ssh
 exit
 ```
 
-Ensuite, suivez le guide normalement à partir de l'étape 2 (le domaine reste chez OVHcloud : l'enregistrement
-**A** pointe simplement vers l'IP Contabo), en vous connectant avec `ssh ubuntu@<IP-du-serveur>`.
+> **Clé SSH (conseillé, pour ne plus taper de mot de passe)** — dans PowerShell :
+> ```powershell
+> ssh-keygen -t ed25519          # Entrée trois fois
+> type $HOME\.ssh\id_ed25519.pub | ssh ubuntu@51.75.12.34 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+> ```
 
 ---
 
 ## 2. Faire pointer le domaine vers le serveur
 
-Dans l'espace client OVHcloud : **Web Cloud → Noms de domaine → votre domaine → Zone DNS**.
+Dans l'espace client Contabo (https://my.contabo.com) : rubrique **DNS** (gestion des zones DNS).
 
-1. Supprimez les enregistrements **A** et **AAAA** existants pour le domaine nu (champ « sous-domaine » vide)
-   et pour `www`, s'il y en a (OVHcloud en crée vers une page d'attente).
-2. **Ajouter une entrée → A** :
-   - sous-domaine : *vide* (pour `cic-credit.com`) ;
-   - cible : **l'adresse IP du VPS** ;
+1. **Créez une zone DNS** pour votre domaine si elle n'existe pas encore.
+2. Ajoutez (ou modifiez) un enregistrement de type **A** :
+   - nom : *vide* ou `@` (pour `cic-credit.com`) ;
+   - valeur : **l'adresse IP du serveur** ;
    - TTL : par défaut.
-3. Attendez la propagation (de quelques minutes à quelques heures). Vérification depuis PowerShell :
+3. Supprimez tout autre enregistrement **A** ou **AAAA** du domaine nu qui pointerait ailleurs.
+4. Attendez la propagation (de quelques minutes à quelques heures). Vérification depuis PowerShell :
    ```powershell
    nslookup cic-credit.com
    ```
-   La réponse doit afficher l'IP du VPS.
+   La réponse doit afficher l'IP du serveur.
 
-> Vous préférez un sous-domaine (`demo.cic-credit.com`) ? Mettez `demo` dans le champ « sous-domaine » et
+> Vous préférez un sous-domaine (`demo.cic-credit.com`) ? Mettez `demo` comme nom de l'enregistrement et
 > utilisez `demo.cic-credit.com` partout où ce guide écrit « votre domaine ».
 
 **Ne passez pas à l'étape 5 tant que `nslookup` ne renvoie pas la bonne IP** : sans cela, le certificat
@@ -194,7 +176,7 @@ ssh-keygen -t ed25519 -f ~/.ssh/github_cic -N ""
 cat ~/.ssh/github_cic.pub
 ```
 
-Sur GitHub : votre dépôt → **Settings → Deploy keys → Add deploy key**. Titre : `serveur OVH` ; collez la
+Sur GitHub : votre dépôt → **Settings → Deploy keys → Add deploy key**. Titre : `serveur CIC` ; collez la
 ligne affichée ; **laissez « Allow write access » décoché** ; Add key.
 
 Puis, sur le serveur :
@@ -369,16 +351,16 @@ scp -r ubuntu@51.75.12.34:cic/sauvegardes .
   saisissez **jamais de vraies données personnelles**.
 - **Pas de vrais SMS** : l'application journalise les messages au lieu de les envoyer. Un passage en profil
   `prod` avec de vrais clients demande d'abord de brancher un fournisseur SMS.
-- **Après le challenge**, arrêtez le site (`docker compose down`) ou résiliez le VPS dans l'espace client
-  OVHcloud pour ne plus être facturé. Le domaine, lui, se renouvelle chaque année si le renouvellement
-  automatique est actif.
+- **Après le challenge**, arrêtez le site (`docker compose down`) puis, si vous n'en avez plus besoin,
+  **résiliez le serveur et le domaine** dans l'espace client Contabo (https://my.contabo.com) avant la fin
+  du mois payé, pour ne pas être facturé le mois suivant.
 - Pour une exploitation réelle (profil `prod`), voir la section « Profil `prod` » du README : comptes du
   back-office à créer en base, sauvegardes à copier hors du serveur.
 
 ---
 
-*Sources des prix : [OVHcloud VPS](https://www.ovhcloud.com/fr/vps/),
-[blog OVHcloud — gamme VPS 2027](https://blog.ovhcloud.com/en/posts/vps-2027/),
-[OVHcloud noms de domaine](https://www.ovhcloud.com/fr/domains/). Hetzner a été écarté : ses offres
-cloud étaient indiquées « indisponibles » au moment de la rédaction
-([page Hetzner](https://www.hetzner.com/cloud/regular-performance/)).*
+*Sources des prix : [Contabo VPS](https://contabo.com/fr/vps/),
+[Contabo domaines](https://contabo.com/en/domains/),
+[DigitalOcean Droplets](https://www.digitalocean.com/pricing/droplets). Écartés au moment de la rédaction
+(novembre 2026) : OVHcloud (VPS-1 et VPS-2 indisponibles dans toutes les localisations) et Hetzner (offres
+cloud indiquées « indisponibles », [page Hetzner](https://www.hetzner.com/cloud/regular-performance/)).*
