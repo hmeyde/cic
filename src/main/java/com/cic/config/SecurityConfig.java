@@ -42,6 +42,9 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * des données personnelles, est réservé au rôle ADMIN.
  * Les comptes sont fournis par le module identite (bean {@code UserDetailsService}).
  *
+ * <p>Actuator : {@code /actuator/health} (statut seul, détails réservés à l'ADMIN) et {@code /actuator/info} sont
+ * publics pour les sondes ; les autres endpoints, dont {@code /actuator/metrics}, sont réservés au rôle ADMIN.
+ *
  * <p>Les autres pages restent publiques, dont la pré-inscription ({@code /inscription}). CSRF actif partout ; en-têtes de sécurité par défaut de
  * Spring Security, plus une politique de référent.
  */
@@ -85,6 +88,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
+                // Supervision : statut de santé et info publics (sonde Docker, Caddy) ; le reste d'Actuator, dont les métriques, à l'ADMIN.
+                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+                .requestMatchers("/actuator", "/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/bo/login").permitAll()
                 .requestMatchers("/bo/fournisseurs", "/bo/fournisseurs/**", "/bo/produits", "/bo/produits/**").hasRole("ADMIN")
                 .requestMatchers("/bo/justificatifs", "/bo/justificatifs/**").hasAnyRole("ANALYSTE", "ADMIN")

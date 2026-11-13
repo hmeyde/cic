@@ -29,7 +29,15 @@ management:
         include: health,info,metrics
   endpoint:
     health:
+      # Public : statut seul (UP/DOWN), sans détail. Détails (base, disque) : rôle ADMIN.
       show-details: when-authorized
+      roles: ADMIN
+      # /actuator/health/liveness et /actuator/health/readiness (la readiness inclut la base).
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
 
 server:
   mime-mappings:

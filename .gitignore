@@ -34,3 +34,8 @@ application-secret*.properties
 
 #
 .prompts/
+# Sauvegardes locales de la base (scripts/sauvegarde-base.sh)
+sauvegardes/
+
+# Sauvegardes locales de la base (scripts/sauvegarde-base.sh)
+sauvegardes/

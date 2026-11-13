@@ -54,6 +54,31 @@ services:
       - "8080"                # joignable par Caddy seulement, jamais publié sur l'hôte
     networks: [interne]
 
+  sauvegarde:
+    # Sauvegarde quotidienne de la base (pg_dump, format custom) dans le volume « sauvegardes ».
+    # Une sauvegarde au démarrage, puis chaque jour à SAUVEGARDE_HEURE (UTC) ; rétention configurable.
+    # Sauvegarde immédiate : docker compose exec sauvegarde bash /usr/local/bin/sauvegarde-base.sh
+    # Copie hors du serveur : docker compose cp sauvegarde:/sauvegardes ./sauvegardes
+    image: postgres:17
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["bash", "/usr/local/bin/sauvegarde-base.sh", "--quotidien"]
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-cic}
+      PGUSER: ${DB_USERNAME}
+      PGPASSWORD: ${DB_PASSWORD}
+      SAUVEGARDE_REPERTOIRE: /sauvegardes
+      SAUVEGARDE_HEURE: ${SAUVEGARDE_HEURE:-02:00}
+      SAUVEGARDE_RETENTION_JOURS: ${SAUVEGARDE_RETENTION_JOURS:-14}
+      TZ: UTC
+    volumes:
+      - ./scripts/sauvegarde-base.sh:/usr/local/bin/sauvegarde-base.sh:ro
+      - sauvegardes:/sauvegardes
+    networks: [interne]
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -74,6 +99,7 @@ services:
 
 volumes:
   pgdata:
+  sauvegardes:
   justificatifs:
   caddy_data:
   caddy_config:
