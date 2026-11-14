@@ -107,6 +107,7 @@ class OpenPdfRenduContrat implements RenduContratPdf {
     }
 
     private static void entete(Document doc, ContenuContrat contenu) {
+        doc.add(LogoPdf.image(32));
         Paragraph titre = new Paragraph("CONTRAT DE VENTE À TEMPÉRAMENT", TITRE);
         titre.setAlignment(Element.ALIGN_CENTER);
         doc.add(titre);

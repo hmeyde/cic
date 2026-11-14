@@ -5,14 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0b6e4f">
     <title>Seheli — Hors ligne</title>
+    <link rel="icon" type="image/svg+xml" href="/img/logo/seheli-symbole.svg?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png?v=2">
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
 <main class="contenu">
-    <h1>Pas de connexion</h1>
-    <p>Vérifiez votre connexion Internet puis réessayez.</p>
-    <p lang="ar" dir="rtl">لا يوجد اتصال. تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.</p>
-    <p><a href="/">Réessayer / إعادة المحاولة</a></p>
+    <section class="section conteneur conteneur--etroit">
+        <!-- Page statique bilingue (mise en cache par le service worker) : les deux versions du logo. -->
+        <p class="logo-page">
+            <img class="logo-page__image" src="/img/logo/seheli-logo.svg" width="208" height="64" alt="Logo Seheli">
+        </p>
+        <h1>Pas de connexion</h1>
+        <p>Vérifiez votre connexion Internet puis réessayez.</p>
+        <div lang="ar" dir="rtl">
+            <p class="logo-page">
+                <img class="logo-page__image" src="/img/logo/seheli-logo-arabe.svg" width="176" height="76" alt="شعار سهلي">
+            </p>
+            <p>لا يوجد اتصال. تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.</p>
+        </div>
+        <p><a href="/">Réessayer / إعادة المحاولة</a></p>
+    </section>
 </main>
 </body>
 </html>

@@ -7,6 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-connexion">
+        <p class="logo-page"><th:block th:replace="~{fragments/logo :: logo('logo-page__image', false)}"></th:block></p>
         <h1 id="titre-connexion" th:text="#{bo.connexion.titre}">Espace équipe</h1>
         <p class="texte-doux" th:text="#{bo.connexion.texte}">Connectez-vous avec votre identifiant et votre mot de passe.</p>
 

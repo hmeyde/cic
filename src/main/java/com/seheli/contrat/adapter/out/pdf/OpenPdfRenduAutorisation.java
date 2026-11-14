@@ -98,6 +98,7 @@ class OpenPdfRenduAutorisation implements RenduAutorisationPdf {
     }
 
     private static void entete(Document doc, ContenuAutorisation contenu) {
+        doc.add(LogoPdf.image(26));
         Paragraph titre = new Paragraph("AUTORISATION DE PRÉLÈVEMENT", TITRE);
         titre.setAlignment(Element.ALIGN_CENTER);
         doc.add(titre);

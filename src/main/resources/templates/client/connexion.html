@@ -7,6 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-connexion">
+        <p class="logo-page"><th:block th:replace="~{fragments/logo :: logo('logo-page__image', false)}"></th:block></p>
         <h1 id="titre-connexion" th:text="#{client.connexion.titre}">Mon espace client</h1>
         <p class="texte-doux" th:text="#{client.connexion.texte}">Saisissez votre numéro de téléphone : nous vous envoyons un code de connexion par SMS.</p>
 

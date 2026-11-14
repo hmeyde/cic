@@ -37,5 +37,6 @@ class OpenPdfRenduBonCommandeTest {
         assertThat(texte).contains("BON DE COMMANDE", "BC-2026-000001", "Mauritel Store", "Galaxy A35",
                 "SEH-2026-000001", "20 000 MRU", "1 600 MRU", "18 400 MRU", "15/11/2026", "Seheli", "Pour Seheli");
         assertThat(texte).doesNotContain("CIC");
+        LogoPdfAssertions.premierePagePorteLeLogo(pdf);
     }
 }

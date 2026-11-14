@@ -63,6 +63,11 @@ class OpenPdfRenduContratTest {
     }
 
     @Test
+    void le_contrat_porte_le_logo_en_tete() throws IOException {
+        LogoPdfAssertions.premierePagePorteLeLogo(rendu.rendre(contenu(exemple())));
+    }
+
+    @Test
     void le_contrat_porte_les_parties_et_les_montants_fixes() throws IOException {
         String texte = texte(rendu.rendre(contenu(exemple())));
 

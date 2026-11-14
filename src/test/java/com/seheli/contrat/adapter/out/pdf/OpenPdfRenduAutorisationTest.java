@@ -94,6 +94,11 @@ class OpenPdfRenduAutorisationTest {
     }
 
     @Test
+    void l_autorisation_porte_le_logo_en_tete() throws IOException {
+        LogoPdfAssertions.premierePagePorteLeLogo(rendu.rendre(contenu(Optional.empty())));
+    }
+
+    @Test
     void tient_sur_une_page() throws IOException {
         PdfReader reader = new PdfReader(rendu.rendre(contenu(Optional.empty())));
         try {

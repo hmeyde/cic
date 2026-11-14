@@ -53,6 +53,7 @@ class OpenPdfRenduBonCommande implements RenduBonCommandePdf {
             doc.addCreator(acheteur);
             doc.open();
 
+            doc.add(LogoPdf.image(32));
             Paragraph titre = new Paragraph("BON DE COMMANDE", TITRE);
             titre.setAlignment(Element.ALIGN_CENTER);
             doc.add(titre);

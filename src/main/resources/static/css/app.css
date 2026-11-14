@@ -89,6 +89,13 @@ a { color: var(--couleur-primaire); }
     font-size: 1.15rem;
 }
 .entete__nav { display: flex; align-items: center; gap: .75rem; }
+/* Logo (docs/MARQUE.md) : hauteur minimale 24 px en latin, 28 px en arabe ; zone de protection assurée par les marges. */
+.marque { min-block-size: 44px; }           /* cible tactile minimale */
+.marque__logo { display: block; block-size: 2rem; inline-size: auto; }
+[dir="rtl"] .marque__logo { block-size: 2.4rem; }
+.logo-page { margin-block: .5rem 1.25rem; text-align: center; }
+.logo-page__image { display: inline-block; block-size: 3.5rem; inline-size: auto; }
+[dir="rtl"] .logo-page__image { block-size: 4rem; }
 .langue {
     display: inline-flex;
     align-items: center;

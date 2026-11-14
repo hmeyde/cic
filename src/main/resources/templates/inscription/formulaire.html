@@ -7,6 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-inscription">
+        <p class="logo-page"><th:block th:replace="~{fragments/logo :: logo('logo-page__image', false)}"></th:block></p>
         <h1 id="titre-inscription" th:text="#{inscription.titre}">Je m'inscris</h1>
         <p class="texte-doux" th:text="#{inscription.texte}">Laissez-nous vos coordonnées : un conseiller Seheli vous rappelle pour préparer votre demande.</p>
 

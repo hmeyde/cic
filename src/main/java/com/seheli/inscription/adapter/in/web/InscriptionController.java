@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.seheli.inscription.application.InscriptionService;
 import com.seheli.inscription.application.SaisieInscription;
@@ -44,6 +45,11 @@ class InscriptionController {
 
     @GetMapping(CHEMIN)
     String formulaire(Model model) {
+        // Open Graph : aperçu (titre, description, logo) quand le lien est partagé ; URL absolues exigées.
+        model.addAttribute("ogTitre", "inscription.titre-page");
+        model.addAttribute("ogUrl", ServletUriComponentsBuilder.fromCurrentContextPath().path(CHEMIN).toUriString());
+        model.addAttribute("ogImage",
+                ServletUriComponentsBuilder.fromCurrentContextPath().path("/img/og-seheli.png").toUriString());
         return afficher(model, SaisieInscription.vide());
     }
 

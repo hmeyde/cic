@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  Logo Seheli (docs/MARQUE.md) : version latine en français, version arabe en arabe.
+  « decoratif » : true quand le nom est déjà porté par le lien ou le titre voisin (alt vide).
+  Les dimensions intrinsèques évitent le décalage de mise en page ; la taille affichée vient du CSS.
+*/-->
+<th:block th:fragment="logo(classe, decoratif)">
+    <img th:if="${#locale.language == 'ar'}" th:class="${classe}" th:src="@{/img/logo/seheli-logo-arabe.svg}"
+         width="176" height="76" th:alt="${decoratif} ? '' : #{logo.alt}">
+    <img th:unless="${#locale.language == 'ar'}" th:class="${classe}" th:src="@{/img/logo/seheli-logo.svg}"
+         width="208" height="64" th:alt="${decoratif} ? '' : #{logo.alt}">
+</th:block>
+</body>
+</html>
