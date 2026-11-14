@@ -46,7 +46,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * publics pour les sondes ; les autres endpoints, dont {@code /actuator/metrics}, sont réservés au rôle ADMIN.
  *
  * <p>Les autres pages restent publiques, dont la pré-inscription ({@code /inscription}). CSRF actif partout ; en-têtes de sécurité par défaut de
- * Spring Security, plus une politique de référent.
+ * Spring Security, plus une politique de référent et une politique de sécurité du contenu ({@link #POLITIQUE_CONTENU}).
  */
 @Configuration
 @EnableWebSecurity
@@ -125,7 +125,16 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Politique de sécurité du contenu : scripts, styles, images et formulaires de l'application seulement ;
+     * aucun script ni style en ligne (les gabarits n'en ont pas), aucun objet embarqué, aucun cadre.
+     */
+    static final String POLITIQUE_CONTENU = "default-src 'self'; script-src 'self'; style-src 'self'; "
+            + "img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; "
+            + "base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+
     private static void entetes(HeadersConfigurer<HttpSecurity> headers) {
-        headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN));
+        headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN))
+                .contentSecurityPolicy(csp -> csp.policyDirectives(POLITIQUE_CONTENU));
     }
 }

@@ -14,6 +14,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" th:content="#{app.description}">
     <meta name="theme-color" content="#0b6e4f">
+    <!--/* CSP sans style en ligne : htmx n'injecte pas sa feuille d'indicateurs (aucun indicateur utilisé). */-->
+    <meta name="htmx-config" content='{"includeIndicatorStyles":false}'>
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:replace="${titre}">CIC</title>
