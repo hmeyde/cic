@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: ./mvnw verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Java 25 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Docker est disponible sur ubuntu-latest : les tests d'intégration
+      # démarrent PostgreSQL via Testcontainers (aucune base à déclarer ici).
+      - name: Build et tests
+        run: ./mvnw -B -ntp verify
+
+      - name: Rapports de tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-surefire
+          path: target/surefire-reports/
+          retention-days: 7
