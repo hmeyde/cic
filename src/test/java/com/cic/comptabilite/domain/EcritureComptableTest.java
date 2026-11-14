@@ -20,7 +20,7 @@ class EcritureComptableTest {
     private static final Instant LE = Instant.parse("2026-11-13T10:00:00Z");
     private static final UUID DOSSIER = UUID.randomUUID();
     private static final UUID CONTRAT = UUID.randomUUID();
-    private static final String NUMERO = "CIC-2026-000001";
+    private static final String NUMERO = "SEH-2026-000001";
 
     /** Solde débiteur (positif) ou créditeur (négatif) de chaque compte, en ouguiyas. */
     private static Map<Compte, Long> soldes(List<EcritureComptable> ecritures) {
@@ -68,7 +68,7 @@ class EcritureComptableTest {
         assertThat(e.sourceId()).isEqualTo(paiement);
         assertThat(e.date()).isEqualTo(JOUR);
         assertThat(e.demandeId()).contains(DOSSIER);
-        assertThat(e.libelle()).isEqualTo("Apport du contrat CIC-2026-000001");
+        assertThat(e.libelle()).isEqualTo("Apport du contrat SEH-2026-000001");
         assertThat(e.lignes()).containsExactly(LigneEcriture.debit(Compte.BANQUE, Montant.de(8_320)),
                 LigneEcriture.credit(Compte.CLIENTS_APPORTS, Montant.de(8_320)));
         assertThat(e.montant()).isEqualTo(Montant.de(8_320));

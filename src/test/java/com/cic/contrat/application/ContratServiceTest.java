@@ -16,6 +16,7 @@ import com.cic.commun.domain.Montant;
 import com.cic.contrat.domain.Contrat;
 import com.cic.contrat.domain.ContratDejaEtabliException;
 import com.cic.contrat.domain.Echeance;
+import com.cic.contrat.domain.Echeancier;
 import com.cic.contrat.domain.FinContratDepasseeException;
 import com.cic.contrat.domain.Prix;
 import com.cic.contrat.domain.StatutAutorisation;
@@ -53,7 +54,7 @@ class ContratServiceTest {
 
         Contrat contrat = service.etablir(exemple(demandeId, 25, Optional.empty()));
 
-        assertThat(contrat.numero()).isEqualTo("CIC-2026-000001");
+        assertThat(contrat.numero()).isEqualTo("SEH-2026-000001");
         assertThat(contrat.demandeId()).isEqualTo(demandeId);
         assertThat(contrat.etabliLe()).isEqualTo(ACCEPTE_LE);
         assertThat(contrat.prix().prixVente()).isEqualTo(Montant.de(20_800));
@@ -130,7 +131,19 @@ class ContratServiceTest {
 
     @Test
     void numero_lisible() {
-        assertThat(ContratService.numero(LocalDate.of(2026, 11, 13), 42)).isEqualTo("CIC-2026-000042");
+        assertThat(ContratService.numero(LocalDate.of(2026, 11, 13), 42)).isEqualTo("SEH-2026-000042");
+    }
+
+    @Test
+    void retrouve_aussi_un_contrat_etabli_avant_le_changement_de_marque() {
+        Contrat ancien = Contrat.etablir("CIC-2026-000007", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+                UUID.randomUUID(), "Galaxy A35",
+                new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
+                Montant.de(8_320), Echeancier.planifier(Montant.de(12_480), 6, LocalDate.of(2026, 11, 20), 25,
+                        Optional.empty()), ACCEPTE_LE);
+        contrats.enregistrer(ancien);
+
+        assertThat(service.parChiffresDuNumero("2026000007")).contains(ancien);
     }
 
     @Test

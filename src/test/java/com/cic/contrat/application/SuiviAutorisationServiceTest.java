@@ -205,7 +205,7 @@ class SuiviAutorisationServiceTest {
         assertThat(service.liste(Optional.empty(), 100)).hasSize(2);
         assertThat(service.liste(Optional.of(StatutAutorisation.SIGNEE), 100)).singleElement().satisfies(l -> {
             assertThat(l.autorisation().id()).isEqualTo(signee.id());
-            assertThat(l.numeroContrat()).startsWith("CIC-2026-");
+            assertThat(l.numeroContrat()).startsWith("SEH-2026-");
             assertThat(l.designation()).isEqualTo("Galaxy A35");
             assertThat(l.client()).isEqualTo("Mohamed Ould Ahmed");
         });

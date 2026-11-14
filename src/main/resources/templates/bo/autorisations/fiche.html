@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{bo.autorisation.titre-page}">Autorisation de prélèvement — Back-office CIC</title>
+    <title th:text="#{bo.autorisation.titre-page}">Autorisation de prélèvement — Back-office Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -12,7 +12,7 @@
             ·
             <a th:href="@{/bo/dossiers/{id}(id=${a.demandeId()})}" th:text="#{bo.autorisation.voir-dossier}">Voir le dossier</a>
         </p>
-        <h1 id="titre-autorisation" th:text="#{bo.autorisation.titre(${a.numeroContrat()})}">Autorisation de prélèvement — CIC-2026-000001</h1>
+        <h1 id="titre-autorisation" th:text="#{bo.autorisation.titre(${a.numeroContrat()})}">Autorisation de prélèvement — SEH-2026-000001</h1>
         <p>
             <span class="etiquette etiquette--sans-marge" th:text="#{'bo.autorisation.statut.' + ${a.statut().name()}}">À signer</span>
             <span class="texte-doux" dir="auto" th:text="#{bo.autorisation.emise(${a.emiseLe()}, ${a.statutChangeLe()})}">Émise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>

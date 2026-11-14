@@ -53,13 +53,14 @@ class OpenPdfRenduContrat implements RenduContratPdf {
     @Override
     public byte[] rendre(ContenuContrat contenu) {
         Contrat c = contenu.contrat();
+        String vendeur = contenu.raisonSociale();
         ByteArrayOutputStream sortie = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
         try {
             PdfWriter.getInstance(doc, sortie);
             doc.addTitle("Contrat de vente à tempérament " + c.numero());
-            doc.addAuthor("CIC");
-            doc.addCreator("CIC");
+            doc.addAuthor(vendeur);
+            doc.addCreator(vendeur);
             HeaderFooter pied = new HeaderFooter(new Phrase("Contrat n° " + c.numero() + " — page ", PETIT), true);
             pied.setAlignment(Element.ALIGN_CENTER);
             pied.setBorder(Rectangle.NO_BORDER);
@@ -67,12 +68,12 @@ class OpenPdfRenduContrat implements RenduContratPdf {
             doc.open();
 
             entete(doc, contenu);
-            parties(doc, contenu.acheteur());
+            parties(doc, vendeur, contenu.acheteur());
             article(doc, "Article 1 — Objet",
-                    "CIC vend à l'acheteur, qui l'accepte, le bien suivant : ", c.designationProduit(),
-                    ". CIC achète ce bien auprès de son fournisseur, puis le revend à l'acheteur au prix fixé "
+                    vendeur + " vend à l'acheteur, qui l'accepte, le bien suivant : ", c.designationProduit(),
+                    ". " + vendeur + " achète ce bien auprès de son fournisseur, puis le revend à l'acheteur au prix fixé "
                             + "à l'article 2, payable en partie à la commande et le reste à tempérament.");
-            prix(doc, c);
+            prix(doc, vendeur, c);
             article(doc, "Article 3 — Apport et autorisation de prélèvement",
                     "Au plus tard le ", date(contenu.dateLimiteApport()),
                     ", l'acheteur paie l'apport de " + montant(c.apport())
@@ -81,23 +82,23 @@ class OpenPdfRenduContrat implements RenduContratPdf {
                             + "encaissé ou si l'autorisation n'est pas acceptée à cette date, la vente est annulée "
                             + "de plein droit, sans frais pour l'acheteur.");
             article(doc, "Article 4 — Commande et remise du bien",
-                    "CIC commande le bien au fournisseur dès que l'apport est encaissé et que l'autorisation "
+                    vendeur + " commande le bien au fournisseur dès que l'apport est encaissé et que l'autorisation "
                             + "de prélèvement est acceptée. Le bien est remis à l'acheteur, qui en confirme la "
                             + "réception. La propriété du bien passe à l'acheteur à sa remise.", "", "");
             echeancier(doc, c);
             article(doc, "Article 6 — Retard de paiement",
                     "Aucun intérêt ni aucune pénalité de retard ne sont dus : le prix ne change jamais après "
-                            + "la signature. En cas d'échéance impayée, CIC prévient l'acheteur et présente de "
+                            + "la signature. En cas d'échéance impayée, " + vendeur + " prévient l'acheteur et présente de "
                             + "nouveau le prélèvement. Tant qu'un retard est en cours, l'acheteur ne peut pas faire "
-                            + "de nouvel achat à crédit auprès de CIC. Un retard persistant ouvre une procédure de "
+                            + "de nouvel achat à crédit auprès de " + vendeur + ". Un retard persistant ouvre une procédure de "
                             + "recouvrement amiable.", "", "");
             article(doc, "Article 7 — Données personnelles",
-                    "L'acheteur a consenti à l'usage de ses données personnelles par CIC pour l'étude de sa "
+                    "L'acheteur a consenti à l'usage de ses données personnelles par " + vendeur + " pour l'étude de sa "
                             + "demande, la gestion de ce contrat et le recouvrement des sommes dues. Ses "
                             + "justificatifs sont conservés de façon confidentielle.", "", "");
             article(doc, "Article 8 — Droit applicable",
                     "Le présent contrat est soumis au droit mauritanien.", "", "");
-            signatures(doc, contenu.etabliLe());
+            signatures(doc, vendeur, contenu.etabliLe());
             doc.close();
         } catch (DocumentException e) {
             throw new IllegalStateException("Mise en page du contrat " + c.numero() + " impossible", e);
@@ -120,14 +121,15 @@ class OpenPdfRenduContrat implements RenduContratPdf {
         doc.add(ref);
     }
 
-    private static void parties(Document doc, Acheteur a) {
+    private static void parties(Document doc, String vendeur, Acheteur a) {
         doc.add(new Paragraph("Entre les soussignés :", TEXTE));
-        Paragraph vendeur = new Paragraph();
-        vendeur.setIndentationLeft(15);
-        vendeur.setSpacingBefore(4);
-        vendeur.add(new Chunk("Le vendeur : ", GRAS));
-        vendeur.add(new Chunk("CIC, vente à crédit aux salariés, Nouakchott (Mauritanie), ci-après « CIC » ;", TEXTE));
-        doc.add(vendeur);
+        Paragraph partieVendeur = new Paragraph();
+        partieVendeur.setIndentationLeft(15);
+        partieVendeur.setSpacingBefore(4);
+        partieVendeur.add(new Chunk("Le vendeur : ", GRAS));
+        partieVendeur.add(new Chunk(vendeur + ", vente à crédit aux salariés, Nouakchott (Mauritanie), ci-après « "
+                + vendeur + " » ;", TEXTE));
+        doc.add(partieVendeur);
         Paragraph acheteur = new Paragraph();
         acheteur.setIndentationLeft(15);
         acheteur.setSpacingBefore(4);
@@ -139,14 +141,14 @@ class OpenPdfRenduContrat implements RenduContratPdf {
         doc.add(new Paragraph("Il a été convenu ce qui suit.", TEXTE));
     }
 
-    private static void prix(Document doc, Contrat c) {
+    private static void prix(Document doc, String vendeur, Contrat c) {
         titreArticle(doc, "Article 2 — Prix de vente");
         PdfPTable t = tableau(new float[] {3, 1});
         ligne(t, "Prix de vente total", montant(c.prix().prixVente()), true);
         ligne(t, "Apport payé à la commande", montant(c.apport()), false);
         ligne(t, "Reste à payer en " + c.nombreMois() + " mensualités", montant(c.resteAFinancer()), false);
         doc.add(t);
-        paragraphe(doc, "Le prix de vente comprend la marge de CIC, fixée à la signature. Il est ferme et "
+        paragraphe(doc, "Le prix de vente comprend la marge de " + vendeur + ", fixée à la signature. Il est ferme et "
                 + "définitif : il ne porte aucun intérêt et ne sera majoré d'aucune pénalité.");
     }
 
@@ -175,14 +177,14 @@ class OpenPdfRenduContrat implements RenduContratPdf {
         }
     }
 
-    private static void signatures(Document doc, LocalDate le) {
+    private static void signatures(Document doc, String vendeur, LocalDate le) {
         Paragraph fait = new Paragraph("Fait à Nouakchott, le " + date(le) + ", en deux exemplaires originaux.", TEXTE);
         fait.setSpacingBefore(14);
         fait.setSpacingAfter(10);
         doc.add(fait);
         PdfPTable t = new PdfPTable(2);
         t.setWidthPercentage(100);
-        t.addCell(signature("Pour CIC"));
+        t.addCell(signature("Pour " + vendeur));
         t.addCell(signature("L'acheteur, précédé de la mention « Lu et approuvé »"));
         doc.add(t);
     }

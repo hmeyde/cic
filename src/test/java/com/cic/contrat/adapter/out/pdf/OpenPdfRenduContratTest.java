@@ -29,7 +29,7 @@ class OpenPdfRenduContratTest {
     private static Contrat exemple() {
         Echeancier plan = Echeancier.planifier(Montant.de(12_480), 6, LocalDate.of(2026, 11, 19), 25,
                 Optional.empty());
-        return Contrat.etablir("CIC-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+        return Contrat.etablir("SEH-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
                 UUID.randomUUID(), "Galaxy A35",
                 new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
                 Montant.de(8_320), plan, Instant.parse("2026-11-12T10:00:00Z"));
@@ -38,7 +38,7 @@ class OpenPdfRenduContratTest {
     private static ContenuContrat contenu(Contrat contrat) {
         return new ContenuContrat(contrat,
                 new Acheteur("Ould Ahmed", "Mohamed", "1234567890", LocalDate.of(1990, 5, 1), "22123456"),
-                LocalDate.of(2026, 11, 12), LocalDate.of(2026, 11, 19));
+                LocalDate.of(2026, 11, 12), LocalDate.of(2026, 11, 19), "Seheli");
     }
 
     private static String texte(byte[] pdf) throws IOException {
@@ -66,7 +66,7 @@ class OpenPdfRenduContratTest {
     void le_contrat_porte_les_parties_et_les_montants_fixes() throws IOException {
         String texte = texte(rendu.rendre(contenu(exemple())));
 
-        assertThat(texte).contains("CONTRAT DE VENTE À TEMPÉRAMENT", "Contrat n° CIC-2026-000001 du 12/11/2026",
+        assertThat(texte).contains("CONTRAT DE VENTE À TEMPÉRAMENT", "Contrat n° SEH-2026-000001 du 12/11/2026",
                 "Mohamed Ould Ahmed", "NNI 1234567890", "01/05/1990", "Galaxy A35",
                 "Prix de vente total", "20 800 MRU",
                 "Apport payé à la commande", "8 320 MRU",
@@ -78,6 +78,7 @@ class OpenPdfRenduContratTest {
         }
         assertThat(texte.split("2 080 MRU", -1)).hasSize(7);
         assertThat(texte).contains("Total des mensualités", "sans intérêt ni pénalité");
+        assertThat(texte).contains("Le vendeur : Seheli", "ci-après « Seheli »", "Pour Seheli").doesNotContain("CIC");
     }
 
     @Test

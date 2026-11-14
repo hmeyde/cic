@@ -6,15 +6,17 @@ import java.util.Objects;
 /**
  * Ce que le contrat imprimé contient : le contrat (prix fixé, apport, échéances), l'acheteur, la date
  * d'établissement et la date limite pour payer l'apport et faire accepter l'autorisation de
- * prélèvement.
+ * prélèvement, et la raison sociale du vendeur (paramètre {@code societe.raison-sociale}).
  */
-public record ContenuContrat(Contrat contrat, Acheteur acheteur, LocalDate etabliLe, LocalDate dateLimiteApport) {
+public record ContenuContrat(Contrat contrat, Acheteur acheteur, LocalDate etabliLe, LocalDate dateLimiteApport,
+        String raisonSociale) {
 
     public ContenuContrat {
         Objects.requireNonNull(contrat, "contrat");
         Objects.requireNonNull(acheteur, "acheteur");
         Objects.requireNonNull(etabliLe, "etabliLe");
         Objects.requireNonNull(dateLimiteApport, "dateLimiteApport");
+        Objects.requireNonNull(raisonSociale, "raisonSociale");
     }
 
     @Override

@@ -54,7 +54,7 @@ class CommandeFournisseurServiceTest {
         parametres.afterSingletonsInstantiated();
         fournisseurs.enregistrer(fournisseur);
         service = new CommandeFournisseurService(demandes, commandes, prealables.service, prealables.contratService,
-                new FournisseurService(fournisseurs, parametres), contenu -> {
+                new FournisseurService(fournisseurs, parametres), parametres, contenu -> {
                     rendus.add(contenu);
                     return new byte[] {'%', 'P', 'D', 'F'};
                 }, journal, evenements::add, clock);
@@ -184,6 +184,7 @@ class CommandeFournisseurServiceTest {
             assertThat(r.commande()).isEqualTo(c);
             assertThat(r.nomFournisseur()).isEqualTo("Mauritel Store");
             assertThat(r.remise()).isEqualTo(Montant.de(1_600));
+            assertThat(r.raisonSociale()).isEqualTo("Seheli");
         });
     }
 }

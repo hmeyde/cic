@@ -51,7 +51,7 @@ class JustificatifPng implements GenerateurJustificatif {
             }
             g.setColor(new Color(0xC0, 0x39, 0x2B));
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
-            g.drawString("DOCUMENT FICTIF — DÉMONSTRATION CIC", 30, HAUTEUR - 34);
+            g.drawString("DOCUMENT FICTIF — DÉMONSTRATION SEHELI", 30, HAUTEUR - 34);
         } finally {
             g.dispose();
         }

@@ -96,7 +96,7 @@ public final class RappelsDeTest {
             echeances.add(Echeance.reconstituer(UUID.randomUUID(), rang, premiere.plusMonths(rang - 1),
                     Montant.de(2_080), StatutEcheance.A_VENIR));
         }
-        Contrat c = Contrat.reconstituer(UUID.randomUUID(), String.format("CIC-2026-%06d", ++ordre), d.id(),
+        Contrat c = Contrat.reconstituer(UUID.randomUUID(), String.format("SEH-2026-%06d", ++ordre), d.id(),
                 client.id(), UUID.randomUUID(), UUID.randomUUID(), "Galaxy A35",
                 new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
                 Montant.de(8_320), echeances, AUJOURDHUI);

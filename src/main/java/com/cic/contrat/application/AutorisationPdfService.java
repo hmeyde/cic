@@ -28,7 +28,7 @@ import com.cic.parametrage.domain.CleParametre;
  * pour sa banque. Produite à la demande à partir de l'autorisation et du contrat enregistrés : les
  * montants et les dates sont ceux des échéances fixées à l'acceptation.
  *
- * <p>Le compte de CIC qui reçoit les virements est lu dans la table {@code parametre}
+ * <p>Le compte du vendeur qui reçoit les virements est lu dans la table {@code parametre}
  * ({@code cic.compte.*}). La banque du client n'est connue que si son salaire est domicilié à la
  * BMCI ; sinon, comme son numéro de compte, il la complète à la main. La date limite est celle de
  * l'apport : date d'acceptation + {@code delai.apport.autorisation.jours}.
@@ -72,13 +72,13 @@ public class AutorisationPdfService {
         Optional<String> banque = emplois.parClient(contrat.clientId())
                 .filter(Emploi::estSalaireDomicilieBmci)
                 .map(e -> BANQUE_BMCI);
-        CompteBeneficiaire cic = new CompteBeneficiaire(parametres.texte(CleParametre.CIC_COMPTE_TITULAIRE),
+        CompteBeneficiaire vendeur = new CompteBeneficiaire(parametres.texte(CleParametre.CIC_COMPTE_TITULAIRE),
                 parametres.texte(CleParametre.CIC_COMPTE_BANQUE), parametres.texte(CleParametre.CIC_COMPTE_NUMERO));
         LocalDate emiseLe = LocalDate.ofInstant(autorisation.emiseLe(), clock.getZone());
         LocalDate dateLimite = LocalDate.ofInstant(contrat.etabliLe(), clock.getZone())
                 .plusDays(parametres.entier(CleParametre.DELAI_APPORT_AUTORISATION_JOURS));
         byte[] pdf = rendu.rendre(new ContenuAutorisation(autorisation, contrat, ContratPdfService.acheteur(client),
-                cic, banque, emiseLe, dateLimite));
+                vendeur, banque, emiseLe, dateLimite, parametres.texte(CleParametre.SOCIETE_RAISON_SOCIALE)));
         return new ContratPdf("autorisation-prelevement-" + contrat.numero() + ".pdf", pdf);
     }
 }

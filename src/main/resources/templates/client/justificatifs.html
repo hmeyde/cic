@@ -2,14 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{client.justificatifs.titre-page}">Mes justificatifs — Espace client CIC</title>
+    <title th:text="#{client.justificatifs.titre-page}">Mes justificatifs — Espace client Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-justificatifs">
         <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Justificatif reçu.</p>
         <h1 id="titre-justificatifs" th:text="#{client.justificatifs.titre}">Mes justificatifs</h1>
-        <p class="texte-doux" th:text="#{client.justificatifs.texte}">Envoyez les pièces demandées. Elles ne sont visibles que par vous et par l’équipe CIC.</p>
+        <p class="texte-doux" th:text="#{client.justificatifs.texte}">Envoyez les pièces demandées. Elles ne sont visibles que par vous et par l’équipe Seheli.</p>
 
         <h2 th:text="#{client.justificatifs.attendus}">Pièces attendues</h2>
         <ul class="liste-pieces">

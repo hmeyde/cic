@@ -6,7 +6,7 @@ import java.util.Objects;
  * Référence unique d'une échéance, portée par le prélèvement (virement permanent, domiciliation ou
  * retenue sur salaire) qui la règle : elle permet de rapprocher le paiement reçu de l'échéance.
  *
- * <p>Tirée du numéro de contrat et du rang : l'échéance 3 du contrat {@code CIC-2026-000042} donne
+ * <p>Tirée du numéro de contrat et du rang : l'échéance 3 du contrat {@code SEH-2026-000042} donne
  * {@code EC2026000042037}, soit {@code EC}, les chiffres du numéro, le rang sur deux chiffres, puis une
  * clé de Luhn sur l'ensemble. Lettres et chiffres seulement, comme la {@link ReferenceApport}.
  */
@@ -23,7 +23,7 @@ public record ReferenceEcheance(String valeur) {
         }
     }
 
-    /** @param numeroContrat numéro du contrat, par exemple {@code CIC-2026-000042} */
+    /** @param numeroContrat numéro du contrat, par exemple {@code SEH-2026-000042} */
     public static ReferenceEcheance pourEcheance(String numeroContrat, int rang) {
         Objects.requireNonNull(numeroContrat, "numeroContrat");
         String chiffres = numeroContrat.replaceAll("\\D", "");

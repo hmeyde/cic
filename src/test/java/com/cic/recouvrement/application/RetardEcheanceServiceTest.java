@@ -99,11 +99,11 @@ class RetardEcheanceServiceTest {
         Message premiere = r.envoyes.get(1);
         assertThat(premiere.telephone()).isEqualTo("36123456");
         assertThat(premiere.texte())
-                .startsWith("CIC : votre mensualité 1/6 de 2080 MRU (contrat " + j3.numero()
+                .startsWith("Seheli : votre mensualité 1/6 de 2080 MRU (contrat " + j3.numero()
                         + ") prévue le 09/11/2026 n'a pas pu être prélevée. Aucune pénalité ne s'applique")
                 .contains("code marchand 012345, référence EC")
                 .contains("https://wa.me/22220000000?text=");
-        assertThat(r.envoyes.getFirst().texte()).startsWith("CIC : 2e relance");
+        assertThat(r.envoyes.getFirst().texte()).startsWith("Seheli : 2e relance");
         assertThat(r.relances.toutes()).extracting(rel -> rel.type())
                 .containsExactlyInAnyOrder(TypeRelance.ECHEC_SECONDE, TypeRelance.ECHEC_PREMIERE);
     }

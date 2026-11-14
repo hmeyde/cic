@@ -31,9 +31,9 @@ class RappelPrelevementServiceTest {
         assertThat(m.telephone()).isEqualTo("36123456");
         assertThat(m.canal()).isEqualTo(Canal.SMS);
         assertThat(m.texte())
-                .startsWith("CIC : rappel, votre mensualité 1/6 de 2080 MRU (contrat " + contrat.numero()
+                .startsWith("Seheli : rappel, votre mensualité 1/6 de 2080 MRU (contrat " + contrat.numero()
                         + ") sera prélevée le 13/11/2026.")
-                .contains("https://wa.me/22220000000?text=Bonjour%20CIC%2C%20j%27ai%20une%20question%20sur%20ma%20"
+                .contains("https://wa.me/22220000000?text=Bonjour%20Seheli%2C%20j%27ai%20une%20question%20sur%20ma%20"
                         + "mensualit%C3%A9%201%2F6%20du%2013%2F11%2F2026%20%28contrat%20" + contrat.numero()
                         + "%29.");
         Relance relance = r.relances.toutes().getFirst();

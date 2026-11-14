@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{bo.import.titre-page}">Importer des paiements — Back-office CIC</title>
+    <title th:text="#{bo.import.titre-page}">Importer des paiements — Back-office Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -40,7 +40,7 @@
                         <td><span class="etiquette etiquette--sans-marge" th:text="#{'bo.ecarts.type.' + ${p.ecart().get().name()}}">Montant différent</span></td>
                         <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 000 MRU</td>
                         <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
-                        <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">CIC-2026-000001</td>
+                        <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">SEH-2026-000001</td>
                     </tr>
                     </tbody>
                 </table>

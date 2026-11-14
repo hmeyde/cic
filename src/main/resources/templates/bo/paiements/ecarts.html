@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{bo.ecarts.titre-page}">Écarts de paiement — Back-office CIC</title>
+    <title th:text="#{bo.ecarts.titre-page}">Écarts de paiement — Back-office Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -33,7 +33,7 @@
                     <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 000 MRU</td>
                     <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
                     <td th:text="${p.difference().isPresent()} ? (${p.tropPercu()} ? #{bo.ecarts.trop-percu(${#numbers.formatInteger(p.difference().get().valeur(), 1, 'WHITESPACE')})} : #{bo.ecarts.manque(${#numbers.formatInteger(p.difference().get().valeur(), 1, 'WHITESPACE')})}) : '—'">Manque 320 MRU</td>
-                    <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">CIC-2026-000001</td>
+                    <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">SEH-2026-000001</td>
                     <td dir="auto" th:text="#{bo.paiement.saisi.valeur(${p.saisiLe()}, ${p.saisiPar()})}">12/11/2026 10:00, admin</td>
                 </tr>
                 </tbody>

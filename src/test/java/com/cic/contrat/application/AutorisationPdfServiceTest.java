@@ -68,7 +68,7 @@ class AutorisationPdfServiceTest {
     }
 
     @Test
-    void imprime_l_autorisation_remplie_avec_le_compte_de_cic_et_la_date_limite() {
+    void imprime_l_autorisation_remplie_avec_le_compte_du_vendeur_et_la_date_limite() {
         emploi(false);
         UUID demandeId = UUID.randomUUID();
         Contrat contrat = etablir(demandeId);
@@ -76,18 +76,19 @@ class AutorisationPdfServiceTest {
         Optional<ContratPdf> pdf = service.pourDemande(demandeId);
 
         assertThat(pdf).hasValueSatisfying(p -> {
-            assertThat(p.nomFichier()).isEqualTo("autorisation-prelevement-CIC-2026-000001.pdf");
+            assertThat(p.nomFichier()).isEqualTo("autorisation-prelevement-SEH-2026-000001.pdf");
             assertThat(p.contenu()).startsWith('%', 'P', 'D', 'F');
         });
         ContenuAutorisation contenu = rendu.get();
         assertThat(contenu.contrat()).isEqualTo(contrat);
         assertThat(contenu.autorisation().contratId()).isEqualTo(contrat.id());
         assertThat(contenu.titulaire().nni()).isEqualTo("1234567890");
-        assertThat(contenu.beneficiaire().titulaire()).isEqualTo("CIC SARL");
+        assertThat(contenu.beneficiaire().titulaire()).isEqualTo("Seheli");
         assertThat(contenu.beneficiaire().banque()).isEqualTo("BMCI");
         assertThat(contenu.beneficiaire().numero()).isEqualTo("00020 00101 00001234567 53");
         assertThat(contenu.banqueTitulaire()).isEmpty();
         assertThat(contenu.emiseLe()).isEqualTo(LocalDate.of(2026, 11, 13));
+        assertThat(contenu.raisonSociale()).isEqualTo("Seheli");
         assertThat(contenu.dateLimite()).isEqualTo(LocalDate.of(2026, 11, 20));
     }
 

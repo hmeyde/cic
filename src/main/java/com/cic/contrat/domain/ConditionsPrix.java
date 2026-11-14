@@ -21,7 +21,7 @@ public record ConditionsPrix(BigDecimal remiseFournisseurPct, BigDecimal margeCi
         exigerEntre(remiseFournisseurPct, "Remise fournisseur", false);
         exigerEntre(apportMinimumPct, "Apport minimum", true);
         if (margeCicPct.signum() < 0) {
-            throw new IllegalArgumentException("Marge CIC négative : " + margeCicPct + " %");
+            throw new IllegalArgumentException("Marge Seheli négative : " + margeCicPct + " %");
         }
     }
 

@@ -31,6 +31,8 @@ import com.cic.demande.domain.DemandeRepository;
 import com.cic.demande.domain.PrealablesCommande;
 import com.cic.demande.domain.RenduBonCommandePdf;
 import com.cic.demande.domain.StatutDossier;
+import com.cic.parametrage.application.ParametreService;
+import com.cic.parametrage.domain.CleParametre;
 
 /**
  * Commande fournisseur : validation du paiement fournisseur d'un dossier APPORT_ET_AUTORISATION et
@@ -55,6 +57,7 @@ public class CommandeFournisseurService {
     private final PrealablesCommandeService prealables;
     private final ContratService contrats;
     private final FournisseurService fournisseurs;
+    private final ParametreService parametres;
     private final RenduBonCommandePdf rendu;
     private final JournalAuditService journal;
     private final ApplicationEventPublisher evenements;
@@ -62,13 +65,14 @@ public class CommandeFournisseurService {
 
     public CommandeFournisseurService(DemandeRepository demandes, CommandeFournisseurRepository commandes,
             PrealablesCommandeService prealables, ContratService contrats, FournisseurService fournisseurs,
-            RenduBonCommandePdf rendu, JournalAuditService journal, ApplicationEventPublisher evenements,
-            Clock clock) {
+            ParametreService parametres, RenduBonCommandePdf rendu, JournalAuditService journal,
+            ApplicationEventPublisher evenements, Clock clock) {
         this.demandes = demandes;
         this.commandes = commandes;
         this.prealables = prealables;
         this.contrats = contrats;
         this.fournisseurs = fournisseurs;
+        this.parametres = parametres;
         this.rendu = rendu;
         this.journal = journal;
         this.evenements = evenements;
@@ -134,7 +138,8 @@ public class CommandeFournisseurService {
             Demande demande = demandes.parId(c.demandeId())
                     .orElseThrow(() -> new IllegalStateException("Dossier introuvable pour " + c.numero()));
             byte[] pdf = rendu.rendre(new ContenuBonCommande(c, nomFournisseur(c.fournisseurId()),
-                    demande.termes().prixPublic(), LocalDate.ofInstant(c.valideLe(), clock.getZone())));
+                    demande.termes().prixPublic(), LocalDate.ofInstant(c.valideLe(), clock.getZone()),
+                    parametres.texte(CleParametre.SOCIETE_RAISON_SOCIALE)));
             return new BonCommandePdf("bon-de-commande-" + c.numero() + ".pdf", pdf);
         });
     }

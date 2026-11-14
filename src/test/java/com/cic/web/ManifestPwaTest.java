@@ -30,7 +30,7 @@ class ManifestPwaTest {
     void le_manifest_contient_les_champs_requis_pour_l_installation() throws Exception {
         JsonNode m = manifest();
         assertThat(m.path("name").asString()).isNotBlank();
-        assertThat(m.path("short_name").asString()).isEqualTo("CIC");
+        assertThat(m.path("short_name").asString()).isEqualTo("Seheli");
         assertThat(m.path("start_url").asString()).startsWith("/");
         assertThat(m.path("display").asString()).isIn("standalone", "fullscreen", "minimal-ui");
     }

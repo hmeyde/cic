@@ -17,7 +17,7 @@ class PaiementTest {
     private static final ReferencePaiement REFERENCE = ReferencePaiement.lire("AP20260000011");
     private static final LocalDate LE = LocalDate.of(2026, 11, 12);
     private static final Instant SAISI = Instant.parse("2026-11-12T10:00:00Z");
-    private static final Rattachement APPORT = Rattachement.apport(UUID.randomUUID(), "CIC-2026-000001",
+    private static final Rattachement APPORT = Rattachement.apport(UUID.randomUUID(), "SEH-2026-000001",
             UUID.randomUUID(), UUID.randomUUID(), Montant.de(8_320));
 
     @Test

@@ -43,13 +43,14 @@ class OpenPdfRenduBonCommande implements RenduBonCommandePdf {
     @Override
     public byte[] rendre(ContenuBonCommande contenu) {
         CommandeFournisseur c = contenu.commande();
+        String acheteur = contenu.raisonSociale();
         ByteArrayOutputStream sortie = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
         try {
             PdfWriter.getInstance(doc, sortie);
             doc.addTitle("Bon de commande " + c.numero());
-            doc.addAuthor("CIC");
-            doc.addCreator("CIC");
+            doc.addAuthor(acheteur);
+            doc.addCreator(acheteur);
             doc.open();
 
             Paragraph titre = new Paragraph("BON DE COMMANDE", TITRE);
@@ -62,11 +63,11 @@ class OpenPdfRenduBonCommande implements RenduBonCommandePdf {
 
             PdfPTable parties = new PdfPTable(2);
             parties.setWidthPercentage(100);
-            parties.addCell(bloc("Acheteur", "CIC, vente à crédit aux salariés\nNouakchott (Mauritanie)"));
+            parties.addCell(bloc("Acheteur", acheteur + ", vente à crédit aux salariés\nNouakchott (Mauritanie)"));
             parties.addCell(bloc("Fournisseur", contenu.nomFournisseur()));
             doc.add(parties);
 
-            Paragraph objet = new Paragraph("Référence CIC : contrat n° " + c.numeroContrat(), TEXTE);
+            Paragraph objet = new Paragraph("Référence " + acheteur + " : contrat n° " + c.numeroContrat(), TEXTE);
             objet.setSpacingBefore(12);
             objet.setSpacingAfter(6);
             doc.add(objet);
@@ -83,7 +84,7 @@ class OpenPdfRenduBonCommande implements RenduBonCommandePdf {
             doc.add(totaux(contenu));
 
             Paragraph conditions = new Paragraph("Le paiement de ce bon de commande a été validé le "
-                    + contenu.le().format(DATE) + " par " + c.validePar() + ". Le produit est remis à CIC, qui le "
+                    + contenu.le().format(DATE) + " par " + c.validePar() + ". Le produit est remis à " + acheteur + ", qui le "
                     + "remet à son client contre confirmation de réception.", TEXTE);
             conditions.setAlignment(Element.ALIGN_JUSTIFIED);
             conditions.setSpacingBefore(14);
@@ -92,7 +93,7 @@ class OpenPdfRenduBonCommande implements RenduBonCommandePdf {
             PdfPTable signatures = new PdfPTable(2);
             signatures.setWidthPercentage(100);
             signatures.setSpacingBefore(20);
-            signatures.addCell(signature("Pour CIC"));
+            signatures.addCell(signature("Pour " + acheteur));
             signatures.addCell(signature("Le fournisseur (cachet et signature)"));
             doc.add(signatures);
 

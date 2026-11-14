@@ -17,7 +17,7 @@ public interface ContratRepository {
     /** Contrat d'un dossier ; au plus un par dossier. */
     Optional<Contrat> parDemande(UUID demandeId);
 
-    /** Contrat portant ce numéro, par exemple {@code CIC-2026-000042} ; les numéros sont uniques. */
+    /** Contrat portant ce numéro, par exemple {@code SEH-2026-000042} ; les numéros sont uniques. */
     Optional<Contrat> parNumero(String numero);
 
     /** Enregistre le nouveau statut d'une échéance du contrat ; seul le statut change après la signature. */

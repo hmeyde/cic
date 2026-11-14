@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{inscription.titre-page}">Je m'inscris — CIC</title>
+    <title th:text="#{inscription.titre-page}">Je m'inscris — Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-inscription">
         <h1 id="titre-inscription" th:text="#{inscription.titre}">Je m'inscris</h1>
-        <p class="texte-doux" th:text="#{inscription.texte}">Laissez-nous vos coordonnées : un conseiller CIC vous rappelle pour préparer votre demande.</p>
+        <p class="texte-doux" th:text="#{inscription.texte}">Laissez-nous vos coordonnées : un conseiller Seheli vous rappelle pour préparer votre demande.</p>
 
         <div th:if="${erreur != null}" role="alert">
             <p class="alerte alerte--erreur" th:text="#{${erreur}}">Vérifiez le formulaire.</p>
@@ -69,7 +69,7 @@
                 <input id="consentement" name="consentement" type="checkbox" value="on" required
                        th:checked="${saisie.consentement}"
                        th:attr="aria-invalid=${erreurChamp == 'consentement'} ? 'true' : null">
-                <label for="consentement" th:text="#{inscription.consentement}">J’accepte que CIC utilise ces informations pour me recontacter au sujet d’un achat à crédit.</label>
+                <label for="consentement" th:text="#{inscription.consentement}">J’accepte que Seheli utilise ces informations pour me recontacter au sujet d’un achat à crédit.</label>
             </div>
             <button type="submit" class="bouton bouton--principal" th:text="#{inscription.envoyer}">Envoyer</button>
         </form>

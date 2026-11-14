@@ -52,7 +52,9 @@ public enum CleParametre {
 
     MASRVI_CODE_MARCHAND("masrvi.code.marchand", TEXTE),
 
-    CIC_WHATSAPP_NUMERO("cic.whatsapp.numero", TEXTE);
+    CIC_WHATSAPP_NUMERO("cic.whatsapp.numero", TEXTE),
+
+    SOCIETE_RAISON_SOCIALE("societe.raison-sociale", TEXTE);
 
     private final String cle;
     private final TypeParametre type;

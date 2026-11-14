@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{inscription.merci.titre-page}">Inscription reçue — CIC</title>
+    <title th:text="#{inscription.merci.titre-page}">Inscription reçue — Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-merci">
         <h1 id="titre-merci" th:text="#{inscription.merci.titre}">Merci, votre inscription est enregistrée</h1>
-        <p th:text="#{inscription.merci.texte}">Un conseiller CIC vous appellera prochainement.</p>
+        <p th:text="#{inscription.merci.texte}">Un conseiller Seheli vous appellera prochainement.</p>
         <div class="actions">
             <a class="bouton bouton--principal" th:href="@{/client/}" th:text="#{inscription.merci.espace-client}">Créer mon compte client</a>
             <a class="bouton bouton--secondaire" th:href="@{/}" th:text="#{inscription.merci.accueil}">Retour à l'accueil</a>

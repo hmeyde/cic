@@ -44,6 +44,13 @@ public class ContratService {
     private static final int CHIFFRES_ANNEE = 4;
     /** Année puis numéro d'ordre, qui tient dans un {@code long} (18 chiffres au plus). */
     private static final int CHIFFRES_MAX = CHIFFRES_ANNEE + 18;
+    /** Préfixe des numéros de contrat (marque Seheli). */
+    static final String PREFIXE = "SEH";
+    /**
+     * Préfixe des contrats établis avant le changement de marque : leurs numéros, déjà imprimés et
+     * repris dans les références de paiement, ne changent pas.
+     */
+    static final String PREFIXE_HISTORIQUE = "CIC";
 
     private final ContratRepository contrats;
     private final AutorisationPrelevementRepository autorisations;
@@ -165,21 +172,23 @@ public class ContratService {
 
     /**
      * Contrat dont le numéro, débarrassé de ses séparateurs, donne ces chiffres : {@code 2026000042}
-     * désigne {@code CIC-2026-000042}. Sert à retrouver le dossier d'une référence de paiement tirée
-     * du numéro de contrat. Vide si les chiffres ne forment aucun numéro possible ou si aucun contrat
-     * ne porte ce numéro.
+     * désigne {@code SEH-2026-000042} (ou {@code CIC-2026-000042} pour un contrat établi avant le
+     * changement de marque ; la séquence des numéros d'ordre est commune aux deux préfixes). Sert à
+     * retrouver le dossier d'une référence de paiement tirée du numéro de contrat. Vide si les chiffres
+     * ne forment aucun numéro possible ou si aucun contrat ne porte ce numéro.
      */
     @Transactional(readOnly = true)
     public Optional<Contrat> parChiffresDuNumero(String chiffres) {
         if (chiffres == null || !chiffres.matches("\\d{" + (CHIFFRES_ANNEE + 1) + "," + CHIFFRES_MAX + "}")) {
             return Optional.empty();
         }
-        String numero = numero(Integer.parseInt(chiffres.substring(0, CHIFFRES_ANNEE)),
-                Long.parseLong(chiffres.substring(CHIFFRES_ANNEE)));
+        int annee = Integer.parseInt(chiffres.substring(0, CHIFFRES_ANNEE));
+        long ordre = Long.parseLong(chiffres.substring(CHIFFRES_ANNEE));
+        String numero = numero(PREFIXE, annee, ordre);
         if (!numero.replaceAll("\\D", "").equals(chiffres)) {
             return Optional.empty();
         }
-        return contrats.parNumero(numero);
+        return contrats.parNumero(numero).or(() -> contrats.parNumero(numero(PREFIXE_HISTORIQUE, annee, ordre)));
     }
 
     /**
@@ -206,12 +215,12 @@ public class ContratService {
         return true;
     }
 
-    /** Numéro lisible du contrat, par exemple {@code CIC-2026-000042}. */
+    /** Numéro lisible du contrat, par exemple {@code SEH-2026-000042}. */
     static String numero(LocalDate le, long ordre) {
-        return numero(le.getYear(), ordre);
+        return numero(PREFIXE, le.getYear(), ordre);
     }
 
-    private static String numero(int annee, long ordre) {
-        return "CIC-%d-%06d".formatted(annee, ordre);
+    private static String numero(String prefixe, int annee, long ordre) {
+        return "%s-%d-%06d".formatted(prefixe, annee, ordre);
     }
 }

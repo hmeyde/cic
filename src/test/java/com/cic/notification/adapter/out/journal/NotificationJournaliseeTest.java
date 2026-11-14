@@ -14,10 +14,10 @@ class NotificationJournaliseeTest {
 
     @Test
     void un_message_envoye_apparait_dans_les_journaux_avec_le_telephone_masque(CapturedOutput sortie) {
-        new NotificationJournalisee().envoyer(Message.sms("36123456", "Votre code CIC : 482913"));
+        new NotificationJournalisee().envoyer(Message.sms("36123456", "Votre code Seheli : 482913"));
 
         assertThat(sortie.getOut())
-                .contains("Notification SMS envoyée à ****3456 : Votre code CIC : 482913")
+                .contains("Notification SMS envoyée à ****3456 : Votre code Seheli : 482913")
                 .doesNotContain("36123456");
     }
 }

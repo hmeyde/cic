@@ -1,6 +1,6 @@
 # Carte du projet CIC
 
-Générée automatiquement depuis le code (`f4a2422`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`6b81aee`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.cic.*`)
 
@@ -85,6 +85,7 @@ Générée automatiquement depuis le code (`f4a2422`). Sert à se repérer vite 
 - V27__apport_capital.sql
 - V28__parametre_alerte_prelevements.sql
 - V29__inscription.sql
+- V30__marque_seheli.sql
 
 ## Profils et configuration
 
@@ -104,4 +105,4 @@ Générée automatiquement depuis le code (`f4a2422`). Sert à se repérer vite 
 
 ## Tests
 
-- 116 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 122 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

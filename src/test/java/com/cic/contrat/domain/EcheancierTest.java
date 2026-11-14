@@ -138,7 +138,7 @@ class EcheancierTest {
         assertThat(e.derniere().date()).isEqualTo(LocalDate.of(2027, 1, 25));
     }
 
-    // Contrôle d'endettement : mensualités CIC ≤ 1/3 du salaire net
+    // Contrôle d'endettement : mensualités Seheli ≤ 1/3 du salaire net
 
     private static final Fraction TIERS = new Fraction(1, 3);
 

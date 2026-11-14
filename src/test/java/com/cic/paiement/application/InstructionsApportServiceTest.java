@@ -21,7 +21,7 @@ class InstructionsApportServiceTest {
 
     @Test
     void montant_code_marchand_parametre_et_reference_du_dossier() {
-        InstructionsApport i = service("012345").pour("CIC-2026-000001", Montant.de(8_320));
+        InstructionsApport i = service("012345").pour("SEH-2026-000001", Montant.de(8_320));
 
         assertThat(i.montant()).isEqualTo(Montant.de(8_320));
         assertThat(i.codeMarchand()).isEqualTo("012345");
@@ -30,6 +30,6 @@ class InstructionsApportServiceTest {
 
     @Test
     void le_code_marchand_suit_la_table_parametre() {
-        assertThat(service(" 778899 ").pour("CIC-2026-000001", Montant.de(8_320)).codeMarchand()).isEqualTo("778899");
+        assertThat(service(" 778899 ").pour("SEH-2026-000001", Montant.de(8_320)).codeMarchand()).isEqualTo("778899");
     }
 }

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{bo.paiements.titre-page}">Paiements reçus — Back-office CIC</title>
+    <title th:text="#{bo.paiements.titre-page}">Paiements reçus — Back-office Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -17,7 +17,7 @@
 
         <div th:if="${resultat != null}" th:with="r=${resultat}" role="status">
             <p th:if="${r.numeroContrat().isPresent()}" class="alerte alerte--info"
-               th:text="#{bo.paiement.rapproche(${r.reference()}, ${r.numeroContrat().get()})}">Paiement AP20260000011 enregistré et rattaché au dossier du contrat CIC-2026-000001.</p>
+               th:text="#{bo.paiement.rapproche(${r.reference()}, ${r.numeroContrat().get()})}">Paiement AP20260000011 enregistré et rattaché au dossier du contrat SEH-2026-000001.</p>
             <p th:if="${r.ecartDeMontant()}" class="alerte alerte--erreur"
                th:text="#{bo.paiement.ecart.alerte(${#numbers.formatInteger(r.montant().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(r.montantAttendu().get().valeur(), 1, 'WHITESPACE')})}">Montant reçu 8 000 MRU, apport attendu 8 320 MRU : écart à régulariser avec le client.</p>
             <p th:if="${r.numeroContrat().isEmpty()}" class="alerte alerte--erreur"
@@ -78,7 +78,7 @@
                         <span class="etiquette etiquette--sans-marge" th:text="#{'bo.paiement.statut.' + ${p.statut().name()}}">Rapproché</span>
                         <span th:if="${p.ecartDeMontant()}" class="etiquette etiquette--sans-marge" th:text="#{bo.paiement.ecart}">Écart de montant</span>
                     </td>
-                    <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">CIC-2026-000001</td>
+                    <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">SEH-2026-000001</td>
                     <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
                     <td dir="auto" th:text="#{bo.paiement.saisi.valeur(${p.saisiLe()}, ${p.saisiPar()})}">12/11/2026 10:00, admin</td>
                 </tr>

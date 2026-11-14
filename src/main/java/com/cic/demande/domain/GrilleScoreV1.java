@@ -103,7 +103,7 @@ public final class GrilleScoreV1 {
             return new ResultatCritere(PART_SALAIRE, 0, "Salaire net nul");
         }
         BigDecimal part = total.valeur().multiply(CENT).divide(d.salaireNet().valeur(), 1, RoundingMode.HALF_UP);
-        String detail = "mensualités CIC " + total + " pour un salaire net de " + d.salaireNet()
+        String detail = "mensualités Seheli " + total + " pour un salaire net de " + d.salaireNet()
                 + " (" + part.toPlainString() + " %)";
         // Comparaisons exactes : total × 100 < 20 × salaire, puis total ≤ salaire × plafond.
         if (total.valeur().multiply(CENT).compareTo(d.salaireNet().valeur().multiply(PART_SALAIRE_BASSE_PCT)) < 0) {
@@ -153,9 +153,9 @@ public final class GrilleScoreV1 {
         int n = d.plansRembourseATemps();
         int points = Math.min(HISTORIQUE_CIC.pointsMax(), n * POINTS_PAR_PLAN);
         String raison = switch (n) {
-            case 0 -> "Aucun plan CIC déjà remboursé à temps";
-            case 1 -> "1 plan CIC remboursé à temps";
-            default -> n + " plans CIC remboursés à temps";
+            case 0 -> "Aucun plan Seheli déjà remboursé à temps";
+            case 1 -> "1 plan Seheli remboursé à temps";
+            default -> n + " plans Seheli remboursés à temps";
         };
         return new ResultatCritere(HISTORIQUE_CIC, points, raison);
     }

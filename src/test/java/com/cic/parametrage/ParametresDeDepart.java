@@ -39,11 +39,12 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.CONNEXION_CODE_VALIDITE_MINUTES, "5"),
             Map.entry(CleParametre.CONNEXION_CODE_ESSAIS_MAX, "5"),
             Map.entry(CleParametre.CONNEXION_CODE_RENVOI_SECONDES, "60"),
-            Map.entry(CleParametre.CIC_COMPTE_TITULAIRE, "CIC SARL"),
+            Map.entry(CleParametre.CIC_COMPTE_TITULAIRE, "Seheli"),
             Map.entry(CleParametre.CIC_COMPTE_BANQUE, "BMCI"),
             Map.entry(CleParametre.CIC_COMPTE_NUMERO, "00020 00101 00001234567 53"),
             Map.entry(CleParametre.MASRVI_CODE_MARCHAND, "012345"),
-            Map.entry(CleParametre.CIC_WHATSAPP_NUMERO, "20000000"));
+            Map.entry(CleParametre.CIC_WHATSAPP_NUMERO, "20000000"),
+            Map.entry(CleParametre.SOCIETE_RAISON_SOCIALE, "Seheli"));
 
     private ParametresDeDepart() {
     }

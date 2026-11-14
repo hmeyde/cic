@@ -9,9 +9,9 @@ class LienWhatsAppTest {
 
     @Test
     void le_lien_vise_le_numero_avec_l_indicatif_222_et_encode_le_texte() {
-        assertThat(LienWhatsApp.vers("20 00 00 00", "Bonjour CIC, j'ai une question (contrat CIC-2026-000042) ?"))
-                .isEqualTo("https://wa.me/22220000000?text=Bonjour%20CIC%2C%20j%27ai%20une%20question%20"
-                        + "%28contrat%20CIC-2026-000042%29%20%3F");
+        assertThat(LienWhatsApp.vers("20 00 00 00", "Bonjour Seheli, j'ai une question (contrat SEH-2026-000042) ?"))
+                .isEqualTo("https://wa.me/22220000000?text=Bonjour%20Seheli%2C%20j%27ai%20une%20question%20"
+                        + "%28contrat%20SEH-2026-000042%29%20%3F");
     }
 
     @Test

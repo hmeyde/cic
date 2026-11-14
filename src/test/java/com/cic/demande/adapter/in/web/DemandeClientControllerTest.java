@@ -219,7 +219,7 @@ class DemandeClientControllerTest {
         assertThat(model.get("suivi")).isInstanceOfSatisfying(SuiviDossier.class,
                 s -> assertThat(s.statut()).isEqualTo(StatutDossier.ACCEPTEE));
         assertThat(model.get("offre")).isInstanceOfSatisfying(OffreClient.class, o -> {
-            assertThat(o.numero()).isEqualTo("CIC-2026-000001");
+            assertThat(o.numero()).isEqualTo("SEH-2026-000001");
             assertThat(o.designation()).isEqualTo("Galaxy A35");
             assertThat(o.etablieLe()).isEqualTo(LocalDate.of(2026, 11, 12));
             assertThat(o.prixTotal()).isEqualTo(Montant.de(20_800));
@@ -269,9 +269,9 @@ class DemandeClientControllerTest {
         assertThat(reponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(reponse.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PDF);
         assertThat(reponse.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
-                .isEqualTo("attachment; filename=\"contrat-CIC-2026-000001.pdf\"");
+                .isEqualTo("attachment; filename=\"contrat-SEH-2026-000001.pdf\"");
         assertThat(reponse.getHeaders().getCacheControl()).isEqualTo("no-store");
-        assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF CIC-2026-000001");
+        assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF SEH-2026-000001");
     }
 
     @Test
@@ -284,9 +284,9 @@ class DemandeClientControllerTest {
         assertThat(reponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(reponse.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PDF);
         assertThat(reponse.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
-                .isEqualTo("attachment; filename=\"autorisation-prelevement-CIC-2026-000001.pdf\"");
+                .isEqualTo("attachment; filename=\"autorisation-prelevement-SEH-2026-000001.pdf\"");
         assertThat(reponse.getHeaders().getCacheControl()).isEqualTo("no-store");
-        assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF ordre CIC-2026-000001");
+        assertThat(new String(reponse.getBody(), StandardCharsets.US_ASCII)).isEqualTo("%PDF ordre SEH-2026-000001");
     }
 
     @Test

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{client.demandes.titre-page}">Mes demandes — Espace client CIC</title>
+    <title th:text="#{client.demandes.titre-page}">Mes demandes — Espace client Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -35,7 +35,7 @@
                         <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
                     </div>
                 </dl>
-                <p class="texte-doux" th:text="#{'client.demande.statut.' + ${d.statut().name()} + '.aide'}">L’équipe CIC étudie votre demande.</p>
+                <p class="texte-doux" th:text="#{'client.demande.statut.' + ${d.statut().name()} + '.aide'}">L’équipe Seheli étudie votre demande.</p>
             </li>
         </ul>
 

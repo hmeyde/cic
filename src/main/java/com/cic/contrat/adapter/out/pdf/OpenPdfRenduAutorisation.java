@@ -33,9 +33,9 @@ import com.cic.contrat.domain.TypeAutorisation;
 /**
  * Autorisation de prélèvement mise en page avec OpenPDF (A4, Helvetica, en français). Pour le MVP,
  * seul l'ordre de virement permanent est mis en page : le client le signe et le remet à sa banque,
- * qui vire chaque mensualité de son compte vers celui de CIC aux dates de l'échéancier du contrat.
+ * qui vire chaque mensualité de son compte vers celui du vendeur aux dates de l'échéancier du contrat.
  *
- * <p>Tout ce que CIC connaît est rempli : titulaire, compte de CIC, montants, dates, libellé des
+ * <p>Tout ce que le vendeur connaît est rempli : titulaire, compte du vendeur, montants, dates, libellé des
  * virements. Ce que seul le client ou sa banque connaît (banque si elle n'est pas connue, numéro de
  * compte, lieu, date, signature, visa de la banque) est laissé en pointillés.
  */
@@ -59,13 +59,14 @@ class OpenPdfRenduAutorisation implements RenduAutorisationPdf {
             throw new IllegalArgumentException("Mise en page indisponible pour " + contenu.autorisation().type());
         }
         Contrat c = contenu.contrat();
+        String vendeur = contenu.raisonSociale();
         ByteArrayOutputStream sortie = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4, 45, 45, 30, 30);
         try {
             PdfWriter.getInstance(doc, sortie);
             doc.addTitle("Ordre de virement permanent " + c.numero());
-            doc.addAuthor("CIC");
-            doc.addCreator("CIC");
+            doc.addAuthor(vendeur);
+            doc.addCreator(vendeur);
             HeaderFooter pied = new HeaderFooter(new Phrase("Autorisation de prélèvement — contrat n° " + c.numero()
                     + " — page ", PETIT), true);
             pied.setAlignment(Element.ALIGN_CENTER);
@@ -80,11 +81,11 @@ class OpenPdfRenduAutorisation implements RenduAutorisationPdf {
             section(doc, "4. Durée et révocation");
             paragraphe(doc, "Cet ordre prend fin de lui-même après le dernier virement. Il garantit le paiement du "
                     + "prix fixé au contrat n° " + c.numero() + " : il ne peut être révoqué ni modifié avant le "
-                    + "paiement complet qu'avec l'accord écrit de CIC. Aucun intérêt ni aucune pénalité ne "
+                    + "paiement complet qu'avec l'accord écrit de " + vendeur + ". Aucun intérêt ni aucune pénalité ne "
                     + "s'ajoutent aux montants ci-dessus. Si un virement ne peut être exécuté faute de provision, "
-                    + "la banque en avise le titulaire ; CIC le contacte pour le régulariser.");
+                    + "la banque en avise le titulaire ; " + vendeur + " le contacte pour le régulariser.");
             section(doc, "5. À faire par le titulaire");
-            paragraphe(doc, "Signer cet ordre, le remettre à sa banque et transmettre à CIC la copie visée par la "
+            paragraphe(doc, "Signer cet ordre, le remettre à sa banque et transmettre à " + vendeur + " la copie visée par la "
                     + "banque au plus tard le " + date(contenu.dateLimite()) + ". Passé cette date, la vente est "
                     + "annulée sans frais.");
             signatures(doc);
@@ -176,7 +177,7 @@ class OpenPdfRenduAutorisation implements RenduAutorisationPdf {
                 + "est exécuté le jour ouvré suivant.");
     }
 
-    /** Libellé repris sur le relevé de CIC pour rapprocher le paiement : {@code CIC-2026-000001 M1/6}. */
+    /** Libellé repris sur le relevé du vendeur pour rapprocher le paiement : {@code SEH-2026-000001 M1/6}. */
     static String libelle(Contrat c, Echeance e) {
         return c.numero() + " M" + e.rang() + "/" + c.nombreMois();
     }

@@ -185,7 +185,7 @@ class DemandeServiceTest {
     void une_echeance_en_retard_bloque_les_nouveaux_achats_meme_avant_la_livraison() {
         Demande livree = DemandesFixtures.demande(client.id(), StatutDossier.LIVREE);
         demandes.enregistrer(livree);
-        contrats.enregistrer(Contrat.reconstituer(UUID.randomUUID(), "CIC-2026-000001", livree.id(), client.id(),
+        contrats.enregistrer(Contrat.reconstituer(UUID.randomUUID(), "SEH-2026-000001", livree.id(), client.id(),
                 UUID.randomUUID(), UUID.randomUUID(), "Galaxy A35",
                 new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
                 Montant.de(8_320), IntStream.rangeClosed(1, 6).mapToObj(rang -> Echeance.reconstituer(

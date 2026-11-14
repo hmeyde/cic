@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{client.compte.titre-page}">Créer mon compte — Espace client CIC</title>
+    <title th:text="#{client.compte.titre-page}">Créer mon compte — Espace client Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -44,10 +44,10 @@
             <div class="champ champ--case">
                 <input id="consentement" type="checkbox" th:field="*{consentement}" required
                        th:attr="aria-invalid=${#fields.hasErrors('consentement')} ? 'true' : null,aria-describedby=${#fields.hasErrors('consentement')} ? 'consentement-erreur' : null">
-                <label for="consentement" th:text="#{client.compte.consentement}">J’accepte que CIC utilise mes données pour étudier mes demandes de crédit et gérer mes remboursements.</label>
+                <label for="consentement" th:text="#{client.compte.consentement}">J’accepte que Seheli utilise mes données pour étudier mes demandes de crédit et gérer mes remboursements.</label>
             </div>
             <p th:if="${#fields.hasErrors('consentement')}" id="consentement-erreur" class="champ__erreur" th:errors="*{consentement}">Erreur</p>
-            <p class="champ__aide texte-doux" th:text="#{client.compte.consentement.aide}">Sans ce consentement, CIC ne peut pas étudier votre demande. Vos justificatifs ne sont visibles que par vous et par l’équipe CIC.</p>
+            <p class="champ__aide texte-doux" th:text="#{client.compte.consentement.aide}">Sans ce consentement, Seheli ne peut pas étudier votre demande. Vos justificatifs ne sont visibles que par vous et par l’équipe Seheli.</p>
             <button type="submit" class="bouton bouton--principal" th:text="#{client.compte.creer}">Créer mon compte</button>
         </form>
     </section>

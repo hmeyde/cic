@@ -161,8 +161,8 @@ class PaiementServiceTest {
     @Test
     void reference_sans_dossier_enregistree_non_rapprochee() {
         contrat();
-        String fauteDeFrappe = ReferenceApport.pourContrat("CIC-2026-000001").valeur().replace("AP2026", "AP2062");
-        String inconnue = ReferenceApport.pourContrat("CIC-2026-000999").valeur();
+        String fauteDeFrappe = ReferenceApport.pourContrat("SEH-2026-000001").valeur().replace("AP2026", "AP2062");
+        String inconnue = ReferenceApport.pourContrat("SEH-2026-000999").valeur();
 
         Paiement p1 = service.saisir(new SaisiePaiement(fauteDeFrappe, "8320", "2026-11-13"), "admin");
         Paiement p2 = service.saisir(new SaisiePaiement(inconnue, "8320", "2026-11-13"), "admin");

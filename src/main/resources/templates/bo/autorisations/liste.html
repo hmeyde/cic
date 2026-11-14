@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{bo.autorisations.titre-page}">Autorisations de prélèvement — Back-office CIC</title>
+    <title th:text="#{bo.autorisations.titre-page}">Autorisations de prélèvement — Back-office Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -38,7 +38,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="a : ${autorisations}">
-                    <td dir="ltr"><a th:href="@{/bo/autorisations/{id}(id=${a.id()})}" th:text="${a.numeroContrat()}">CIC-2026-000001</a></td>
+                    <td dir="ltr"><a th:href="@{/bo/autorisations/{id}(id=${a.id()})}" th:text="${a.numeroContrat()}">SEH-2026-000001</a></td>
                     <td dir="auto" th:text="${a.client().orElse('—')}">Mohamed Ould Ahmed</td>
                     <td dir="auto" th:text="${a.designation()}">Galaxy A35</td>
                     <td th:text="#{'bo.autorisation.type.' + ${a.type().name()}}">Virement permanent</td>

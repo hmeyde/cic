@@ -6,7 +6,7 @@ import java.util.Objects;
  * Référence unique que le client saisit dans Masrvi en payant son apport : elle permet de rapprocher
  * le paiement reçu de son dossier.
  *
- * <p>Elle est tirée du numéro de contrat, unique par dossier : {@code CIC-2026-000042} donne
+ * <p>Elle est tirée du numéro de contrat, unique par dossier : {@code SEH-2026-000042} donne
  * {@code AP20260000425}, soit {@code AP}, les chiffres du numéro, puis une clé de Luhn qui détecte une
  * faute de frappe sur un chiffre ou l'inversion de deux chiffres voisins. Lettres et chiffres
  * seulement, sans séparateur, pour être saisie sans erreur sur un téléphone.
@@ -22,7 +22,7 @@ public record ReferenceApport(String valeur) {
         }
     }
 
-    /** @param numeroContrat numéro du contrat du dossier, par exemple {@code CIC-2026-000042} */
+    /** @param numeroContrat numéro du contrat du dossier, par exemple {@code SEH-2026-000042} */
     public static ReferenceApport pourContrat(String numeroContrat) {
         Objects.requireNonNull(numeroContrat, "numeroContrat");
         String chiffres = numeroContrat.replaceAll("\\D", "");

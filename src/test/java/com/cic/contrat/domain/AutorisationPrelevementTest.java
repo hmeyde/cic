@@ -18,7 +18,7 @@ class AutorisationPrelevementTest {
     private static final Instant LE = Instant.parse("2026-11-13T09:30:00Z");
 
     private static Contrat contrat() {
-        return Contrat.etablir("CIC-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+        return Contrat.etablir("SEH-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
                 UUID.randomUUID(), "Galaxy A35",
                 new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
                 Montant.de(8_320),
@@ -44,10 +44,10 @@ class AutorisationPrelevementTest {
         Contrat c = contrat();
         AutorisationPrelevement autreContrat = AutorisationPrelevement.emettre(contrat(), LE);
         Acheteur acheteur = new Acheteur("Ould Ahmed", "Mohamed", "1234567890", LocalDate.of(1990, 5, 1), "22123456");
-        CompteBeneficiaire cic = new CompteBeneficiaire("CIC SARL", "BMCI", "00020");
+        CompteBeneficiaire cic = new CompteBeneficiaire("Seheli", "BMCI", "00020");
 
         assertThatThrownBy(() -> new ContenuAutorisation(autreContrat, c, acheteur, cic, Optional.empty(),
-                LocalDate.of(2026, 11, 13), LocalDate.of(2026, 11, 20)))
+                LocalDate.of(2026, 11, 13), LocalDate.of(2026, 11, 20), "Seheli"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{client.dossier.titre-page}">Suivi de mon dossier — Espace client CIC</title>
+    <title th:text="#{client.dossier.titre-page}">Suivi de mon dossier — Espace client Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
@@ -27,8 +27,8 @@
                  aria-labelledby="titre-prochaine">
                 <h2 id="titre-prochaine" th:text="#{client.dossier.prochaine}">Prochaine étape</h2>
                 <p class="etiquette etiquette--sans-marge"
-                   th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-cic}">À faire par CIC</p>
-                <p th:text="#{'client.dossier.prochaine.' + ${suivi.prochaine().name()}}">L’équipe CIC étudie votre demande.</p>
+                   th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-cic}">À faire par Seheli</p>
+                <p th:text="#{'client.dossier.prochaine.' + ${suivi.prochaine().name()}}">L’équipe Seheli étudie votre demande.</p>
                 <p th:if="${suivi.dateLimite().isPresent()}" class="prochaine-etape__limite"
                    th:text="#{client.dossier.date-limite(${#temporals.format(suivi.dateLimite().get(), 'dd/MM/yyyy')})}">Avant le 19/11/2026</p>
                 <form th:if="${suivi.statut().name() == 'COMMANDEE'}" class="formulaire remise" method="post"
@@ -52,7 +52,7 @@
                         <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(paiementApport.montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
                     </div>
                     <div>
-                        <dt th:text="#{client.apport.code-marchand}">Code marchand CIC</dt>
+                        <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
                         <dd class="paiement-apport__code" dir="ltr" th:text="${paiementApport.codeMarchand()}">012345</dd>
                     </div>
                     <div>
@@ -62,7 +62,7 @@
                 </dl>
                 <ol class="paiement-apport__etapes">
                     <li th:text="#{client.apport.etape1}">Ouvrez Masrvi et choisissez le paiement marchand.</li>
-                    <li th:text="#{client.apport.etape2}">Saisissez le code marchand CIC et le montant exact.</li>
+                    <li th:text="#{client.apport.etape2}">Saisissez le code marchand Seheli et le montant exact.</li>
                     <li th:text="#{client.apport.etape3}">Indiquez la référence de votre dossier dans le motif du paiement.</li>
                 </ol>
                 <p class="texte-doux" th:text="#{client.apport.aide}">Sans la bonne référence, nous ne pourrons pas rattacher votre paiement à votre dossier.</p>
@@ -101,7 +101,7 @@
 
             <section th:if="${offre != null}" class="offre" aria-labelledby="titre-offre">
                 <h2 id="titre-offre" th:text="#{client.offre.titre}">Mon offre</h2>
-                <p class="texte-doux" th:text="#{client.offre.reference(${offre.numero()}, ${#temporals.format(offre.etablieLe(), 'dd/MM/yyyy')})}">Contrat CIC-2026-000001 du 13/11/2026</p>
+                <p class="texte-doux" th:text="#{client.offre.reference(${offre.numero()}, ${#temporals.format(offre.etablieLe(), 'dd/MM/yyyy')})}">Contrat SEH-2026-000001 du 13/11/2026</p>
                 <p th:text="#{client.offre.prix-fixe}">Prix fixé : il ne changera plus, sans intérêt ni pénalité.</p>
                 <dl class="conditions">
                     <div>

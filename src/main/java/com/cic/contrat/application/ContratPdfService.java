@@ -57,7 +57,8 @@ public class ContratPdfService {
                 .orElseThrow(() -> new IllegalStateException("Client introuvable pour le " + contrat));
         LocalDate etabliLe = LocalDate.ofInstant(contrat.etabliLe(), clock.getZone());
         LocalDate dateLimite = etabliLe.plusDays(parametres.entier(CleParametre.DELAI_APPORT_AUTORISATION_JOURS));
-        byte[] pdf = rendu.rendre(new ContenuContrat(contrat, acheteur(client), etabliLe, dateLimite));
+        byte[] pdf = rendu.rendre(new ContenuContrat(contrat, acheteur(client), etabliLe, dateLimite,
+                parametres.texte(CleParametre.SOCIETE_RAISON_SOCIALE)));
         return new ContratPdf("contrat-" + contrat.numero() + ".pdf", pdf);
     }
 

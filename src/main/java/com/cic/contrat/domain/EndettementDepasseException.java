@@ -14,7 +14,7 @@ public class EndettementDepasseException extends ErreurMetier {
     private final Fraction partMax;
 
     public EndettementDepasseException(Montant totalMensualites, Montant salaireNet, Fraction partMax) {
-        super(CODE, "Total des mensualités CIC (" + totalMensualites + ") supérieur à " + partMax
+        super(CODE, "Total des mensualités Seheli (" + totalMensualites + ") supérieur à " + partMax
                 + " du salaire net (" + salaireNet + ")");
         this.totalMensualites = totalMensualites;
         this.salaireNet = salaireNet;

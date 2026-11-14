@@ -20,7 +20,7 @@ class ContratTest {
     private static final Instant LE = Instant.parse("2026-11-13T09:30:00Z");
 
     private static Contrat etablir(Montant apport, Echeancier plan) {
-        return Contrat.etablir("CIC-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+        return Contrat.etablir("SEH-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
                 UUID.randomUUID(), "Galaxy A35", PRIX, apport, plan, LE);
     }
 
@@ -57,7 +57,7 @@ class ContratTest {
                 Echeance.reconstituer(UUID.randomUUID(), 3, LocalDate.of(2026, 12, 25), Montant.de(6_240),
                         StatutEcheance.A_VENIR));
 
-        assertThatThrownBy(() -> Contrat.reconstituer(UUID.randomUUID(), "CIC-2026-000001", UUID.randomUUID(),
+        assertThatThrownBy(() -> Contrat.reconstituer(UUID.randomUUID(), "SEH-2026-000001", UUID.randomUUID(),
                 UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "Galaxy A35", PRIX, Montant.de(8_320),
                 echeances, LE)).isInstanceOf(IllegalArgumentException.class);
     }

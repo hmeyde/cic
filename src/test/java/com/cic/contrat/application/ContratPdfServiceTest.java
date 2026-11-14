@@ -63,7 +63,7 @@ class ContratPdfServiceTest {
         Optional<ContratPdf> pdf = service.pourDemande(demandeId);
 
         assertThat(pdf).hasValueSatisfying(p -> {
-            assertThat(p.nomFichier()).isEqualTo("contrat-CIC-2026-000001.pdf");
+            assertThat(p.nomFichier()).isEqualTo("contrat-SEH-2026-000001.pdf");
             assertThat(p.contenu()).startsWith('%', 'P', 'D', 'F');
         });
         ContenuContrat contenu = rendu.get();
@@ -73,6 +73,7 @@ class ContratPdfServiceTest {
         assertThat(contenu.acheteur().nom()).isEqualTo("Ould Ahmed");
         assertThat(contenu.acheteur().prenom()).isEqualTo("Mohamed");
         assertThat(contenu.acheteur().nni()).isEqualTo("1234567890");
+        assertThat(contenu.raisonSociale()).isEqualTo("Seheli");
     }
 
     @Test

@@ -36,7 +36,7 @@ class OpenPdfRenduAutorisationTest {
     private static Contrat exemple() {
         Echeancier plan = Echeancier.planifier(Montant.de(12_480), 6, LocalDate.of(2026, 11, 19), 25,
                 Optional.empty());
-        return Contrat.etablir("CIC-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+        return Contrat.etablir("SEH-2026-000001", UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
                 UUID.randomUUID(), "Galaxy A35",
                 new Prix(Montant.de(20_000), Montant.de(18_400), Montant.de(20_800), Montant.de(8_320)),
                 Montant.de(8_320), plan, ETABLI_LE);
@@ -45,8 +45,8 @@ class OpenPdfRenduAutorisationTest {
     private static ContenuAutorisation contenu(Contrat contrat, AutorisationPrelevement a, Optional<String> banque) {
         return new ContenuAutorisation(a, contrat,
                 new Acheteur("Ould Ahmed", "Mohamed", "1234567890", LocalDate.of(1990, 5, 1), "22123456"),
-                new CompteBeneficiaire("CIC SARL", "BMCI", "00020 00101 00001234567 53"), banque,
-                LocalDate.of(2026, 11, 12), LocalDate.of(2026, 11, 19));
+                new CompteBeneficiaire("Seheli", "BMCI", "00020 00101 00001234567 53"), banque,
+                LocalDate.of(2026, 11, 12), LocalDate.of(2026, 11, 19), "Seheli");
     }
 
     private static ContenuAutorisation contenu(Optional<String> banque) {
@@ -76,12 +76,12 @@ class OpenPdfRenduAutorisationTest {
     }
 
     @Test
-    void l_ordre_de_virement_est_rempli_avec_le_titulaire_le_compte_de_cic_et_les_mensualites() throws IOException {
+    void l_ordre_de_virement_est_rempli_avec_le_titulaire_le_compte_du_vendeur_et_les_mensualites() throws IOException {
         String texte = texte(rendu.rendre(contenu(Optional.empty())));
 
         assertThat(texte).contains("AUTORISATION DE PRÉLÈVEMENT", "Ordre de virement permanent",
-                "Contrat n° CIC-2026-000001", "Mohamed Ould Ahmed", "1234567890", "22123456",
-                "CIC SARL", "BMCI", "00020 00101 00001234567 53",
+                "Contrat n° SEH-2026-000001", "Mohamed Ould Ahmed", "1234567890", "22123456",
+                "Seheli", "BMCI", "00020 00101 00001234567 53",
                 "12 480 MRU", "mensuelle, 6 virements, du 25/11/2026 au 25/04/2027", "19/11/2026",
                 "Signature du titulaire du compte", "Cachet et visa de la banque");
         for (String date : List.of("25/11/2026", "25/12/2026", "25/01/2027", "25/02/2027", "25/03/2027",
@@ -89,7 +89,8 @@ class OpenPdfRenduAutorisationTest {
             assertThat(texte).contains(date);
         }
         assertThat(texte.split("2 080 MRU", -1)).hasSize(7);
-        assertThat(texte).contains("CIC-2026-000001 M1/6", "CIC-2026-000001 M6/6");
+        assertThat(texte).contains("SEH-2026-000001 M1/6", "SEH-2026-000001 M6/6");
+        assertThat(texte).contains("transmettre à Seheli").doesNotContain("CIC");
     }
 
     @Test

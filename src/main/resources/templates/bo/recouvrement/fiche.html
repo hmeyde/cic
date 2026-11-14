@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
-    <title th:text="#{bo.recouvrement.fiche.titre-page}">Dossier en recouvrement — Back-office CIC</title>
+    <title th:text="#{bo.recouvrement.fiche.titre-page}">Dossier en recouvrement — Back-office Seheli</title>
 </head>
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-fiche" th:with="f=${fiche}">
         <p><a th:href="@{/bo/recouvrement}" th:text="#{bo.recouvrement.retour}">Retour au recouvrement</a></p>
-        <h1 id="titre-fiche" th:text="#{bo.recouvrement.fiche.titre(${f.numeroContrat()})}">Contrat CIC-2026-000001</h1>
+        <h1 id="titre-fiche" th:text="#{bo.recouvrement.fiche.titre(${f.numeroContrat()})}">Contrat SEH-2026-000001</h1>
         <p>
             <span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${f.statut().name()}}">Échéance en retard</span>
             <span dir="auto" th:text="${f.designation()}">Galaxy A35</span>
