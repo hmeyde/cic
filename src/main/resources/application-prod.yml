@@ -21,7 +21,7 @@ logging:
       console: ecs
   level:
     root: WARN
-    com.cic: INFO
+    com.seheli: INFO
     org.flywaydb: INFO
 
 server:
@@ -32,6 +32,6 @@ server:
         http-only: true
         same-site: lax
 
-cic:
+seheli:
   documents:
     repertoire: ${CIC_DOCUMENTS_REPERTOIRE}   # obligatoire en production (volume persistant, sauvegardé)

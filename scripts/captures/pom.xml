@@ -8,8 +8,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.cic</groupId>
-    <artifactId>cic-captures</artifactId>
+    <groupId>com.seheli</groupId>
+    <artifactId>seheli-captures</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -33,7 +33,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <mainClass>com.cic.captures.CapturesEcrans</mainClass>
+                    <mainClass>com.seheli.captures.CapturesEcrans</mainClass>
                 </configuration>
             </plugin>
         </plugins>

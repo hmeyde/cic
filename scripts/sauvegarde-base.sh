@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sauvegarde de la base PostgreSQL de CIC (pg_dump au format custom, restaurable avec pg_restore).
+# Sauvegarde de la base PostgreSQL de Seheli (pg_dump au format custom, restaurable avec pg_restore).
 #
 # Usage :
 #   scripts/sauvegarde-base.sh            # une sauvegarde, tout de suite

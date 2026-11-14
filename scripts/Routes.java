@@ -3,7 +3,7 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
-/** Liste les routes web des contrôleurs Spring : java Routes.java src/main/java/com/cic */
+/** Liste les routes web des contrôleurs Spring : java Routes.java src/main/java/com/seheli */
 public class Routes {
     public static void main(String[] args) throws Exception {
         Path base = Path.of(args[0]);

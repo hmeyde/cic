@@ -11,11 +11,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.cic</groupId>
-    <artifactId>cic</artifactId>
+    <groupId>com.seheli</groupId>
+    <artifactId>seheli</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>cic</name>
-    <description>CIC — Crédit Instantané à la Consommation, MVP</description>
+    <name>seheli</name>
+    <description>Seheli — vente à crédit conforme mourabaha, MVP</description>
 
     <properties>
         <java.version>25</java.version>

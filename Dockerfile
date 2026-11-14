@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Image de production de l'application CIC, en deux étapes :
+# Image de production de l'application Seheli, en deux étapes :
 #  1. build : compilation Maven avec le JDK 25 (les tests tournent en CI, pas pendant le build de l'image) ;
 #  2. run   : JRE 25 seul, utilisateur non root, couches Spring Boot extraites pour un démarrage rapide.
 
@@ -13,7 +13,7 @@ RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -q -B dependency:go-offline
 COPY src src
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -q -B package -DskipTests \
- && java -Djarmode=tools -jar target/cic-*.jar extract --layers --launcher --destination /build/extrait
+ && java -Djarmode=tools -jar target/seheli-*.jar extract --layers --launcher --destination /build/extrait
 
 FROM eclipse-temurin:25-jre
 RUN useradd --system --uid 10001 --home-dir /app cic \

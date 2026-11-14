@@ -1,8 +1,8 @@
-# Carte du projet CIC
+# Carte du projet Seheli
 
-Générée automatiquement depuis le code (`6b81aee`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`9666d51`). Sert à se repérer vite ; le code fait foi.
 
-## Modules (`com.cic.*`)
+## Modules (`com.seheli.*`)
 
 | Module | Couches | Classes principales |
 |---|---|---|

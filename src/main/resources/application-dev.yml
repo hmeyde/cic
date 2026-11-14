@@ -11,11 +11,11 @@ spring:
 
 logging:
   level:
-    com.cic: DEBUG
+    com.seheli: DEBUG
     org.springframework.security: INFO
     org.flywaydb: INFO
 
-cic:
+seheli:
   back-office:
     admin-dev:              # comptes créés au démarrage en dev s'ils n'existent pas (ComptesBackOfficeDev)
       identifiant: ${CIC_BO_ADMIN_IDENTIFIANT:admin}

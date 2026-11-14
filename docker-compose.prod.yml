@@ -1,4 +1,4 @@
-# Déploiement de CIC : application + PostgreSQL + Caddy (HTTPS).
+# Déploiement de Seheli : application + PostgreSQL + Caddy (HTTPS).
 # Aucun secret ici : tout vient du fichier .env (non versionné), à créer depuis .env.example.
 #   cp .env.example .env   # puis remplacer chaque valeur A_CHANGER
 #   docker compose up -d --build

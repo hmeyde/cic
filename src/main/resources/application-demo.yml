@@ -12,11 +12,11 @@ spring:
 logging:
   level:
     root: INFO
-    com.cic: INFO
+    com.seheli: INFO
     org.springframework.security: WARN
     org.flywaydb: INFO
 
-cic:
+seheli:
   back-office:
     # Un compte par rôle, créé au démarrage s'il n'existe pas (ComptesBackOfficeDev). Mots de passe de
     # démonstration par défaut : les remplacer par variables d'environnement sur un serveur accessible.

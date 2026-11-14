@@ -245,7 +245,7 @@ compilation). Suivez le démarrage :
 docker compose logs -f app caddy
 ```
 
-Attendez `Started CicApplication` côté `app`, et `certificate obtained successfully` côté `caddy`, puis
+Attendez `Started SeheliApplication` côté `app`, et `certificate obtained successfully` côté `caddy`, puis
 **Ctrl+C** pour quitter l'affichage (l'application continue de tourner).
 
 ---

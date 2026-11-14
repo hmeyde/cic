@@ -2,13 +2,13 @@
 # Génère docs/CARTE.md à partir du code : bash scripts/carte.sh (depuis la racine du dépôt).
 set -u
 cd "${1:-.}"
-B=src/main/java/com/cic
+B=src/main/java/com/seheli
 {
-echo "# Carte du projet CIC"
+echo "# Carte du projet Seheli"
 echo
 echo "Générée automatiquement depuis le code (\`$(git log -1 --format=%h)\`). Sert à se repérer vite ; le code fait foi."
 echo
-echo "## Modules (\`com.cic.*\`)"
+echo "## Modules (\`com.seheli.*\`)"
 echo
 echo "| Module | Couches | Classes principales |"
 echo "|---|---|---|"

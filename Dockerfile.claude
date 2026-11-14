@@ -1,4 +1,4 @@
-# Conteneur isolé pour faire tourner Claude Code sur le projet CIC.
+# Conteneur isolé pour faire tourner Claude Code sur le projet Seheli.
 # Il ne voit que le dossier du projet (monté dans /workspace).
 FROM eclipse-temurin:25-jdk
 

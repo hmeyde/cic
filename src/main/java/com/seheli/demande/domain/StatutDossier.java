@@ -1,0 +1,115 @@
+package com.seheli.demande.domain;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * Statut d'un dossier et machine à états de son cycle de vie (CLAUDE.md, « Cycle de vie d'un dossier »).
+ *
+ * <pre>
+ * DEMANDE_SOUMISE → EN_ANALYSE → ACCEPTEE | REFUSEE
+ * ACCEPTEE → APPORT_ET_AUTORISATION | ANNULEE
+ * APPORT_ET_AUTORISATION → COMMANDEE → LIVREE → EN_REMBOURSEMENT
+ * EN_REMBOURSEMENT → SOLDEE | EN_RETARD
+ * EN_RETARD → EN_REMBOURSEMENT | RECOUVREMENT
+ * </pre>
+ *
+ * Toute autre transition lève {@link TransitionInterditeException}.
+ */
+public enum StatutDossier {
+    DEMANDE_SOUMISE,
+    EN_ANALYSE,
+    ACCEPTEE,
+    REFUSEE,
+    ANNULEE,
+    APPORT_ET_AUTORISATION,
+    COMMANDEE,
+    LIVREE,
+    EN_REMBOURSEMENT,
+    EN_RETARD,
+    SOLDEE,
+    RECOUVREMENT;
+
+    private static final Map<StatutDossier, Set<StatutDossier>> TRANSITIONS = new EnumMap<>(StatutDossier.class);
+
+    static {
+        autoriser(DEMANDE_SOUMISE, EN_ANALYSE);
+        autoriser(EN_ANALYSE, ACCEPTEE, REFUSEE);
+        autoriser(ACCEPTEE, APPORT_ET_AUTORISATION, ANNULEE);
+        autoriser(APPORT_ET_AUTORISATION, COMMANDEE);
+        autoriser(COMMANDEE, LIVREE);
+        autoriser(LIVREE, EN_REMBOURSEMENT);
+        autoriser(EN_REMBOURSEMENT, SOLDEE, EN_RETARD);
+        autoriser(EN_RETARD, EN_REMBOURSEMENT, RECOUVREMENT);
+        for (StatutDossier statut : values()) {
+            TRANSITIONS.putIfAbsent(statut, Collections.unmodifiableSet(EnumSet.noneOf(StatutDossier.class)));
+        }
+    }
+
+    private static void autoriser(StatutDossier depuis, StatutDossier premier, StatutDossier... autres) {
+        TRANSITIONS.put(depuis, Collections.unmodifiableSet(EnumSet.of(premier, autres)));
+    }
+
+    /** Statuts atteignables directement depuis celui-ci (vide pour un statut final). */
+    public Set<StatutDossier> suivants() {
+        return TRANSITIONS.get(this);
+    }
+
+    public boolean peutPasserA(StatutDossier cible) {
+        Objects.requireNonNull(cible, "cible");
+        return suivants().contains(cible);
+    }
+
+    /** Statut sans suivant : REFUSEE, ANNULEE, SOLDEE, RECOUVREMENT. */
+    public boolean estFinal() {
+        return suivants().isEmpty();
+    }
+
+    /**
+     * Dossier actif : ni refusé, ni annulé, ni soldé. Un dossier en recouvrement reste actif tant
+     * que le client doit encore de l'argent à Seheli. Sert à la règle « un seul dossier actif par client ».
+     */
+    public boolean estActif() {
+        return this != REFUSEE && this != ANNULEE && this != SOLDEE;
+    }
+
+    /**
+     * Dossier en attente de la décision de l'analyste : accepter, refuser ou demander un
+     * justificatif (cette dernière laisse le dossier EN_ANALYSE).
+     */
+    public boolean attendDecision() {
+        return this == EN_ANALYSE;
+    }
+
+    /** Le client a une échéance impayée sur ce dossier (EN_RETARD ou RECOUVREMENT). */
+    public boolean estEnRetard() {
+        return this == EN_RETARD || this == RECOUVREMENT;
+    }
+
+    /**
+     * Les mensualités sont prélevées à leur date : apport encaissé et autorisation ACCEPTEE
+     * (APPORT_ET_AUTORISATION et au-delà), dossier pas encore soldé.
+     */
+    public boolean estEnPrelevement() {
+        return switch (this) {
+            case APPORT_ET_AUTORISATION, COMMANDEE, LIVREE, EN_REMBOURSEMENT, EN_RETARD, RECOUVREMENT -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Vérifie la transition et la décrit pour le journal d'audit.
+     *
+     * @throws TransitionInterditeException si la transition n'est pas permise
+     */
+    public ChangementStatut passerA(StatutDossier cible) {
+        if (!peutPasserA(cible)) {
+            throw new TransitionInterditeException(this, cible);
+        }
+        return new ChangementStatut(this, cible);
+    }
+}

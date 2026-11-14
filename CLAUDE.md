@@ -1,9 +1,9 @@
-# CIC — MVP
+# Seheli (سهلي) — MVP
 
 ## Contexte
-CIC vend à crédit des téléphones et de l'électroménager à des salariés en Mauritanie.
+Seheli vend à crédit des téléphones et de l'électroménager à des salariés en Mauritanie.
 Le client paie 40 % d'apport, reçoit le produit, puis rembourse le reste en 3 à 6 mensualités prélevées dès le versement de son salaire.
-CIC achète au fournisseur avec une remise et revend presque au prix public, plus une marge fixée à la signature (logique de mourabaha : pas d'intérêt, pas de pénalité).
+Seheli achète au fournisseur avec une remise et revend presque au prix public, plus une marge fixée à la signature (logique de mourabaha : pas d'intérêt, pas de pénalité).
 Le MVP est le prototype présenté au BMCI Business Challenge : il doit fonctionner de bout en bout en démonstration.
 
 ## Périmètre du MVP
@@ -29,7 +29,8 @@ Exclus : Bankily, API Masrvi, vrai fournisseur SMS ou WhatsApp (adaptateur qui j
 - Actuator, Micrometer, journaux JSON en production.
 
 ## Architecture
-- Monolithe modulaire. Un package par module sous `com.cic` : `identite`, `catalogue`, `demande`, `contrat`, `paiement`, `recouvrement`, `comptabilite`, `notification`, `pilotage`, `audit`, `inscription`.
+- Monolithe modulaire. Un package par module sous `com.seheli` : `identite`, `catalogue`, `demande`, `contrat`, `paiement`, `recouvrement`, `comptabilite`, `notification`, `pilotage`, `audit`, `inscription`.
+- Ancien nom conservé volontairement : base de données `cic`, migrations Flyway existantes, clés de la table `parametre` (`cic.compte.*`, `marge.cic.defaut.pct`…), variables d'environnement `CIC_*`, répertoires `~/.cic/`. La configuration Spring est sous `seheli.*`.
 - Architecture hexagonale dans chaque module : `domain` (Java pur, sans Spring), `application` (cas d'usage), `adapter.in.web`, `adapter.out.persistence`, `adapter.out.*` pour les services externes.
 - Jamais d'accès direct au repository d'un autre module : passer par l'API publique du module ou par des événements de domaine.
 - Pas de relation JPA entre modules : on référence un autre module par identifiant.
@@ -40,10 +41,10 @@ Exclus : Bankily, API Masrvi, vrai fournisseur SMS ou WhatsApp (adaptateur qui j
 
 ## Règles de gestion (valeurs de départ, table `parametre`)
 - Apport minimum : 40 % du prix de vente.
-- Marge CIC : 4 % du prix public, par catégorie de produit.
+- Marge Seheli : 4 % du prix public, par catégorie de produit.
 - Remise fournisseur : 5 à 10 %, par fournisseur.
 - Durée : 3 à 6 mois.
-- Total des mensualités CIC d'un client ≤ 1/3 de son salaire net.
+- Total des mensualités Seheli d'un client ≤ 1/3 de son salaire net.
 - Un seul dossier actif par client.
 - Apport et autorisation de prélèvement sous 7 jours après acceptation, sinon dossier ANNULEE.
 - Date d'échéance = jour de paie du client. Pour un CDD, la dernière échéance tombe avant la fin du contrat.
@@ -58,7 +59,7 @@ Exclus : Bankily, API Masrvi, vrai fournisseur SMS ou WhatsApp (adaptateur qui j
 Prix public 20 000 MRU ; remise 8 % → prix d'achat 18 400 ; marge 4 % → prix de vente 20 800 ; apport 40 % = 8 320 ; reste 12 480 = 6 × 2 080 ; capital engagé 10 080 ; bénéfice brut 2 400.
 
 ## Score v1
-Conditions éliminatoires : NNI et pièce d'identité vérifiés ; 18 ans ou plus ; contrat de travail en cours ; salaire versé sur un compte ; mensualités ≤ 1/3 du salaire net ; aucun retard en cours chez CIC.
+Conditions éliminatoires : NNI et pièce d'identité vérifiés ; 18 ans ou plus ; contrat de travail en cours ; salaire versé sur un compte ; mensualités ≤ 1/3 du salaire net ; aucun retard en cours chez Seheli.
 
 Note sur 100 :
 - Type de contrat (25) : fonctionnaire ou CDI 25 ; CDD plus long que le crédit 15.
@@ -67,7 +68,7 @@ Note sur 100 :
 - Part du salaire consacrée aux échéances (15) : moins de 20 % 15 ; de 20 à 33 % 8.
 - Apport au-delà de 40 % (10) : proportionnel à l'apport supplémentaire.
 - Garant (10).
-- Historique chez CIC (10) : plans déjà remboursés à temps.
+- Historique chez Seheli (10) : plans déjà remboursés à temps.
 
 Lecture : ≥ 70 FAVORABLE ; 50 à 69 A_EXAMINER ; < 50 DEFAVORABLE. Le score recommande, l'analyste décide toujours. Chaque critère garde ses points et sa raison ; la version de la grille est stockée.
 

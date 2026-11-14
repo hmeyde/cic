@@ -1,6 +1,6 @@
 spring:
   application:
-    name: cic
+    name: seheli
   profiles:
     active: dev        # surchargé par SPRING_PROFILES_ACTIVE en production
   messages:
@@ -43,7 +43,7 @@ server:
   mime-mappings:
     webmanifest: application/manifest+json
 
-cic:
+seheli:
   documents:
     # Justificatifs : répertoire hors de l'application et de ses ressources statiques.
     repertoire: ${CIC_DOCUMENTS_REPERTOIRE:${user.home}/.cic/justificatifs}
