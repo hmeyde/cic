@@ -27,8 +27,8 @@ COPY --from=build /build/extrait/application/ ./
 USER cic
 
 # Justificatifs et autorisations signées : hors de l'image, dans un volume.
-ENV CIC_DOCUMENTS_REPERTOIRE=/data/justificatifs \
-    CIC_AUTORISATIONS_REPERTOIRE=/data/autorisations-signees \
+ENV SEHELI_DOCUMENTS_REPERTOIRE=/data/justificatifs \
+    SEHELI_AUTORISATIONS_REPERTOIRE=/data/autorisations-signees \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -Duser.timezone=UTC"
 VOLUME /data
 EXPOSE 8080

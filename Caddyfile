@@ -1,7 +1,7 @@
 # Caddy : terminaison HTTPS devant l'application.
-# CIC_DOMAINE = nom de domaine public -> certificat Let's Encrypt automatique (ports 80 et 443 ouverts).
-# CIC_DOMAINE = localhost (par défaut) -> certificat de l'autorité interne de Caddy, pour un essai local.
-{$CIC_DOMAINE:localhost} {
+# SEHELI_DOMAINE = nom de domaine public -> certificat Let's Encrypt automatique (ports 80 et 443 ouverts).
+# SEHELI_DOMAINE = localhost (par défaut) -> certificat de l'autorité interne de Caddy, pour un essai local.
+{$SEHELI_DOMAINE:localhost} {
 	encode zstd gzip
 
 	header {

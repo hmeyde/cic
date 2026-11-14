@@ -118,7 +118,7 @@ public class RappelPrelevementService {
         String date = DATE.format(e.date());
         String question = messages.getMessage("recouvrement.rappel.prelevement.whatsapp",
                 new Object[] {rang, total, date, a.numeroContrat()}, LANGUE);
-        String lien = LienWhatsApp.vers(parametres.texte(CleParametre.CIC_WHATSAPP_NUMERO), question);
+        String lien = LienWhatsApp.vers(parametres.texte(CleParametre.SEHELI_WHATSAPP_NUMERO), question);
         return messages.getMessage("recouvrement.rappel.prelevement.sms",
                 new Object[] {rang, total, e.montant().valeur().toPlainString(), a.numeroContrat(), date, lien},
                 LANGUE);

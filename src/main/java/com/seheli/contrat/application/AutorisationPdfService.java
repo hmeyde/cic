@@ -72,8 +72,8 @@ public class AutorisationPdfService {
         Optional<String> banque = emplois.parClient(contrat.clientId())
                 .filter(Emploi::estSalaireDomicilieBmci)
                 .map(e -> BANQUE_BMCI);
-        CompteBeneficiaire vendeur = new CompteBeneficiaire(parametres.texte(CleParametre.CIC_COMPTE_TITULAIRE),
-                parametres.texte(CleParametre.CIC_COMPTE_BANQUE), parametres.texte(CleParametre.CIC_COMPTE_NUMERO));
+        CompteBeneficiaire vendeur = new CompteBeneficiaire(parametres.texte(CleParametre.SEHELI_COMPTE_TITULAIRE),
+                parametres.texte(CleParametre.SEHELI_COMPTE_BANQUE), parametres.texte(CleParametre.SEHELI_COMPTE_NUMERO));
         LocalDate emiseLe = LocalDate.ofInstant(autorisation.emiseLe(), clock.getZone());
         LocalDate dateLimite = LocalDate.ofInstant(contrat.etabliLe(), clock.getZone())
                 .plusDays(parametres.entier(CleParametre.DELAI_APPORT_AUTORISATION_JOURS));

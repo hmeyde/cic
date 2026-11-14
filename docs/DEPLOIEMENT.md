@@ -1,4 +1,4 @@
-# Mettre CIC en ligne — guide pas à pas
+# Mettre Seheli en ligne — guide pas à pas
 
 Ce guide part de zéro : rien n'est acheté, rien n'est installé. À la fin, l'application tourne sur
 `https://<votre-domaine>` en HTTPS, avec les données de démonstration pour le jury.
@@ -111,6 +111,28 @@ Dans l'espace client Contabo (https://my.contabo.com) : rubrique **DNS** (gestio
 **Ne passez pas à l'étape 5 tant que `nslookup` ne renvoie pas la bonne IP** : sans cela, le certificat
 HTTPS ne peut pas être obtenu.
 
+### 2.1 Mise en ligne sans nom de domaine (sslip.io)
+
+Pas encore de domaine ? Le service gratuit [sslip.io](https://sslip.io) fait pointer tout nom
+`<IP>.sslip.io` vers l'adresse `<IP>` : Caddy obtient alors un vrai certificat Let's Encrypt sans aucun
+réglage DNS.
+
+1. Dans `.env` (étape 5.1), mettez l'IP du serveur suivie de `.sslip.io` :
+   ```bash
+   SEHELI_DOMAINE=VOTRE_IP.sslip.io        # par exemple 203.0.113.10.sslip.io
+   ```
+2. Les ports **80** et **443** doivent être ouverts vers le serveur (pare-feu `ufw` de l'étape 4.1, et
+   pare-feu de l'hébergeur s'il y en a un) : Let's Encrypt s'y connecte pour valider le nom.
+3. Si l'application tourne déjà, recréez seulement Caddy pour qu'il lise la nouvelle valeur :
+   ```bash
+   docker compose up -d --force-recreate caddy
+   docker compose logs -f caddy              # attendre « certificate obtained successfully »
+   ```
+4. Ouvrez `https://VOTRE_IP.sslip.io`.
+
+Le jour où vous achetez un domaine, remplacez simplement `SEHELI_DOMAINE` dans `.env` et relancez la même
+commande `--force-recreate caddy`.
+
 ---
 
 ## 3. Mettre le code sur GitHub
@@ -219,12 +241,12 @@ Changez **seulement** ces lignes :
 | Ligne | Valeur |
 |---|---|
 | `SPRING_PROFILES_ACTIVE` | `demo` (démonstration pour le jury) |
-| `CIC_DOMAINE` | votre domaine, par exemple `cic-credit.com` |
+| `SEHELI_DOMAINE` | votre domaine, par exemple `cic-credit.com` |
 | `DB_PASSWORD` | mot de passe n° 1 |
-| `CIC_BO_ADMIN_MOT_DE_PASSE` | mot de passe n° 2 |
-| `CIC_BO_ANALYSTE_MOT_DE_PASSE` | mot de passe n° 3 |
-| `CIC_BO_RECOUVREMENT_MOT_DE_PASSE` | mot de passe n° 4 |
-| `CIC_BO_ASSOCIE_MOT_DE_PASSE` | mot de passe n° 5 |
+| `SEHELI_BO_ADMIN_MOT_DE_PASSE` | mot de passe n° 2 |
+| `SEHELI_BO_ANALYSTE_MOT_DE_PASSE` | mot de passe n° 3 |
+| `SEHELI_BO_RECOUVREMENT_MOT_DE_PASSE` | mot de passe n° 4 |
+| `SEHELI_BO_ASSOCIE_MOT_DE_PASSE` | mot de passe n° 5 |
 
 Enregistrez avec **Ctrl+O**, Entrée, puis quittez avec **Ctrl+X**. Il ne doit plus rester aucun `A_CHANGER` :
 
@@ -303,6 +325,28 @@ docker compose up -d --build
 ```
 
 Les migrations de base s'appliquent toutes seules ; les données sont conservées.
+
+### Passer de CIC à Seheli sur un serveur existant
+
+Les variables d'environnement `CIC_*` s'appellent désormais `SEHELI_*`, et l'image Docker `cic:latest`
+devient `seheli:latest`. Le nom du projet Compose reste figé à `cic` (clé `name: cic` de
+`docker-compose.prod.yml`) : les volumes `cic_pgdata`, `cic_justificatifs`, `cic_sauvegardes` et
+`cic_caddy_data` sont repris tels quels, **aucune donnée n'est perdue** et le certificat HTTPS est conservé.
+
+Une seule fois, sur le serveur :
+
+```bash
+cd ~/cic
+cp .env .env.avant-seheli                 # copie de secours (contient des secrets : à supprimer ensuite)
+sed -i 's/^CIC_/SEHELI_/' .env            # CIC_DOMAINE -> SEHELI_DOMAINE, CIC_BO_* -> SEHELI_BO_*
+grep -c '^SEHELI_' .env                   # 9 lignes attendues
+git pull
+docker compose up -d --build
+```
+
+Sans le `sed`, `docker compose` s'arrête sur `SEHELI_BO_ADMIN_MOT_DE_PASSE manquant dans .env` : rien
+n'est modifié, il suffit de lancer le `sed` puis de recommencer. Une fois `app` revenu en `(healthy)` :
+`rm .env.avant-seheli` et, pour libérer de la place, `docker image rm cic:latest`.
 
 ### Sauvegardes
 

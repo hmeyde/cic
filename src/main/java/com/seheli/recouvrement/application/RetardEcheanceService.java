@@ -194,7 +194,7 @@ public class RetardEcheanceService {
         String date = DATE.format(e.date());
         String question = messages.getMessage("recouvrement.rappel.prelevement.whatsapp",
                 new Object[] {rang, total, date, a.numeroContrat()}, LANGUE);
-        String lien = LienWhatsApp.vers(parametres.texte(CleParametre.CIC_WHATSAPP_NUMERO), question);
+        String lien = LienWhatsApp.vers(parametres.texte(CleParametre.SEHELI_WHATSAPP_NUMERO), question);
         String reference = ReferenceEcheance.pourEcheance(a.numeroContrat(), e.rang()).valeur();
         return messages.getMessage("recouvrement.relance." + due.type().name() + ".sms",
                 new Object[] {rang, total, e.montant().valeur().toPlainString(), a.numeroContrat(), date,

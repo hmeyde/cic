@@ -18,18 +18,18 @@ logging:
 seheli:
   back-office:
     admin-dev:              # comptes créés au démarrage en dev s'ils n'existent pas (ComptesBackOfficeDev)
-      identifiant: ${CIC_BO_ADMIN_IDENTIFIANT:admin}
-      mot-de-passe: ${CIC_BO_ADMIN_MOT_DE_PASSE:admin-dev}
+      identifiant: ${SEHELI_BO_ADMIN_IDENTIFIANT:admin}
+      mot-de-passe: ${SEHELI_BO_ADMIN_MOT_DE_PASSE:admin-dev}
     analyste-dev:           # rôle ANALYSTE : file des dossiers à analyser
-      identifiant: ${CIC_BO_ANALYSTE_IDENTIFIANT:analyste}
-      mot-de-passe: ${CIC_BO_ANALYSTE_MOT_DE_PASSE:analyste-dev}
+      identifiant: ${SEHELI_BO_ANALYSTE_IDENTIFIANT:analyste}
+      mot-de-passe: ${SEHELI_BO_ANALYSTE_MOT_DE_PASSE:analyste-dev}
     recouvrement-dev:       # rôle RECOUVREMENT : écran du recouvrement, paiements reçus
-      identifiant: ${CIC_BO_RECOUVREMENT_IDENTIFIANT:recouvrement}
-      mot-de-passe: ${CIC_BO_RECOUVREMENT_MOT_DE_PASSE:recouvrement-dev}
+      identifiant: ${SEHELI_BO_RECOUVREMENT_IDENTIFIANT:recouvrement}
+      mot-de-passe: ${SEHELI_BO_RECOUVREMENT_MOT_DE_PASSE:recouvrement-dev}
     associe-dev:            # rôle ASSOCIE : tableau de bord des associés, apports en capital (lecture)
-      identifiant: ${CIC_BO_ASSOCIE_IDENTIFIANT:associe}
-      mot-de-passe: ${CIC_BO_ASSOCIE_MOT_DE_PASSE:associe-dev}
+      identifiant: ${SEHELI_BO_ASSOCIE_IDENTIFIANT:associe}
+      mot-de-passe: ${SEHELI_BO_ASSOCIE_MOT_DE_PASSE:associe-dev}
 
   client-demo:              # client créé au démarrage s'il n'existe pas (ClientDemonstration)
-    telephone: ${CIC_CLIENT_DEMO_TELEPHONE:22000001}
-    nni: ${CIC_CLIENT_DEMO_NNI:9990000001}
+    telephone: ${SEHELI_CLIENT_DEMO_TELEPHONE:22000001}
+    nni: ${SEHELI_CLIENT_DEMO_NNI:9990000001}

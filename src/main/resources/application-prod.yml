@@ -34,4 +34,4 @@ server:
 
 seheli:
   documents:
-    repertoire: ${CIC_DOCUMENTS_REPERTOIRE}   # obligatoire en production (volume persistant, sauvegardé)
+    repertoire: ${SEHELI_DOCUMENTS_REPERTOIRE}   # obligatoire en production (volume persistant, sauvegardé)

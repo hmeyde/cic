@@ -3,6 +3,12 @@
 #   cp .env.example .env   # puis remplacer chaque valeur A_CHANGER
 #   docker compose up -d --build
 # (.env fixe COMPOSE_FILE=docker-compose.prod.yml ; docker-compose.yml reste la base locale de développement.)
+
+# Nom du projet figé à « cic » (ancien nom, à ne pas changer) : les volumes déjà créés sur le serveur
+# (cic_pgdata, cic_justificatifs, cic_sauvegardes, cic_caddy_data…) restent les mêmes, quel que soit
+# le nom du répertoire du dépôt.
+name: cic
+
 services:
   db:
     image: postgres:17
@@ -22,7 +28,7 @@ services:
 
   app:
     build: .
-    image: cic:latest
+    image: seheli:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -40,14 +46,14 @@ services:
       SERVER_FORWARD_HEADERS_STRATEGY: native
       SERVER_SERVLET_SESSION_COOKIE_SECURE: "true"
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
-      CIC_BO_ADMIN_IDENTIFIANT: ${CIC_BO_ADMIN_IDENTIFIANT:-admin}
-      CIC_BO_ADMIN_MOT_DE_PASSE: ${CIC_BO_ADMIN_MOT_DE_PASSE:?CIC_BO_ADMIN_MOT_DE_PASSE manquant dans .env}
-      CIC_BO_ANALYSTE_IDENTIFIANT: ${CIC_BO_ANALYSTE_IDENTIFIANT:-analyste}
-      CIC_BO_ANALYSTE_MOT_DE_PASSE: ${CIC_BO_ANALYSTE_MOT_DE_PASSE:?CIC_BO_ANALYSTE_MOT_DE_PASSE manquant dans .env}
-      CIC_BO_RECOUVREMENT_IDENTIFIANT: ${CIC_BO_RECOUVREMENT_IDENTIFIANT:-recouvrement}
-      CIC_BO_RECOUVREMENT_MOT_DE_PASSE: ${CIC_BO_RECOUVREMENT_MOT_DE_PASSE:?CIC_BO_RECOUVREMENT_MOT_DE_PASSE manquant dans .env}
-      CIC_BO_ASSOCIE_IDENTIFIANT: ${CIC_BO_ASSOCIE_IDENTIFIANT:-associe}
-      CIC_BO_ASSOCIE_MOT_DE_PASSE: ${CIC_BO_ASSOCIE_MOT_DE_PASSE:?CIC_BO_ASSOCIE_MOT_DE_PASSE manquant dans .env}
+      SEHELI_BO_ADMIN_IDENTIFIANT: ${SEHELI_BO_ADMIN_IDENTIFIANT:-admin}
+      SEHELI_BO_ADMIN_MOT_DE_PASSE: ${SEHELI_BO_ADMIN_MOT_DE_PASSE:?SEHELI_BO_ADMIN_MOT_DE_PASSE manquant dans .env}
+      SEHELI_BO_ANALYSTE_IDENTIFIANT: ${SEHELI_BO_ANALYSTE_IDENTIFIANT:-analyste}
+      SEHELI_BO_ANALYSTE_MOT_DE_PASSE: ${SEHELI_BO_ANALYSTE_MOT_DE_PASSE:?SEHELI_BO_ANALYSTE_MOT_DE_PASSE manquant dans .env}
+      SEHELI_BO_RECOUVREMENT_IDENTIFIANT: ${SEHELI_BO_RECOUVREMENT_IDENTIFIANT:-recouvrement}
+      SEHELI_BO_RECOUVREMENT_MOT_DE_PASSE: ${SEHELI_BO_RECOUVREMENT_MOT_DE_PASSE:?SEHELI_BO_RECOUVREMENT_MOT_DE_PASSE manquant dans .env}
+      SEHELI_BO_ASSOCIE_IDENTIFIANT: ${SEHELI_BO_ASSOCIE_IDENTIFIANT:-associe}
+      SEHELI_BO_ASSOCIE_MOT_DE_PASSE: ${SEHELI_BO_ASSOCIE_MOT_DE_PASSE:?SEHELI_BO_ASSOCIE_MOT_DE_PASSE manquant dans .env}
     volumes:
       - justificatifs:/data   # justificatifs et autorisations signées, hors de l'image
     expose:
@@ -86,7 +92,7 @@ services:
       app:
         condition: service_healthy
     environment:
-      CIC_DOMAINE: ${CIC_DOMAINE:-localhost}
+      SEHELI_DOMAINE: ${SEHELI_DOMAINE:-localhost}
     ports:
       - "80:80"
       - "443:443"

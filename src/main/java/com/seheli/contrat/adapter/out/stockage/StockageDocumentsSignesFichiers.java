@@ -18,7 +18,7 @@ import com.seheli.contrat.domain.StockageDocumentsSignes;
 /**
  * Autorisations signées rangées sur disque, dans un répertoire hors de l'application et de ses
  * ressources statiques ({@code seheli.autorisations.repertoire}, variable
- * {@code CIC_AUTORISATIONS_REPERTOIRE}). Un fichier par document, nommé par son identifiant (UUID) :
+ * {@code SEHELI_AUTORISATIONS_REPERTOIRE}). Un fichier par document, nommé par son identifiant (UUID) :
  * ni nom d'origine, ni donnée personnelle. Écriture atomique (fichier temporaire puis renommage) ;
  * répertoire et fichiers réservés au compte qui exécute l'application quand le système le permet.
  */

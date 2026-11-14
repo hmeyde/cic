@@ -12,7 +12,7 @@ import static com.seheli.parametrage.domain.TypeParametre.TEXTE;
 public enum CleParametre {
 
     APPORT_MINIMUM_PCT("apport.minimum.pct", POURCENTAGE),
-    MARGE_CIC_DEFAUT_PCT("marge.cic.defaut.pct", POURCENTAGE),
+    MARGE_SEHELI_DEFAUT_PCT("marge.cic.defaut.pct", POURCENTAGE),
     REMISE_FOURNISSEUR_MIN_PCT("remise.fournisseur.min.pct", POURCENTAGE),
     REMISE_FOURNISSEUR_MAX_PCT("remise.fournisseur.max.pct", POURCENTAGE),
 
@@ -46,13 +46,13 @@ public enum CleParametre {
     CONNEXION_CODE_ESSAIS_MAX("connexion.code.essais.max", ENTIER),
     CONNEXION_CODE_RENVOI_SECONDES("connexion.code.renvoi.secondes", ENTIER),
 
-    CIC_COMPTE_TITULAIRE("cic.compte.titulaire", TEXTE),
-    CIC_COMPTE_BANQUE("cic.compte.banque", TEXTE),
-    CIC_COMPTE_NUMERO("cic.compte.numero", TEXTE),
+    SEHELI_COMPTE_TITULAIRE("cic.compte.titulaire", TEXTE),
+    SEHELI_COMPTE_BANQUE("cic.compte.banque", TEXTE),
+    SEHELI_COMPTE_NUMERO("cic.compte.numero", TEXTE),
 
     MASRVI_CODE_MARCHAND("masrvi.code.marchand", TEXTE),
 
-    CIC_WHATSAPP_NUMERO("cic.whatsapp.numero", TEXTE),
+    SEHELI_WHATSAPP_NUMERO("cic.whatsapp.numero", TEXTE),
 
     SOCIETE_RAISON_SOCIALE("societe.raison-sociale", TEXTE);
 

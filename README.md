@@ -141,10 +141,10 @@ docker compose down -v && docker compose up -d
 | Variable | Rôle | Défaut |
 |---|---|---|
 | `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` | base PostgreSQL | `jdbc:postgresql://localhost:5432/cic`, `cic`, `cic` |
-| `CIC_BO_<ROLE>_IDENTIFIANT`, `CIC_BO_<ROLE>_MOT_DE_PASSE` (`ADMIN`, `ANALYSTE`, `RECOUVREMENT`, `ASSOCIE`) | comptes back-office créés au démarrage (`dev`, `demo`) s'ils n'existent pas | voir tableau ci-dessus |
-| `CIC_CLIENT_DEMO_TELEPHONE`, `CIC_CLIENT_DEMO_NNI` | client de démonstration | `22000001`, `9990000001` |
-| `CIC_DOCUMENTS_REPERTOIRE` | justificatifs déposés | `~/.cic/justificatifs` |
-| `CIC_AUTORISATIONS_REPERTOIRE` | autorisations de prélèvement signées | `~/.cic/autorisations-signees` |
+| `SEHELI_BO_<ROLE>_IDENTIFIANT`, `SEHELI_BO_<ROLE>_MOT_DE_PASSE` (`ADMIN`, `ANALYSTE`, `RECOUVREMENT`, `ASSOCIE`) | comptes back-office créés au démarrage (`dev`, `demo`) s'ils n'existent pas | voir tableau ci-dessus |
+| `SEHELI_CLIENT_DEMO_TELEPHONE`, `SEHELI_CLIENT_DEMO_NNI` | client de démonstration | `22000001`, `9990000001` |
+| `SEHELI_DOCUMENTS_REPERTOIRE` | justificatifs déposés | `~/.cic/justificatifs` |
+| `SEHELI_AUTORISATIONS_REPERTOIRE` | autorisations de prélèvement signées | `~/.cic/autorisations-signees` |
 
 Un compte back-office déjà créé garde son mot de passe : changer la variable ne le modifie pas (repartir d'une
 base vide ou réinitialiser la démonstration).
@@ -153,7 +153,7 @@ base vide ou réinitialiser la démonstration).
 
 `bash scripts/captures.sh` capture en PNG les écrans clés (pages publiques, parcours client, back-office par rôle),
 en français et en arabe, dans `docs/captures/fr/` et `docs/captures/ar/`. L'application doit tourner en profil
-`demo` sur une base fraîche ou réinitialisée (URL : `CIC_CAPTURES_URL`, défaut `http://localhost:8080`).
+`demo` sur une base fraîche ou réinitialisée (URL : `SEHELI_CAPTURES_URL`, défaut `http://localhost:8080`).
 L'outil est un petit projet Maven séparé (`scripts/captures/`, Playwright pour Java : ni Node ni dépendance
 ajoutée à l'application) ; au premier lancement, il télécharge Chromium dans `~/.cache/ms-playwright`.
 Chromium a besoin des bibliothèques système habituelles (paquets `libnss3`, `libgbm1`, `libasound2t64`…) et
@@ -203,18 +203,23 @@ docker compose logs -f app caddy
 
 Dans `.env` :
 
-- `CIC_DOMAINE` : le nom de domaine public (par exemple `cic.exemple.mr`) ;
+- `SEHELI_DOMAINE` : le nom de domaine public (par exemple `seheli.exemple.mr`) ;
 - `SPRING_PROFILES_ACTIVE=demo` pour le jury (données fictives, code `000000`, réinitialisation) ;
   `prod` pour une exploitation réelle ;
-- `DB_PASSWORD` et les quatre `CIC_BO_*_MOT_DE_PASSE` : des mots de passe longs et distincts, par exemple
+- `DB_PASSWORD` et les quatre `SEHELI_BO_*_MOT_DE_PASSE` : des mots de passe longs et distincts, par exemple
   générés avec `openssl rand -base64 18`. Ce sont eux qu'on remet au jury.
 
 Le site est prêt quand `docker compose ps` affiche `app` en `healthy` (une à trois minutes au premier
 démarrage) : ouvrir `https://<domaine>`. Vérification : `curl -s https://<domaine>/actuator/health` renvoie
 `{"status":"UP"}`.
 
-Essai du déploiement complet sur un poste : laisser `CIC_DOMAINE=localhost`, puis ouvrir
+Essai du déploiement complet sur un poste : laisser `SEHELI_DOMAINE=localhost`, puis ouvrir
 `https://localhost` (certificat de l'autorité interne de Caddy, à accepter dans le navigateur).
+
+Sans nom de domaine : `SEHELI_DOMAINE=VOTRE_IP.sslip.io` (ports 80 et 443 ouverts), puis
+`docker compose up -d --force-recreate caddy` ; détails dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
+Serveur installé avant le renommage en Seheli : suivre la section « Passer de CIC à Seheli sur un serveur
+existant » du même guide (renommage des variables du `.env`, volumes conservés).
 
 ### Mise à jour
 

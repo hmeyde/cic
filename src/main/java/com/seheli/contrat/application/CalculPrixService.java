@@ -30,7 +30,7 @@ public class CalculPrixService {
     public Prix calculer(Montant prixPublic, BigDecimal remiseFournisseurPct) {
         Parametres courants = parametres.courants();
         return calculer(courants, prixPublic, remiseFournisseurPct,
-                courants.pourcentage(CleParametre.MARGE_CIC_DEFAUT_PCT));
+                courants.pourcentage(CleParametre.MARGE_SEHELI_DEFAUT_PCT));
     }
 
     /**

@@ -19,9 +19,9 @@ import com.microsoft.playwright.options.LoadState;
  * Parcours client et pages publiques en format mobile, back-office en format bureau. Chaque rôle a son propre
  * contexte de navigateur ; la langue est choisie par {@code ?lang=} puis mémorisée dans le cookie de l'application.
  *
- * <p>Variables d'environnement (facultatives) : {@code CIC_CAPTURES_URL} (défaut {@code http://localhost:8080}),
- * {@code CIC_CAPTURES_SORTIE} (défaut {@code docs/captures}), et les identifiants back-office
- * {@code CIC_BO_<ROLE>_IDENTIFIANT} / {@code CIC_BO_<ROLE>_MOT_DE_PASSE} (défauts du profil demo).
+ * <p>Variables d'environnement (facultatives) : {@code SEHELI_CAPTURES_URL} (défaut {@code http://localhost:8080}),
+ * {@code SEHELI_CAPTURES_SORTIE} (défaut {@code docs/captures}), et les identifiants back-office
+ * {@code SEHELI_BO_<ROLE>_IDENTIFIANT} / {@code SEHELI_BO_<ROLE>_MOT_DE_PASSE} (défauts du profil demo).
  */
 public final class CapturesEcrans {
 
@@ -42,8 +42,8 @@ public final class CapturesEcrans {
     }
 
     public static void main(String[] args) throws Exception {
-        String base = env("CIC_CAPTURES_URL", "http://localhost:8080").replaceAll("/+$", "");
-        Path sortie = Path.of(env("CIC_CAPTURES_SORTIE", "docs/captures")).toAbsolutePath();
+        String base = env("SEHELI_CAPTURES_URL", "http://localhost:8080").replaceAll("/+$", "");
+        Path sortie = Path.of(env("SEHELI_CAPTURES_SORTIE", "docs/captures")).toAbsolutePath();
         installerChromium();
         try (Playwright playwright = Playwright.create(new Playwright.CreateOptions()
                 .setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
@@ -146,8 +146,8 @@ public final class CapturesEcrans {
     private Page connecterBackOffice(BrowserContext ctx, String role, String defaut, String langue) {
         Page p = ctx.newPage();
         ouvrir(p, "/bo/login?lang=" + langue, langue);
-        p.fill("#identifiant", env("CIC_BO_" + role + "_IDENTIFIANT", defaut));
-        p.fill("#motDePasse", env("CIC_BO_" + role + "_MOT_DE_PASSE", defaut + "-demo"));
+        p.fill("#identifiant", env("SEHELI_BO_" + role + "_IDENTIFIANT", defaut));
+        p.fill("#motDePasse", env("SEHELI_BO_" + role + "_MOT_DE_PASSE", defaut + "-demo"));
         soumettre(p);
         verifierPas(p, "/bo/login", "connexion back-office refusée pour le rôle " + role);
         return p;

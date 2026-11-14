@@ -12,7 +12,7 @@ public final class ParametresDeDepart {
 
     private static final Map<CleParametre, String> VALEURS = Map.ofEntries(
             Map.entry(CleParametre.APPORT_MINIMUM_PCT, "40"),
-            Map.entry(CleParametre.MARGE_CIC_DEFAUT_PCT, "4"),
+            Map.entry(CleParametre.MARGE_SEHELI_DEFAUT_PCT, "4"),
             Map.entry(CleParametre.REMISE_FOURNISSEUR_MIN_PCT, "5"),
             Map.entry(CleParametre.REMISE_FOURNISSEUR_MAX_PCT, "10"),
             Map.entry(CleParametre.DUREE_MIN_MOIS, "3"),
@@ -39,11 +39,11 @@ public final class ParametresDeDepart {
             Map.entry(CleParametre.CONNEXION_CODE_VALIDITE_MINUTES, "5"),
             Map.entry(CleParametre.CONNEXION_CODE_ESSAIS_MAX, "5"),
             Map.entry(CleParametre.CONNEXION_CODE_RENVOI_SECONDES, "60"),
-            Map.entry(CleParametre.CIC_COMPTE_TITULAIRE, "Seheli"),
-            Map.entry(CleParametre.CIC_COMPTE_BANQUE, "BMCI"),
-            Map.entry(CleParametre.CIC_COMPTE_NUMERO, "00020 00101 00001234567 53"),
+            Map.entry(CleParametre.SEHELI_COMPTE_TITULAIRE, "Seheli"),
+            Map.entry(CleParametre.SEHELI_COMPTE_BANQUE, "BMCI"),
+            Map.entry(CleParametre.SEHELI_COMPTE_NUMERO, "00020 00101 00001234567 53"),
             Map.entry(CleParametre.MASRVI_CODE_MARCHAND, "012345"),
-            Map.entry(CleParametre.CIC_WHATSAPP_NUMERO, "20000000"),
+            Map.entry(CleParametre.SEHELI_WHATSAPP_NUMERO, "20000000"),
             Map.entry(CleParametre.SOCIETE_RAISON_SOCIALE, "Seheli"));
 
     private ParametresDeDepart() {

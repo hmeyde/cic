@@ -30,7 +30,7 @@ Exclus : Bankily, API Masrvi, vrai fournisseur SMS ou WhatsApp (adaptateur qui j
 
 ## Architecture
 - Monolithe modulaire. Un package par module sous `com.seheli` : `identite`, `catalogue`, `demande`, `contrat`, `paiement`, `recouvrement`, `comptabilite`, `notification`, `pilotage`, `audit`, `inscription`.
-- Ancien nom conservé volontairement : base de données `cic`, migrations Flyway existantes, clés de la table `parametre` (`cic.compte.*`, `marge.cic.defaut.pct`…), variables d'environnement `CIC_*`, répertoires `~/.cic/`. La configuration Spring est sous `seheli.*`.
+- Ancien nom conservé volontairement : base de données `cic`, migrations Flyway existantes, clés de la table `parametre` (`cic.compte.*`, `marge.cic.defaut.pct`…), répertoires `~/.cic/`, nom du projet Docker Compose `cic` (volumes existants). Les variables d'environnement sont `SEHELI_*` et la configuration Spring est sous `seheli.*`.
 - Architecture hexagonale dans chaque module : `domain` (Java pur, sans Spring), `application` (cas d'usage), `adapter.in.web`, `adapter.out.persistence`, `adapter.out.*` pour les services externes.
 - Jamais d'accès direct au repository d'un autre module : passer par l'API publique du module ou par des événements de domaine.
 - Pas de relation JPA entre modules : on référence un autre module par identifiant.

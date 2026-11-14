@@ -23,7 +23,7 @@ class ParametresTest {
 
         assertThat(p.taille()).isEqualTo(CleParametre.values().length);
         assertThat(p.pourcentage(CleParametre.APPORT_MINIMUM_PCT)).isEqualByComparingTo("40");
-        assertThat(p.pourcentage(CleParametre.MARGE_CIC_DEFAUT_PCT)).isEqualByComparingTo("4");
+        assertThat(p.pourcentage(CleParametre.MARGE_SEHELI_DEFAUT_PCT)).isEqualByComparingTo("4");
         assertThat(p.entier(CleParametre.DUREE_MAX_MOIS)).isEqualTo(6);
         assertThat(p.entier(CleParametre.DELAI_APPORT_AUTORISATION_JOURS)).isEqualTo(7);
         assertThat(p.fraction(CleParametre.ENDETTEMENT_MAX_FRACTION)).isEqualTo(new Fraction(1, 3));

@@ -46,10 +46,10 @@ server:
 seheli:
   documents:
     # Justificatifs : répertoire hors de l'application et de ses ressources statiques.
-    repertoire: ${CIC_DOCUMENTS_REPERTOIRE:${user.home}/.cic/justificatifs}
+    repertoire: ${SEHELI_DOCUMENTS_REPERTOIRE:${user.home}/.cic/justificatifs}
   autorisations:
     # Autorisations de prélèvement signées, déposées par le back-office : hors de l’application.
-    repertoire: ${CIC_AUTORISATIONS_REPERTOIRE:${user.home}/.cic/autorisations-signees}
+    repertoire: ${SEHELI_AUTORISATIONS_REPERTOIRE:${user.home}/.cic/autorisations-signees}
   parametres:
     rechargement: PT5M   # relecture périodique de la table parametre
   jobs:

@@ -21,20 +21,20 @@ seheli:
     # Un compte par rôle, créé au démarrage s'il n'existe pas (ComptesBackOfficeDev). Mots de passe de
     # démonstration par défaut : les remplacer par variables d'environnement sur un serveur accessible.
     admin-dev:              # rôle ADMIN : catalogue, paiement fournisseur, apports en capital
-      identifiant: ${CIC_BO_ADMIN_IDENTIFIANT:admin}
-      mot-de-passe: ${CIC_BO_ADMIN_MOT_DE_PASSE:admin-demo}
+      identifiant: ${SEHELI_BO_ADMIN_IDENTIFIANT:admin}
+      mot-de-passe: ${SEHELI_BO_ADMIN_MOT_DE_PASSE:admin-demo}
     analyste-dev:           # rôle ANALYSTE : file des dossiers, décision, autorisations de prélèvement
-      identifiant: ${CIC_BO_ANALYSTE_IDENTIFIANT:analyste}
-      mot-de-passe: ${CIC_BO_ANALYSTE_MOT_DE_PASSE:analyste-demo}
+      identifiant: ${SEHELI_BO_ANALYSTE_IDENTIFIANT:analyste}
+      mot-de-passe: ${SEHELI_BO_ANALYSTE_MOT_DE_PASSE:analyste-demo}
     recouvrement-dev:       # rôle RECOUVREMENT : paiements reçus, prélèvements, retards, recouvrement
-      identifiant: ${CIC_BO_RECOUVREMENT_IDENTIFIANT:recouvrement}
-      mot-de-passe: ${CIC_BO_RECOUVREMENT_MOT_DE_PASSE:recouvrement-demo}
+      identifiant: ${SEHELI_BO_RECOUVREMENT_IDENTIFIANT:recouvrement}
+      mot-de-passe: ${SEHELI_BO_RECOUVREMENT_MOT_DE_PASSE:recouvrement-demo}
     associe-dev:            # rôle ASSOCIE : tableau de bord des associés
-      identifiant: ${CIC_BO_ASSOCIE_IDENTIFIANT:associe}
-      mot-de-passe: ${CIC_BO_ASSOCIE_MOT_DE_PASSE:associe-demo}
+      identifiant: ${SEHELI_BO_ASSOCIE_IDENTIFIANT:associe}
+      mot-de-passe: ${SEHELI_BO_ASSOCIE_MOT_DE_PASSE:associe-demo}
 
   client-demo:              # client créé au démarrage s'il n'existe pas (ClientDemonstration)
-    telephone: ${CIC_CLIENT_DEMO_TELEPHONE:22000001}
-    nni: ${CIC_CLIENT_DEMO_NNI:9990000001}
+    telephone: ${SEHELI_CLIENT_DEMO_TELEPHONE:22000001}
+    nni: ${SEHELI_CLIENT_DEMO_NNI:9990000001}
   # Données de démonstration (module demonstration) : 10 clients fictifs, téléphones 22100001 à 22100010,
   # code de connexion 000000. Chargées une seule fois, au premier démarrage sur une base vide.
