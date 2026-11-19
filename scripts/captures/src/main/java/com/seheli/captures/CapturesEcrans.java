@@ -28,6 +28,8 @@ public final class CapturesEcrans {
     private static final List<String> LANGUES = List.of("fr", "ar");
     /** Client fictif en COMMANDEE, remise à confirmer : l'exemple chiffré de CLAUDE.md. */
     private static final String TELEPHONE_CLIENT = "22100006";
+    /** Client fictif en EN_REMBOURSEMENT : écran « Mon remboursement » (échéances payées et à venir). */
+    private static final String TELEPHONE_CLIENT_REMBOURSEMENT = "22100007";
     private static final String CODE_DEMO = "000000";
 
     private final String base;
@@ -88,8 +90,7 @@ public final class CapturesEcrans {
             soumettre(p);
             verifierPas(p, "/client/connexion?", "numéro de téléphone refusé");
             capturer(p, langue, "04-client-code");
-            p.fill("#code", CODE_DEMO);
-            soumettre(p);
+            saisirCode(p);
             verifierPas(p, "/client/connexion", "connexion client refusée (profil demo actif ?)");
 
             ouvrir(p, "/client", langue);
@@ -100,6 +101,17 @@ public final class CapturesEcrans {
             capturer(p, langue, "07-client-produit");
             ouvrir(p, "/client/dossier", langue);
             capturer(p, langue, "08-client-dossier");
+        }
+        try (BrowserContext ctx = mobile()) {
+            Page p = ctx.newPage();
+            ouvrir(p, "/client/connexion?lang=" + langue, langue);
+            p.fill("#telephone", TELEPHONE_CLIENT_REMBOURSEMENT);
+            soumettre(p);
+            verifierPas(p, "/client/connexion?", "numéro de téléphone refusé");
+            saisirCode(p);
+            verifierPas(p, "/client/connexion", "connexion client refusée (profil demo actif ?)");
+            ouvrir(p, "/client/dossier/remboursement", langue);
+            capturer(p, langue, "09-client-remboursement");
         }
     }
 
@@ -179,6 +191,20 @@ public final class CapturesEcrans {
         }
         lien.click();
         attendre(p, langue);
+    }
+
+    /**
+     * Saisit le code à usage unique : le formulaire se soumet seul au sixième chiffre ; si la page n'a pas changé
+     * après quelques secondes, le bouton est cliqué.
+     */
+    private static void saisirCode(Page p) {
+        p.fill("#code", CODE_DEMO);
+        try {
+            p.waitForURL(url -> !url.contains("/client/connexion/code"), new Page.WaitForURLOptions().setTimeout(5000));
+        } catch (com.microsoft.playwright.TimeoutError e) {
+            soumettre(p);
+        }
+        p.waitForLoadState(LoadState.NETWORKIDLE);
     }
 
     private static void soumettre(Page p) {

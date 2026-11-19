@@ -133,7 +133,7 @@ class ParcoursDemandeIntegrationTest extends TestIntegration {
         assertThat(score.note().resultat(CritereScore.PART_SALAIRE).points()).isEqualTo(15);
         assertThat(score.note().resultat(CritereScore.APPORT_SUPPLEMENTAIRE).points()).isZero();
         assertThat(score.note().resultat(CritereScore.GARANT).points()).isZero();
-        assertThat(score.note().resultat(CritereScore.HISTORIQUE_CIC).points()).isZero();
+        assertThat(score.note().resultat(CritereScore.HISTORIQUE_SEHELI).points()).isZero();
         assertThat(score.note().note()).isEqualTo(70);
         assertThat(score.recommandation()).isEqualTo(Recommandation.FAVORABLE);
         assertThat(score.versionGrille()).isNotBlank();

@@ -17,7 +17,7 @@ import com.seheli.commun.domain.Montant;
  * @param derniereEcheance       date de la dernière échéance de l'échéancier proposé
  * @param modeRemboursement      mode de remboursement choisi
  * @param salaireNet             salaire net mensuel
- * @param mensualitesCicEnCours  total des mensualités Seheli déjà dues (zéro sinon)
+ * @param mensualitesSeheliEnCours  total des mensualités Seheli déjà dues (zéro sinon)
  * @param nouvelleMensualite     mensualité la plus élevée de l'échéancier proposé
  * @param prixVente              prix de vente du produit
  * @param apportMinimum          apport minimum exigé (40 % du prix de vente)
@@ -32,7 +32,7 @@ public record DossierScore(
         LocalDate derniereEcheance,
         ModeRemboursement modeRemboursement,
         Montant salaireNet,
-        Montant mensualitesCicEnCours,
+        Montant mensualitesSeheliEnCours,
         Montant nouvelleMensualite,
         Montant prixVente,
         Montant apportMinimum,
@@ -47,7 +47,7 @@ public record DossierScore(
         Objects.requireNonNull(derniereEcheance, "derniereEcheance");
         Objects.requireNonNull(modeRemboursement, "modeRemboursement");
         Objects.requireNonNull(salaireNet, "salaireNet");
-        Objects.requireNonNull(mensualitesCicEnCours, "mensualitesCicEnCours");
+        Objects.requireNonNull(mensualitesSeheliEnCours, "mensualitesSeheliEnCours");
         Objects.requireNonNull(nouvelleMensualite, "nouvelleMensualite");
         Objects.requireNonNull(prixVente, "prixVente");
         Objects.requireNonNull(apportMinimum, "apportMinimum");

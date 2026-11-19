@@ -64,7 +64,7 @@ class EcheancierServiceTest {
     }
 
     @Test
-    void tient_compte_des_mensualites_cic_en_cours() {
+    void tient_compte_des_mensualites_seheli_en_cours() {
         assertThatThrownBy(() -> service.etablir(Montant.de(12_480), 6, DEPART, 25, Optional.empty(),
                 Montant.de(9_000), Montant.de(1_000)))
                 .isInstanceOf(EndettementDepasseException.class);

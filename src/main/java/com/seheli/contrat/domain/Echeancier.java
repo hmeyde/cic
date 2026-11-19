@@ -112,15 +112,15 @@ public record Echeancier(List<EcheancePrevue> echeances) {
      * salaire net. Comparaison exacte, sans arrondi (1/3 n'est pas 33 %).
      *
      * @param salaireNet            salaire net mensuel du client
-     * @param mensualitesCicEnCours total des mensualités Seheli qu'il rembourse déjà (zéro sinon)
+     * @param mensualitesSeheliEnCours total des mensualités Seheli qu'il rembourse déjà (zéro sinon)
      * @param partMax               part maximale du salaire ({@code endettement.max.fraction})
      * @throws EndettementDepasseException si le plafond est dépassé
      */
-    public void verifierEndettement(Montant salaireNet, Montant mensualitesCicEnCours, Fraction partMax) {
+    public void verifierEndettement(Montant salaireNet, Montant mensualitesSeheliEnCours, Fraction partMax) {
         Objects.requireNonNull(salaireNet, "salaireNet");
-        Objects.requireNonNull(mensualitesCicEnCours, "mensualitesCicEnCours");
+        Objects.requireNonNull(mensualitesSeheliEnCours, "mensualitesSeheliEnCours");
         Objects.requireNonNull(partMax, "partMax");
-        Montant total = mensualitesCicEnCours.plus(mensualiteMaximale());
+        Montant total = mensualitesSeheliEnCours.plus(mensualiteMaximale());
         if (!partMax.admet(total, salaireNet)) {
             throw new EndettementDepasseException(total, salaireNet, partMax);
         }

@@ -43,6 +43,6 @@ class ReferenceEcheanceTest {
         assertThat(ReferenceEcheance.estValide("EC")).isFalse();
         assertThatThrownBy(() -> ReferenceEcheance.pourEcheance("SEH-2026-000042", 0))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> ReferenceEcheance.pourEcheance("CIC", 1)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> ReferenceEcheance.pourEcheance("SEH", 1)).isInstanceOf(IllegalArgumentException.class);
     }
 }

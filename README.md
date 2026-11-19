@@ -1,16 +1,56 @@
-# CIC — vente à crédit conforme mourabaha (MVP)
+<p align="center">
+  <img src="src/main/resources/static/img/logo/seheli-logo.svg" alt="Seheli" height="64">
+  &nbsp;&nbsp;
+  <img src="src/main/resources/static/img/logo/seheli-logo-arabe.svg" alt="سهلي" height="64">
+</p>
 
-CIC vend à crédit des téléphones et de l'électroménager à des salariés en Mauritanie : 40 % d'apport, puis 3 à
-6 mensualités prélevées au versement du salaire, sans intérêt ni pénalité. Ce dépôt contient le prototype
-présenté au **BMCI Business Challenge** : parcours client, back-office, tableau de bord des associés, page
-publique d'inscription, en français et en arabe.
+# Seheli (سهلي) — vente à crédit conforme mourabaha (MVP)
+
+Seheli vend à crédit des téléphones et de l'électroménager à des salariés en Mauritanie : 40 % d'apport, puis 3 à
+6 mensualités prélevées au versement du salaire, sans intérêt ni pénalité. Le prix est fixé à la signature et ne
+change plus. Ce dépôt contient le prototype présenté au **BMCI Business Challenge** : parcours client, back-office,
+tableau de bord des associés, page publique d'inscription, en français et en arabe (de droite à gauche).
+
+L'interface est pensée mobile d'abord pour le client (installable comme une application, PWA) et pour
+l'ordinateur côté back-office (menu latéral selon le rôle, tableaux triables, fiche dossier en deux colonnes,
+score critère par critère). Le client suit son dossier étape par étape et voit, dans « Mon remboursement », ses
+échéances payées, la prochaine échéance et le reste à payer ; les associés suivent l'encours, la concentration
+des risques, les provisions et le capital sur un tableau de bord.
 
 - Règles métier, architecture et périmètre : [`CLAUDE.md`](CLAUDE.md)
 - Carte du code (modules, routes, migrations, jobs) : [`docs/CARTE.md`](docs/CARTE.md)
+- Marque (logo, palette) : [`docs/MARQUE.md`](docs/MARQUE.md)
 
-Sommaire : [1. Accès de démonstration pour le jury](#1-accès-de-démonstration-pour-le-jury) ·
+Sommaire : [Aperçu](#aperçu) · [1. Accès de démonstration pour le jury](#1-accès-de-démonstration-pour-le-jury) ·
 [2. Lancement local](#2-lancement-local) · [3. Déploiement sur un VPS](#3-déploiement-sur-un-vps) ·
 [4. Exploitation](#4-exploitation) · [5. Dépannage](#5-dépannage)
+
+---
+
+## Aperçu
+
+Captures du profil `demo`, régénérées par `bash scripts/captures.sh` (voir [§2](#captures-décran)). Toutes les
+captures : [`docs/captures/fr/`](docs/captures/fr) et [`docs/captures/ar/`](docs/captures/ar).
+
+### Parcours client (mobile)
+
+| Accueil | Catalogue | Suivi du dossier | Mon remboursement |
+|---|---|---|---|
+| <img src="docs/captures/fr/01-accueil.png" alt="Accueil" width="190"> | <img src="docs/captures/fr/06-client-catalogue.png" alt="Catalogue" width="190"> | <img src="docs/captures/fr/08-client-dossier.png" alt="Suivi du dossier" width="190"> | <img src="docs/captures/fr/09-client-remboursement.png" alt="Mon remboursement" width="190"> |
+
+En arabe, la même interface s'affiche de droite à gauche :
+
+| الصفحة الرئيسية | الكتالوج | متابعة ملفي | سدادي |
+|---|---|---|---|
+| <img src="docs/captures/ar/01-accueil.png" alt="Accueil en arabe" width="190"> | <img src="docs/captures/ar/06-client-catalogue.png" alt="Catalogue en arabe" width="190"> | <img src="docs/captures/ar/08-client-dossier.png" alt="Suivi du dossier en arabe" width="190"> | <img src="docs/captures/ar/09-client-remboursement.png" alt="Mon remboursement en arabe" width="190"> |
+
+### Back-office (ordinateur)
+
+| File des dossiers | Fiche dossier et score détaillé |
+|---|---|
+| <img src="docs/captures/fr/12-bo-dossiers.png" alt="File des dossiers" width="420"> | <img src="docs/captures/fr/13-bo-dossier-score.png" alt="Fiche dossier et score" width="420"> |
+| **Recouvrement** | **Tableau de bord des associés** |
+| <img src="docs/captures/fr/18-bo-recouvrement.png" alt="Recouvrement" width="420"> | <img src="docs/captures/fr/20-bo-pilotage.png" alt="Tableau de bord des associés" width="420"> |
 
 ---
 
@@ -105,7 +145,7 @@ démonstration rechargées (environ une minute). À faire avant chaque passage d
 ### Démarrage
 
 ```bash
-git clone <url-du-depot> cic && cd cic
+git clone <url-du-depot> seheli && cd seheli
 docker compose up -d                                   # PostgreSQL sur localhost:5432 (base, utilisateur et mot de passe : cic)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo # application sur http://localhost:8080
 ```
@@ -159,6 +199,14 @@ ajoutée à l'application) ; au premier lancement, il télécharge Chromium dans
 Chromium a besoin des bibliothèques système habituelles (paquets `libnss3`, `libgbm1`, `libasound2t64`…) et
 d'une police arabe (`fonts-noto-core`).
 
+### Ancien nom « CIC » conservé dans quelques noms techniques
+
+Le projet s'appelait CIC avant de devenir Seheli. Pour ne perdre aucune donnée sur un serveur déjà installé,
+l'ancien nom reste volontairement dans : la base de données et son utilisateur (`cic`), le nom du projet Docker
+Compose (`name: cic`, donc les volumes `cic_*`), les migrations Flyway déjà appliquées, les clés de la table
+`parametre` (`cic.compte.*`, `marge.cic.defaut.pct`…), les répertoires `~/.cic/` et les numéros des contrats
+établis avant le renommage (`CIC-AAAA-NNNNNN`). Tout ce que voient les clients et l'équipe dit « Seheli ».
+
 ---
 
 ## 3. Déploiement sur un VPS
@@ -186,7 +234,7 @@ sudo usermod -aG docker "$USER" && newgrp docker
 sudo ufw allow OpenSSH && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && sudo ufw allow 443/udp && sudo ufw enable
 
 # 3. Code
-git clone <url-du-depot> cic && cd cic
+git clone <url-du-depot> seheli && cd seheli
 
 # 4. Configuration : copier le modèle puis remplacer chaque A_CHANGER
 cp .env.example .env
@@ -224,7 +272,7 @@ existant » du même guide (renommage des variables du `.env`, volumes conservé
 ### Mise à jour
 
 ```bash
-cd cic
+cd seheli
 git pull
 docker compose up -d --build
 ```
@@ -251,7 +299,7 @@ le serveur tourne en `demo`.
 
 ## 4. Exploitation
 
-| Besoin | Commande (dans le répertoire `cic` du serveur) |
+| Besoin | Commande (dans le répertoire `seheli` du serveur) |
 |---|---|
 | État des services | `docker compose ps` |
 | Journaux de l'application (JSON) | `docker compose logs -f app` |

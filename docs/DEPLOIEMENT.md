@@ -15,7 +15,7 @@ Tout chez **Contabo** : serveur, domaine et DNS sur **un seul compte**, une seul
 | Quoi | Offre | Lien | Prix indicatif* |
 |---|---|---|---|
 | **Serveur (VPS)** | **Cloud VPS 4** : 4 vCPU, 8 Go de RAM, 100 Go SSD, trafic illimité, Europe (Allemagne) | https://contabo.com/fr/vps/ | ~5,50 € TTC / mois + frais d'installation uniques en paiement mensuel (de l'ordre de 5 €) |
-| **Nom de domaine** | un `.com` (par exemple `cic-credit.com`), DNS gratuit inclus | https://contabo.com/fr/domains/ | ~1,99 € / mois (~24 € / an) |
+| **Nom de domaine** | un `.com` (par exemple `seheli-credit.com`), DNS gratuit inclus | https://contabo.com/fr/domains/ | ~1,99 € / mois (~24 € / an) |
 | **Dépôt du code** | GitHub — dépôt **privé** | https://github.com/new | gratuit |
 
 \* Prix relevés en novembre 2026 sur les pages publiques ; **vérifiez le montant exact au moment de la commande**.
@@ -95,18 +95,18 @@ Dans l'espace client Contabo (https://my.contabo.com) : rubrique **DNS** (gestio
 
 1. **Créez une zone DNS** pour votre domaine si elle n'existe pas encore.
 2. Ajoutez (ou modifiez) un enregistrement de type **A** :
-   - nom : *vide* ou `@` (pour `cic-credit.com`) ;
+   - nom : *vide* ou `@` (pour `seheli-credit.com`) ;
    - valeur : **l'adresse IP du serveur** ;
    - TTL : par défaut.
 3. Supprimez tout autre enregistrement **A** ou **AAAA** du domaine nu qui pointerait ailleurs.
 4. Attendez la propagation (de quelques minutes à quelques heures). Vérification depuis PowerShell :
    ```powershell
-   nslookup cic-credit.com
+   nslookup seheli-credit.com
    ```
    La réponse doit afficher l'IP du serveur.
 
-> Vous préférez un sous-domaine (`demo.cic-credit.com`) ? Mettez `demo` comme nom de l'enregistrement et
-> utilisez `demo.cic-credit.com` partout où ce guide écrit « votre domaine ».
+> Vous préférez un sous-domaine (`demo.seheli-credit.com`) ? Mettez `demo` comme nom de l'enregistrement et
+> utilisez `demo.seheli-credit.com` partout où ce guide écrit « votre domaine ».
 
 **Ne passez pas à l'étape 5 tant que `nslookup` ne renvoie pas la bonne IP** : sans cela, le certificat
 HTTPS ne peut pas être obtenu.
@@ -138,16 +138,16 @@ commande `--force-recreate caddy`.
 ## 3. Mettre le code sur GitHub
 
 1. Créez un compte sur https://github.com si besoin, puis un dépôt sur https://github.com/new :
-   - nom : `cic` ;
+   - nom : `seheli` ;
    - visibilité : **Private** ;
    - **ne cochez rien** (pas de README, pas de .gitignore, pas de licence).
 2. Envoyez le code. Le plus simple depuis **IntelliJ** (sur Windows) :
-   **Git → Manage Remotes → +** et collez l'URL du dépôt (`https://github.com/<vous>/cic.git`), puis
+   **Git → Manage Remotes → +** et collez l'URL du dépôt (`https://github.com/<vous>/seheli.git`), puis
    **Git → Push** (IntelliJ ouvre le navigateur pour vous connecter à GitHub la première fois).
 
    Ou en ligne de commande, à la racine du projet :
    ```bash
-   git remote add origin https://github.com/<vous>/cic.git
+   git remote add origin https://github.com/<vous>/seheli.git
    git push -u origin master
    ```
    (GitHub demande un *personal access token* comme mot de passe :
@@ -194,11 +194,11 @@ vérifiez : `docker ps` doit répondre sans erreur.
 Le dépôt est privé : on donne au serveur une clé **en lecture seule**, limitée à ce dépôt.
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/github_cic -N ""
-cat ~/.ssh/github_cic.pub
+ssh-keygen -t ed25519 -f ~/.ssh/github_seheli -N ""
+cat ~/.ssh/github_seheli.pub
 ```
 
-Sur GitHub : votre dépôt → **Settings → Deploy keys → Add deploy key**. Titre : `serveur CIC` ; collez la
+Sur GitHub : votre dépôt → **Settings → Deploy keys → Add deploy key**. Titre : `serveur Seheli` ; collez la
 ligne affichée ; **laissez « Allow write access » décoché** ; Add key.
 
 Puis, sur le serveur :
@@ -206,13 +206,13 @@ Puis, sur le serveur :
 ```bash
 cat >> ~/.ssh/config <<'EOF'
 Host github.com
-    IdentityFile ~/.ssh/github_cic
+    IdentityFile ~/.ssh/github_seheli
     IdentitiesOnly yes
 EOF
 chmod 600 ~/.ssh/config
 
-git clone git@github.com:<vous>/cic.git
-cd cic
+git clone git@github.com:<vous>/seheli.git
+cd seheli
 ```
 
 (Répondez `yes` à la question sur l'empreinte de github.com.)
@@ -241,7 +241,7 @@ Changez **seulement** ces lignes :
 | Ligne | Valeur |
 |---|---|
 | `SPRING_PROFILES_ACTIVE` | `demo` (démonstration pour le jury) |
-| `SEHELI_DOMAINE` | votre domaine, par exemple `cic-credit.com` |
+| `SEHELI_DOMAINE` | votre domaine, par exemple `seheli-credit.com` |
 | `DB_PASSWORD` | mot de passe n° 1 |
 | `SEHELI_BO_ADMIN_MOT_DE_PASSE` | mot de passe n° 2 |
 | `SEHELI_BO_ANALYSTE_MOT_DE_PASSE` | mot de passe n° 3 |
@@ -282,14 +282,14 @@ Les quatre services `db`, `app`, `sauvegarde` et `caddy` doivent être `running`
 `(healthy)`.
 
 ```bash
-curl -s https://cic-credit.com/actuator/health
+curl -s https://seheli-credit.com/actuator/health
 ```
 
 Réponse attendue : `{"status":"UP"}`.
 
 Puis, depuis votre téléphone :
 
-1. Ouvrez `https://cic-credit.com` : le cadenas HTTPS doit être présent.
+1. Ouvrez `https://seheli-credit.com` : le cadenas HTTPS doit être présent.
 2. Changez la langue en arabe : la page passe de droite à gauche.
 3. **Espace client** : téléphone `22100006`, code `000000` : le dossier « commandé » s'affiche.
 4. **Back-office** (`/bo/login`) : identifiant `analyste` avec le mot de passe n° 3.
@@ -301,10 +301,10 @@ Puis, depuis votre téléphone :
 
 | Espace | Adresse | Accès |
 |---|---|---|
-| Accueil | `https://cic-credit.com` | — |
-| Client | `https://cic-credit.com/client` | téléphones `22000001` à `22100010` (liste dans le README, section 1), code **`000000`** |
-| Back-office | `https://cic-credit.com/bo/login` | `admin`, `analyste`, `recouvrement`, `associe` avec les mots de passe 2 à 5 |
-| Pré-inscription | `https://cic-credit.com/inscription` | sans compte |
+| Accueil | `https://seheli-credit.com` | — |
+| Client | `https://seheli-credit.com/client` | téléphones `22000001` à `22100010` (liste dans le README, section 1), code **`000000`** |
+| Back-office | `https://seheli-credit.com/bo/login` | `admin`, `analyste`, `recouvrement`, `associe` avec les mots de passe 2 à 5 |
+| Pré-inscription | `https://seheli-credit.com/inscription` | sans compte |
 
 Pour un parcours complet en direct (de la demande au remboursement), utilisez le client **`22000001`**,
 qui n'a aucun dossier. Le bouton **« Réinitialiser la démo »** (compte `admin`) remet tout à l'état initial
@@ -319,7 +319,7 @@ entre deux passages.
 Sur votre PC : commit puis push vers GitHub. Puis sur le serveur :
 
 ```bash
-cd ~/cic
+cd ~/seheli
 git pull
 docker compose up -d --build
 ```
@@ -348,6 +348,11 @@ Sans le `sed`, `docker compose` s'arrête sur `SEHELI_BO_ADMIN_MOT_DE_PASSE manq
 n'est modifié, il suffit de lancer le `sed` puis de recommencer. Une fois `app` revenu en `(healthy)` :
 `rm .env.avant-seheli` et, pour libérer de la place, `docker image rm cic:latest`.
 
+Le répertoire du dépôt peut rester `~/cic` sur ce serveur (ce guide écrit `~/seheli` pour une nouvelle
+installation) : le nom du projet Compose étant figé, le nom du répertoire n'a aucune incidence. Si le dépôt
+GitHub est renommé en `seheli`, GitHub redirige l'ancienne adresse ; `git remote set-url origin <nouvelle URL>`
+la met à jour.
+
 ### Sauvegardes
 
 Une sauvegarde de la base est faite **chaque nuit à 02:00 UTC** et gardée 14 jours, **sur le serveur**.
@@ -360,12 +365,12 @@ docker compose cp sauvegarde:/sauvegardes ./sauvegardes
 
 ```powershell
 # sur votre PC
-scp -r ubuntu@VOTRE_IP:cic/sauvegardes .
+scp -r ubuntu@VOTRE_IP:seheli/sauvegardes .
 ```
 
 ### Commandes utiles
 
-| Besoin | Commande (dans `~/cic`) |
+| Besoin | Commande (dans `~/seheli`) |
 |---|---|
 | État | `docker compose ps` |
 | Journaux | `docker compose logs -f app` |

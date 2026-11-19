@@ -33,7 +33,7 @@ public record Prix(Montant prixPublic, Montant prixAchat, Montant prixVente, Mon
             throw new IllegalArgumentException("Le prix public doit être strictement positif");
         }
         Montant prixAchat = prixPublic.moins(prixPublic.pourcentage(conditions.remiseFournisseurPct()));
-        Montant prixVente = prixPublic.plus(prixPublic.pourcentage(conditions.margeCicPct()));
+        Montant prixVente = prixPublic.plus(prixPublic.pourcentage(conditions.margeSeheliPct()));
         Montant apportMinimum = prixVente.pourcentage(conditions.apportMinimumPct());
         return new Prix(prixPublic, prixAchat, prixVente, apportMinimum);
     }

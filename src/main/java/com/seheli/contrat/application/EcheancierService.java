@@ -32,18 +32,18 @@ public class EcheancierService {
      * endettement.
      *
      * @param salaireNet            salaire net mensuel du client
-     * @param mensualitesCicEnCours mensualités Seheli déjà dues par le client (zéro s'il n'en a pas)
+     * @param mensualitesSeheliEnCours mensualités Seheli déjà dues par le client (zéro s'il n'en a pas)
      * @throws com.seheli.contrat.domain.FinContratDepasseeException si la dernière échéance ne tombe
      *         pas avant la fin du CDD
      * @throws com.seheli.contrat.domain.EndettementDepasseException si le total des mensualités Seheli
      *         dépasse la part autorisée du salaire net
      */
     public Echeancier etablir(Montant resteAFinancer, int nombreMois, LocalDate dateDepart, int jourPaie,
-            Optional<LocalDate> finContrat, Montant salaireNet, Montant mensualitesCicEnCours) {
+            Optional<LocalDate> finContrat, Montant salaireNet, Montant mensualitesSeheliEnCours) {
         Parametres p = parametres.courants();
         Echeancier echeancier = Echeancier.etablir(resteAFinancer, nombreMois, dureeAutorisee(p), dateDepart,
                 jourPaie, finContrat);
-        echeancier.verifierEndettement(salaireNet, mensualitesCicEnCours,
+        echeancier.verifierEndettement(salaireNet, mensualitesSeheliEnCours,
                 p.fraction(CleParametre.ENDETTEMENT_MAX_FRACTION));
         return echeancier;
     }

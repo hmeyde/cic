@@ -3,7 +3,7 @@ package com.seheli.demande.domain;
 import static com.seheli.demande.domain.CritereScore.ANCIENNETE;
 import static com.seheli.demande.domain.CritereScore.APPORT_SUPPLEMENTAIRE;
 import static com.seheli.demande.domain.CritereScore.GARANT;
-import static com.seheli.demande.domain.CritereScore.HISTORIQUE_CIC;
+import static com.seheli.demande.domain.CritereScore.HISTORIQUE_SEHELI;
 import static com.seheli.demande.domain.CritereScore.MODE_REMBOURSEMENT;
 import static com.seheli.demande.domain.CritereScore.PART_SALAIRE;
 import static com.seheli.demande.domain.CritereScore.TYPE_CONTRAT;
@@ -58,7 +58,7 @@ class GrilleScoreV1Test {
         assertThat(note.versionGrille()).isEqualTo("v1");
         assertThat(note.criteres()).extracting(ResultatCritere::critere).containsExactly(
                 TYPE_CONTRAT, ANCIENNETE, MODE_REMBOURSEMENT, PART_SALAIRE, APPORT_SUPPLEMENTAIRE, GARANT,
-                HISTORIQUE_CIC);
+                HISTORIQUE_SEHELI);
         assertThat(note.criteres()).extracting(ResultatCritere::points).containsExactly(25, 15, 15, 15, 0, 0, 0);
         assertThat(note.criteres()).allSatisfy(r -> assertThat(r.raison()).isNotBlank());
         assertThat(note.note()).isEqualTo(70);
@@ -322,7 +322,7 @@ class GrilleScoreV1Test {
             derniereEcheance = d.derniereEcheance();
             mode = d.modeRemboursement();
             salaire = d.salaireNet();
-            enCours = d.mensualitesCicEnCours();
+            enCours = d.mensualitesSeheliEnCours();
             nouvelle = d.nouvelleMensualite();
             prixVente = d.prixVente();
             apportMinimum = d.apportMinimum();

@@ -11,7 +11,7 @@ public enum ProchaineEtape {
     ATTENDRE_PREMIER_PRELEVEMENT(false),
     PROVISIONNER_COMPTE(true),
     REGULARISER_ECHEANCE(true),
-    CONTACTER_CIC(true),
+    CONTACTER_SEHELI(true),
     NOUVELLE_DEMANDE_POSSIBLE(true);
 
     private final boolean parClient;
@@ -34,7 +34,7 @@ public enum ProchaineEtape {
             case LIVREE -> ATTENDRE_PREMIER_PRELEVEMENT;
             case EN_REMBOURSEMENT -> PROVISIONNER_COMPTE;
             case EN_RETARD -> REGULARISER_ECHEANCE;
-            case RECOUVREMENT -> CONTACTER_CIC;
+            case RECOUVREMENT -> CONTACTER_SEHELI;
             case REFUSEE, ANNULEE, SOLDEE -> NOUVELLE_DEMANDE_POSSIBLE;
         };
     }

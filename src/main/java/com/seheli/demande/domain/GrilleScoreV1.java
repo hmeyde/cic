@@ -3,7 +3,7 @@ package com.seheli.demande.domain;
 import static com.seheli.demande.domain.CritereScore.ANCIENNETE;
 import static com.seheli.demande.domain.CritereScore.APPORT_SUPPLEMENTAIRE;
 import static com.seheli.demande.domain.CritereScore.GARANT;
-import static com.seheli.demande.domain.CritereScore.HISTORIQUE_CIC;
+import static com.seheli.demande.domain.CritereScore.HISTORIQUE_SEHELI;
 import static com.seheli.demande.domain.CritereScore.MODE_REMBOURSEMENT;
 import static com.seheli.demande.domain.CritereScore.PART_SALAIRE;
 import static com.seheli.demande.domain.CritereScore.TYPE_CONTRAT;
@@ -98,7 +98,7 @@ public final class GrilleScoreV1 {
     }
 
     static ResultatCritere partSalaire(DossierScore d, ReglesScore r) {
-        Montant total = d.mensualitesCicEnCours().plus(d.nouvelleMensualite());
+        Montant total = d.mensualitesSeheliEnCours().plus(d.nouvelleMensualite());
         if (d.salaireNet().estZero()) {
             return new ResultatCritere(PART_SALAIRE, 0, "Salaire net nul");
         }
@@ -151,12 +151,12 @@ public final class GrilleScoreV1 {
 
     static ResultatCritere historique(DossierScore d) {
         int n = d.plansRembourseATemps();
-        int points = Math.min(HISTORIQUE_CIC.pointsMax(), n * POINTS_PAR_PLAN);
+        int points = Math.min(HISTORIQUE_SEHELI.pointsMax(), n * POINTS_PAR_PLAN);
         String raison = switch (n) {
             case 0 -> "Aucun plan Seheli déjà remboursé à temps";
             case 1 -> "1 plan Seheli remboursé à temps";
             default -> n + " plans Seheli remboursés à temps";
         };
-        return new ResultatCritere(HISTORIQUE_CIC, points, raison);
+        return new ResultatCritere(HISTORIQUE_SEHELI, points, raison);
     }
 }

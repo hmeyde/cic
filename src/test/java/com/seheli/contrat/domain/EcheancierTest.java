@@ -166,7 +166,7 @@ class EcheancierTest {
     }
 
     @Test
-    void endettement_compte_les_mensualites_cic_deja_en_cours() {
+    void endettement_compte_les_mensualites_seheli_deja_en_cours() {
         Echeancier e = etablir(12_480, 6);
 
         // 1 000 + 2 080 = 3 080 ; 3 080 × 3 = 9 240

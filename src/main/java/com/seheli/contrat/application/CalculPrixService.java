@@ -37,8 +37,8 @@ public class CalculPrixService {
      * @throws IllegalArgumentException si la remise sort des bornes
      *         {@code remise.fournisseur.min.pct} – {@code remise.fournisseur.max.pct}
      */
-    public Prix calculer(Montant prixPublic, BigDecimal remiseFournisseurPct, BigDecimal margeCicPct) {
-        return calculer(parametres.courants(), prixPublic, remiseFournisseurPct, margeCicPct);
+    public Prix calculer(Montant prixPublic, BigDecimal remiseFournisseurPct, BigDecimal margeSeheliPct) {
+        return calculer(parametres.courants(), prixPublic, remiseFournisseurPct, margeSeheliPct);
     }
 
     private static Prix calculer(Parametres p, Montant prixPublic, BigDecimal remisePct, BigDecimal margePct) {

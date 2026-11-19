@@ -12,7 +12,7 @@ public enum CritereScore {
     PART_SALAIRE("score.critere.part.salaire", 15),
     APPORT_SUPPLEMENTAIRE("score.critere.apport", 10),
     GARANT("score.critere.garant", 10),
-    HISTORIQUE_CIC("score.critere.historique", 10);
+    HISTORIQUE_SEHELI("score.critere.historique", 10);
 
     private final String code;
     private final int pointsMax;

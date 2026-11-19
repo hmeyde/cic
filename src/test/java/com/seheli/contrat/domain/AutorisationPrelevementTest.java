@@ -44,9 +44,9 @@ class AutorisationPrelevementTest {
         Contrat c = contrat();
         AutorisationPrelevement autreContrat = AutorisationPrelevement.emettre(contrat(), LE);
         Acheteur acheteur = new Acheteur("Ould Ahmed", "Mohamed", "1234567890", LocalDate.of(1990, 5, 1), "22123456");
-        CompteBeneficiaire cic = new CompteBeneficiaire("Seheli", "BMCI", "00020");
+        CompteBeneficiaire seheli = new CompteBeneficiaire("Seheli", "BMCI", "00020");
 
-        assertThatThrownBy(() -> new ContenuAutorisation(autreContrat, c, acheteur, cic, Optional.empty(),
+        assertThatThrownBy(() -> new ContenuAutorisation(autreContrat, c, acheteur, seheli, Optional.empty(),
                 LocalDate.of(2026, 11, 13), LocalDate.of(2026, 11, 20), "Seheli"))
                 .isInstanceOf(IllegalArgumentException.class);
     }

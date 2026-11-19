@@ -31,7 +31,7 @@
                     <p class="texte-doux action__depuis" th:text="#{client.dossier.depuis(${#temporals.format(suivi.statutDepuis(), 'dd/MM/yyyy')})}">Depuis le 12/11/2026</p>
                 </div>
                 <h2 id="titre-action" th:text="#{client.action.titre}">Prochaine action</h2>
-                <p class="action__qui" th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-cic}">À faire par vous</p>
+                <p class="action__qui" th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-seheli}">À faire par vous</p>
                 <p class="action__message" th:if="${prochaine != 'NOUVELLE_DEMANDE_POSSIBLE'}"
                    th:text="#{'client.dossier.prochaine.' + ${prochaine}}">Payez votre apport avec la référence Masrvi et signez l’autorisation de prélèvement.</p>
                 <p class="action__message" th:if="${prochaine == 'NOUVELLE_DEMANDE_POSSIBLE'}"

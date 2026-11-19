@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`c4a0f8f`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`8f2ec38`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -10,7 +10,7 @@ Générée automatiquement depuis le code (`c4a0f8f`). Sert à se repérer vite 
 | `catalogue` (35) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | CatalogueClientController, CatalogueClientService, Fournisseur, FournisseurBackOfficeController, FournisseurJpaRepository, FournisseurPersistenceAdapter, FournisseurRepository, FournisseurService, Produit, ProduitBackOfficeController, ProduitJpaRepository, ProduitPersistenceAdapter |
 | `commun` (4) | domain | Fraction, Montant |
 | `comptabilite` (31) | adapter.in adapter.in.evenement adapter.in.web adapter.out adapter.out.persistence application domain | ApportCapitalJpaRepository, ApportCapitalPersistenceAdapter, ApportCapitalRepository, ApportCapitalService, CapitalBackOfficeController, ComptabiliteService, Compte, EcritureComptableJpaRepository, EcritureComptablePersistenceAdapter, EcritureComptableRepository, IndicateursFinanciersService, Sens |
-| `config` (5) | - | - |
+| `config` (6) | - | - |
 | `contrat` (63) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
 | `demande` (103) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
 | `demonstration` (21) | adapter.in adapter.in.demarrage adapter.in.web adapter.out adapter.out.base adapter.out.demarrage adapter.out.horloge adapter.out.image application domain | DonneesDemonstrationService, ReinitialisationDemonstrationController, ReinitialisationDemonstrationService, Simulation |
@@ -19,7 +19,7 @@ Générée automatiquement depuis le code (`c4a0f8f`). Sert à se repérer vite 
 | `notification` (6) | adapter.out adapter.out.journal domain | Canal, Message, Notification |
 | `paiement` (36) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | ImportPaiementsBackOfficeController, ImportPaiementsService, InstructionsApportService, Paiement, PaiementJpaRepository, PaiementPersistenceAdapter, PaiementRepository, PaiementsBackOfficeController, PaiementService, Rattachement |
 | `parametrage` (13) | adapter.out adapter.out.persistence application domain | Parametre, ParametreJpaRepository, ParametrePersistenceAdapter, Parametres, ParametreService |
-| `pilotage` (11) | adapter.in adapter.in.web application domain | Concentration, TableauDeBordController, TableauDeBordService |
+| `pilotage` (15) | adapter.in adapter.in.web application domain | Barres, Concentration, Courbe, TableauDeBordController, TableauDeBordService |
 | `recouvrement` (29) | adapter.in adapter.in.scheduling adapter.in.web adapter.out adapter.out.persistence application domain | NoteRecouvrementJpaRepository, NoteRecouvrementPersistenceAdapter, NoteRecouvrementRepository, RappelPrelevementJob, RappelPrelevementService, RecouvrementBackOfficeController, Relance, RelanceJpaRepository, RelancePersistenceAdapter, RelanceRepository, RetardEcheanceService, RetardsEtRelancesJob |
 | `web` (12) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
 
@@ -88,6 +88,7 @@ Générée automatiquement depuis le code (`c4a0f8f`). Sert à se repérer vite 
 - V29__inscription.sql
 - V30__marque_seheli.sql
 - V31__parametre_apport_simulation_max.sql
+- V32__critere_historique_seheli.sql
 
 ## Profils et configuration
 
@@ -107,4 +108,4 @@ Générée automatiquement depuis le code (`c4a0f8f`). Sert à se repérer vite 
 
 ## Tests
 
-- 128 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 132 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

@@ -18,7 +18,7 @@ import com.seheli.commun.domain.Montant;
  * @param finContrat              date de fin du contrat (CDD) ; vide pour un CDI ou un fonctionnaire
  * @param salaireVerseSurCompte   le salaire est versé sur un compte bancaire (pas en espèces)
  * @param salaireNet              salaire net mensuel
- * @param mensualitesCicEnCours   total des mensualités Seheli déjà dues (zéro sinon)
+ * @param mensualitesSeheliEnCours   total des mensualités Seheli déjà dues (zéro sinon)
  * @param nouvelleMensualite      mensualité la plus élevée de l'échéancier demandé
  * @param retardEnCours           le client a une échéance Seheli en retard
  */
@@ -30,7 +30,7 @@ public record DossierEligibilite(
         Optional<LocalDate> finContrat,
         boolean salaireVerseSurCompte,
         Montant salaireNet,
-        Montant mensualitesCicEnCours,
+        Montant mensualitesSeheliEnCours,
         Montant nouvelleMensualite,
         boolean retardEnCours) {
 
@@ -39,7 +39,7 @@ public record DossierEligibilite(
         Objects.requireNonNull(debutContrat, "debutContrat");
         Objects.requireNonNull(finContrat, "finContrat");
         Objects.requireNonNull(salaireNet, "salaireNet");
-        Objects.requireNonNull(mensualitesCicEnCours, "mensualitesCicEnCours");
+        Objects.requireNonNull(mensualitesSeheliEnCours, "mensualitesSeheliEnCours");
         Objects.requireNonNull(nouvelleMensualite, "nouvelleMensualite");
     }
 }

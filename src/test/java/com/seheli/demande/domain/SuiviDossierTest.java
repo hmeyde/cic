@@ -71,7 +71,7 @@ class SuiviDossierTest {
             "LIVREE, ATTENDRE_PREMIER_PRELEVEMENT, false",
             "EN_REMBOURSEMENT, PROVISIONNER_COMPTE, true",
             "EN_RETARD, REGULARISER_ECHEANCE, true",
-            "RECOUVREMENT, CONTACTER_CIC, true",
+            "RECOUVREMENT, CONTACTER_SEHELI, true",
             "SOLDEE, NOUVELLE_DEMANDE_POSSIBLE, true",
     })
     void chaque_statut_a_sa_prochaine_action(StatutDossier statut, ProchaineEtape prochaine, boolean parClient) {

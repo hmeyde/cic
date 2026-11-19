@@ -39,6 +39,6 @@ class ReferenceApportTest {
         assertThat(ReferenceApport.estValide("SEH-2026-000001")).isFalse();
         assertThat(ReferenceApport.estValide("ap20260000011")).isFalse();
         assertThatThrownBy(() -> new ReferenceApport("AP20260000012")).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> ReferenceApport.pourContrat("CIC")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> ReferenceApport.pourContrat("SEH")).isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -16,15 +16,15 @@ RUN --mount=type=cache,target=/root/.m2 ./mvnw -q -B package -DskipTests \
  && java -Djarmode=tools -jar target/seheli-*.jar extract --layers --launcher --destination /build/extrait
 
 FROM eclipse-temurin:25-jre
-RUN useradd --system --uid 10001 --home-dir /app cic \
+RUN useradd --system --uid 10001 --home-dir /app seheli \
  && mkdir -p /app /data/justificatifs /data/autorisations-signees \
- && chown -R cic:cic /data
+ && chown -R seheli:seheli /data
 WORKDIR /app
 COPY --from=build /build/extrait/dependencies/ ./
 COPY --from=build /build/extrait/spring-boot-loader/ ./
 COPY --from=build /build/extrait/snapshot-dependencies/ ./
 COPY --from=build /build/extrait/application/ ./
-USER cic
+USER seheli
 
 # Justificatifs et autorisations signées : hors de l'image, dans un volume.
 ENV SEHELI_DOCUMENTS_REPERTOIRE=/data/justificatifs \

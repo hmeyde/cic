@@ -92,7 +92,7 @@ public final class ConditionsEliminatoires {
     }
 
     static ResultatCondition endettement(DossierEligibilite d, ReglesEligibilite r) {
-        Montant total = d.mensualitesCicEnCours().plus(d.nouvelleMensualite());
+        Montant total = d.mensualitesSeheliEnCours().plus(d.nouvelleMensualite());
         String detail = "mensualités Seheli " + total + " pour un salaire net de " + d.salaireNet()
                 + " (plafond " + r.endettementMax() + ")";
         if (!d.salaireNet().estZero() && r.endettementMax().admet(total, d.salaireNet())) {

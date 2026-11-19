@@ -203,7 +203,7 @@ class DemandeServiceTest {
 
         Demande demande = soumettre();
 
-        assertThat(demande.score().note().resultat(CritereScore.HISTORIQUE_CIC).points()).isEqualTo(5);
+        assertThat(demande.score().note().resultat(CritereScore.HISTORIQUE_SEHELI).points()).isEqualTo(5);
         assertThat(demandes.parClient(client.id())).hasSize(3);
     }
 

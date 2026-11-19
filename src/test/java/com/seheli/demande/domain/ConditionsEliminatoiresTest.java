@@ -38,28 +38,28 @@ class ConditionsEliminatoiresTest {
     private static DossierEligibilite identite(boolean nni, boolean piece) {
         DossierEligibilite v = VALIDE;
         return new DossierEligibilite(nni, piece, v.dateNaissance(), v.debutContrat(), v.finContrat(),
-                v.salaireVerseSurCompte(), v.salaireNet(), v.mensualitesCicEnCours(), v.nouvelleMensualite(),
+                v.salaireVerseSurCompte(), v.salaireNet(), v.mensualitesSeheliEnCours(), v.nouvelleMensualite(),
                 v.retardEnCours());
     }
 
     private static DossierEligibilite neLe(LocalDate naissance) {
         DossierEligibilite v = VALIDE;
         return new DossierEligibilite(v.nniVerifie(), v.pieceIdentiteVerifiee(), naissance, v.debutContrat(),
-                v.finContrat(), v.salaireVerseSurCompte(), v.salaireNet(), v.mensualitesCicEnCours(),
+                v.finContrat(), v.salaireVerseSurCompte(), v.salaireNet(), v.mensualitesSeheliEnCours(),
                 v.nouvelleMensualite(), v.retardEnCours());
     }
 
     private static DossierEligibilite contrat(LocalDate debut, Optional<LocalDate> fin) {
         DossierEligibilite v = VALIDE;
         return new DossierEligibilite(v.nniVerifie(), v.pieceIdentiteVerifiee(), v.dateNaissance(), debut, fin,
-                v.salaireVerseSurCompte(), v.salaireNet(), v.mensualitesCicEnCours(), v.nouvelleMensualite(),
+                v.salaireVerseSurCompte(), v.salaireNet(), v.mensualitesSeheliEnCours(), v.nouvelleMensualite(),
                 v.retardEnCours());
     }
 
     private static DossierEligibilite salaireSurCompte(boolean surCompte) {
         DossierEligibilite v = VALIDE;
         return new DossierEligibilite(v.nniVerifie(), v.pieceIdentiteVerifiee(), v.dateNaissance(),
-                v.debutContrat(), v.finContrat(), surCompte, v.salaireNet(), v.mensualitesCicEnCours(),
+                v.debutContrat(), v.finContrat(), surCompte, v.salaireNet(), v.mensualitesSeheliEnCours(),
                 v.nouvelleMensualite(), v.retardEnCours());
     }
 
@@ -74,7 +74,7 @@ class ConditionsEliminatoiresTest {
         DossierEligibilite v = VALIDE;
         return new DossierEligibilite(v.nniVerifie(), v.pieceIdentiteVerifiee(), v.dateNaissance(),
                 v.debutContrat(), v.finContrat(), v.salaireVerseSurCompte(), v.salaireNet(),
-                v.mensualitesCicEnCours(), v.nouvelleMensualite(), enRetard);
+                v.mensualitesSeheliEnCours(), v.nouvelleMensualite(), enRetard);
     }
 
     @Test
