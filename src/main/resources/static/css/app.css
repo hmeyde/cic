@@ -3,8 +3,38 @@
  * Propriétés logiques (inline/block) pour que le rendu s'inverse avec dir="rtl".
  */
 
+/* Polices auto-hébergées (OFL) */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/Inter-Bold.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Noto Naskh Arabic";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../fonts/NotoNaskhArabic-Regular.woff2") format("woff2");
+}
+
 :root {
+    color-scheme: light dark;           /* champs, barres de défilement natives suivent le thème */
+
+    /* Couleurs principales */
     --couleur-primaire: #0b6e4f;
+    --couleur-sur-primaire: #ffffff;    /* texte posé sur un fond --couleur-primaire */
+    --couleur-pied: #1d2522;
+    --couleur-pied-texte: #e6ecea;
+    --couleur-pied-doux: #a9b5b1;
     --couleur-primaire-fonce: #08523b;
     --couleur-accent: #f2b705;
     --couleur-texte: #1d2522;
@@ -12,11 +42,77 @@
     --couleur-fond: #ffffff;
     --couleur-fond-doux: #f3f7f5;
     --couleur-bordure: #dde5e2;
+
+    /* Couleurs sémantiques */
+    --couleur-danger: #b42318;
+    --couleur-danger-fond: #fdecec;
+    --couleur-danger-texte: #7a1a12;
+    --couleur-sur-danger: #ffffff;
+    --couleur-succes: #0b6e4f;
+    --couleur-succes-fond: #e8f5e9;
+    --couleur-attention: #f2b705;
+    --couleur-attention-fond: #fef9e7;
+
+    /* Rayons */
+    --rayon-sm: 6px;
     --rayon: 12px;
+    --rayon-lg: 16px;
+    --rayon-plein: 999px;
+
+    /* Espacement */
+    --espace-xs: 0.25rem;
+    --espace-sm: 0.5rem;
     --espace: 1rem;
+    --espace-lg: 1.5rem;
+    --espace-xl: 2rem;
+    --espace-2xl: 2.5rem;
+    --espace-3xl: 3rem;
+
+    /* Typographie */
+    --texte-xs: 0.75rem;
+    --texte-sm: 0.875rem;
+    --texte-base: 1rem;
+    --texte-lg: 1.125rem;
+    --texte-xl: 1.25rem;
+    --texte-2xl: 1.75rem;
+
+    /* Ombres */
+    --ombre-sm: 0 1px 2px rgba(0, 0, 0, .06);
+    --ombre: 0 2px 6px rgba(0, 0, 0, .08);
+    --ombre-lg: 0 4px 16px rgba(0, 0, 0, .12);
+
     --largeur-max: 72rem;
-    --police: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --police: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --police-arabe: "Noto Naskh Arabic", "Noto Sans Arabic", "Segoe UI", Tahoma, "Geeza Pro", Arial, sans-serif;
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --couleur-primaire: #34d399;
+        --couleur-sur-primaire: #0b1512;    /* le vert clair du mode sombre exige un texte foncé */
+        --couleur-primaire-fonce: #10b981;
+        --couleur-pied: #0a0f0d;
+        --couleur-accent: #fbbf24;
+        --couleur-texte: #e8ecea;
+        --couleur-texte-doux: #9ca9a5;
+        --couleur-fond: #111816;
+        --couleur-fond-doux: #1a2320;
+        --couleur-bordure: #2d3b37;
+
+        --couleur-danger: #f87171;
+        --couleur-danger-fond: #3b1414;
+        --couleur-danger-texte: #fca5a5;
+        --couleur-sur-danger: #1f0a0a;
+        --couleur-succes: #34d399;
+        --couleur-succes-fond: #0d2818;
+        --couleur-attention: #fbbf24;
+        --couleur-attention-fond: #2d2305;
+
+        --ombre-sm: 0 1px 2px rgba(0, 0, 0, .2);
+        --ombre: 0 2px 6px rgba(0, 0, 0, .3);
+        --ombre-lg: 0 4px 16px rgba(0, 0, 0, .4);
+    }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -58,7 +154,7 @@ a { color: var(--couleur-primaire); }
     inset-block-start: -3rem;
     padding: .5rem 1rem;
     background: var(--couleur-primaire);
-    color: #fff;
+    color: var(--couleur-sur-primaire);
     border-radius: var(--rayon);
     z-index: 10;
 }
@@ -113,7 +209,8 @@ a { color: var(--couleur-primaire); }
 
 /* Accroche */
 .accroche {
-    background: linear-gradient(160deg, var(--couleur-primaire), var(--couleur-primaire-fonce));
+    /* Verts de la marque en dur : le texte blanc garde son contraste en clair comme en sombre. */
+    background: linear-gradient(160deg, #0b6e4f, #08523b);
     color: #fff;
     padding-block: 2.5rem;
 }
@@ -146,6 +243,7 @@ a { color: var(--couleur-primaire); }
     border: 1px solid var(--couleur-bordure);
     border-radius: var(--rayon);
     padding: var(--espace);
+    box-shadow: var(--ombre-sm);
 }
 .etapes, .engagements {
     list-style: none;
@@ -167,7 +265,7 @@ a { color: var(--couleur-primaire); }
     place-items: center;
     border-radius: 50%;
     background: var(--couleur-primaire);
-    color: #fff;
+    color: var(--couleur-sur-primaire);
     font-weight: 700;
 }
 .etape h3 { font-size: 1.05rem; margin-block-end: .25rem; }
@@ -176,15 +274,15 @@ a { color: var(--couleur-primaire); }
 
 /* Pied de page */
 .pied {
-    background: var(--couleur-texte);
-    color: #e6ecea;
+    background: var(--couleur-pied);
+    color: var(--couleur-pied-texte);
     padding-block: 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
     font-size: .95rem;
 }
 .pied a { color: #fff; }
 .pied__liens { display: flex; flex-wrap: wrap; gap: 1rem; margin-block-end: 1rem; }
 .pied__liens a { display: inline-flex; align-items: center; min-height: 44px; }
-.pied__mentions { margin: 0; color: #a9b5b1; font-size: .85rem; }
+.pied__mentions { margin: 0; color: var(--couleur-pied-doux); font-size: .85rem; }
 
 /* Formulaires et alertes */
 .conteneur--etroit { max-width: 28rem; }
@@ -204,10 +302,30 @@ a { color: var(--couleur-primaire); }
     color: var(--couleur-texte);
 }
 .alerte { padding: .75rem 1rem; border-radius: var(--rayon); border-inline-start: 4px solid; }
-.alerte--erreur { background: #fdecec; border-color: #b42318; color: #7a1a12; }
+.alerte--erreur { background: var(--couleur-danger-fond); border-color: var(--couleur-danger); color: var(--couleur-danger-texte); }
 .alerte--info { background: var(--couleur-fond-doux); border-color: var(--couleur-primaire); }
+.alerte--succes { background: var(--couleur-succes-fond); border-color: var(--couleur-succes); color: var(--couleur-succes); }
+.alerte--attention { background: var(--couleur-attention-fond); border-color: var(--couleur-attention); color: #7a5d00; }
+@media (prefers-color-scheme: dark) { .alerte--attention { color: var(--couleur-attention); } }
 .bouton--contour { border-color: var(--couleur-primaire); color: var(--couleur-primaire); background: transparent; }
 .bouton--contour:hover { background: var(--couleur-fond-doux); }
+.bouton--danger { background: var(--couleur-danger); color: var(--couleur-sur-danger); }
+.bouton--danger:hover { background: #931d14; }
+@media (prefers-color-scheme: dark) { .bouton--danger:hover { background: #ef4444; } }
+.bouton--chargement { pointer-events: none; opacity: .7; }
+.bouton--chargement::after {
+    content: "";
+    display: inline-block;
+    inline-size: 1em;
+    block-size: 1em;
+    margin-inline-start: .5em;
+    border: 2px solid currentColor;
+    border-block-start-color: transparent;
+    border-radius: 50%;
+    animation: rotation-bouton .6s linear infinite;
+}
+@keyframes rotation-bouton { to { transform: rotate(360deg); } }
+
 .etiquette {
     display: inline-block;
     margin-inline-start: .5rem;
@@ -219,6 +337,11 @@ a { color: var(--couleur-primaire); }
 }
 
 .etiquette--sans-marge { margin-inline-start: 0; }
+.etiquette--favorable { background: var(--couleur-succes-fond); border-color: var(--couleur-succes); color: var(--couleur-succes); }
+.etiquette--attention { background: var(--couleur-attention-fond); border-color: var(--couleur-attention); color: #7a5d00; }
+@media (prefers-color-scheme: dark) { .etiquette--attention { color: var(--couleur-attention); } }
+.etiquette--danger { background: var(--couleur-danger-fond); border-color: var(--couleur-danger); color: var(--couleur-danger-texte); }
+.etiquette--neutre { background: var(--couleur-fond-doux); border-color: var(--couleur-bordure); color: var(--couleur-texte-doux); }
 .visuellement-cache {
     position: absolute;
     width: 1px;
@@ -239,9 +362,10 @@ a { color: var(--couleur-primaire); }
 .tableau tbody tr:last-child td { border-block-end: 0; }
 .tableau .nombre { text-align: end; font-variant-numeric: tabular-nums; }
 .tableau a { display: inline-flex; align-items: center; min-height: 44px; }
+.tableau--dense th, .tableau--dense td { padding: .4rem .6rem; font-size: var(--texte-sm); }
 .champ__aide { margin: 0; font-size: .9rem; }
-.champ__erreur { margin: 0; color: #b42318; font-weight: 600; }
-.champ input[aria-invalid="true"] { border-color: #b42318; }
+.champ__erreur { margin: 0; color: var(--couleur-danger); font-weight: 600; }
+.champ input[aria-invalid="true"] { border-color: var(--couleur-danger); }
 .champ--case { grid-template-columns: auto 1fr; align-items: center; gap: .75rem; }
 .champ--case input { width: 1.5rem; height: 1.5rem; min-height: 0; accent-color: var(--couleur-primaire); }
 .actions-formulaire { display: flex; flex-wrap: wrap; gap: .75rem; }
@@ -250,7 +374,7 @@ a { color: var(--couleur-primaire); }
 .actions-ligne form { margin: 0; }
 .bouton-lien { min-height: 44px; padding: 0; border: 0; background: none; font: inherit; color: var(--couleur-primaire); text-decoration: underline; cursor: pointer; }
 .champ input[readonly] { background: var(--couleur-fond-doux); }
-.champ select[aria-invalid="true"] { border-color: #b42318; }
+.champ select[aria-invalid="true"] { border-color: var(--couleur-danger); }
 
 /* Tablette et plus */
 @media (min-width: 40rem) {
@@ -279,7 +403,7 @@ html { scroll-behavior: smooth; }
 /* Catalogue client */
 .filtres { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem 1.5rem; }
 .filtre { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border: 1px solid var(--couleur-bordure); border-radius: 999px; color: var(--couleur-primaire); text-decoration: none; }
-.filtre--actif { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: #fff; }
+.filtre--actif { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
 .grille-produits { display: grid; gap: 1rem; padding: 0; margin: 0 0 1.5rem; list-style: none; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
 .carte-produit { display: grid; gap: .35rem; align-content: start; }
 .carte-produit p { margin: 0; }
@@ -299,7 +423,7 @@ html { scroll-behavior: smooth; }
 .choix-duree__option { position: relative; }
 .choix-duree__option input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .choix-duree__option span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border: 1px solid var(--couleur-bordure); border-radius: 999px; color: var(--couleur-primaire); }
-.choix-duree__option input:checked + span { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: #fff; }
+.choix-duree__option input:checked + span { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
 .choix-duree__option input:focus-visible + span { outline: 3px solid var(--couleur-primaire); outline-offset: 2px; }
 .conditions__principale dd { font-size: 1.25rem; color: var(--couleur-primaire); }
 
@@ -329,11 +453,11 @@ html { scroll-behavior: smooth; }
 }
 .frise__nom { font-weight: 600; }
 .frise__etat { color: var(--couleur-texte-doux); font-size: .9rem; }
-.frise__etape--faite::before { content: "✓"; background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: #fff; }
+.frise__etape--faite::before { content: "✓"; background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
 .frise__etape--en_cours { border-color: var(--couleur-primaire); background: var(--couleur-fond-doux); }
 .frise__etape--en_cours::before { background: var(--couleur-accent); border-color: var(--couleur-accent); color: #1d1a00; }
-.frise__etape--arretee { border-color: #b42318; }
-.frise__etape--arretee::before { content: "✕"; background: #b42318; border-color: #b42318; color: #fff; }
+.frise__etape--arretee { border-color: var(--couleur-danger); }
+.frise__etape--arretee::before { content: "✕"; background: var(--couleur-danger); border-color: var(--couleur-danger); color: var(--couleur-sur-danger); }
 .frise__etape--a_venir .frise__nom { color: var(--couleur-texte-doux); font-weight: 400; }
 
 /* Fiche dossier du back-office */
@@ -343,7 +467,7 @@ html { scroll-behavior: smooth; }
 .fiche-score__note { font-size: 1.75rem; }
 .tableau--retour td, .tableau--retour th { white-space: normal; }
 .tableau tfoot th, .tableau tfoot td { border-block-start: 2px solid var(--couleur-bordure); border-block-end: 0; }
-.ligne--echec th, .ligne--echec td { background: #fdecec; color: #7a1a12; }
+.ligne--echec th, .ligne--echec td { background: var(--couleur-danger-fond); color: var(--couleur-danger-texte); }
 .paiement-apport { margin-block-end: 1rem; border-inline-start: 4px solid var(--couleur-primaire); }
 .paiement-apport h2 { margin-block: 0 .75rem; font-size: 1.15rem; }
 .paiement-apport__code { font-family: ui-monospace, monospace; font-size: 1.1rem; letter-spacing: .05em; user-select: all; }
@@ -351,7 +475,7 @@ html { scroll-behavior: smooth; }
 
 /* Recouvrement : notes datées */
 .liste-notes { list-style: none; padding: 0; margin: 1rem 0 0; }
-.liste-notes li { border-top: 1px solid #e3e3e3; padding: .5rem 0; }
+.liste-notes li { border-block-start: 1px solid var(--couleur-bordure); padding-block: .5rem; }
 .liste-notes p { margin: 0; }
 .note__texte { white-space: pre-line; }
 
@@ -366,7 +490,43 @@ html { scroll-behavior: smooth; }
 .alertes-risque { margin-block-end: 1.5rem; }
 .alertes-risque__titre { margin: 0 0 .5rem; font-size: 1.1rem; }
 .alertes-risque__liste { margin: 0; padding-inline-start: 1.25rem; display: grid; gap: .35rem; }
-.indicateur--alerte { border-inline-start-color: #b42318; background: #fdecec; }
+.indicateur--alerte { border-inline-start-color: var(--couleur-danger); background: var(--couleur-danger-fond); }
 
 /* Inscription : champ piège anti-robot, invisible pour les humains */
 .champ-piege { position: absolute; inset-inline-start: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Page de démo des composants (dev uniquement) */
+.demo-section { margin-block-end: var(--espace-2xl); }
+.demo-section h2 { border-block-end: 1px solid var(--couleur-bordure); padding-block-end: var(--espace-sm); }
+.demo-nuancier { display: flex; flex-wrap: wrap; gap: var(--espace-sm); }
+.demo-nuance { display: grid; place-items: center; width: 6rem; height: 4rem; border-radius: var(--rayon); border: 1px solid var(--couleur-bordure); font-size: var(--texte-xs); text-align: center; }
+.demo-nuance--primaire { background: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
+.demo-nuance--primaire-fonce { background: var(--couleur-primaire-fonce); color: var(--couleur-sur-primaire); }
+.demo-nuance--accent { background: var(--couleur-accent); color: #1d1a00; }
+.demo-nuance--danger { background: var(--couleur-danger); color: var(--couleur-sur-danger); }
+.demo-nuance--succes { background: var(--couleur-succes); color: var(--couleur-sur-primaire); }
+.demo-nuance--attention { background: var(--couleur-attention); color: #1d1a00; }
+.demo-nuance--fond-doux { background: var(--couleur-fond-doux); }
+.demo-nuance--bordure { background: var(--couleur-bordure); }
+.demo-nuance--texte { background: var(--couleur-texte); color: var(--couleur-fond); }
+.demo-nuance--texte-doux { background: var(--couleur-texte-doux); color: var(--couleur-fond); }
+.demo-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espace); margin-block-end: var(--espace); }
+.demo-fond-primaire { background: var(--couleur-primaire); padding: var(--espace); border-radius: var(--rayon); }
+.demo-typo-xs { font-size: var(--texte-xs); }
+.demo-typo-sm { font-size: var(--texte-sm); }
+.demo-typo-base { font-size: var(--texte-base); }
+.demo-typo-lg { font-size: var(--texte-lg); }
+.demo-typo-xl { font-size: var(--texte-xl); }
+.demo-typo-2xl { font-size: var(--texte-2xl); }
+.demo-espacement { margin-block-end: var(--espace); }
+
+/* Mode sombre : le mot-symbole vert foncé disparaît sur fond sombre. On pose le logo sur le
+   « fond doux » clair autorisé par docs/MARQUE.md, avec la zone de protection en marge intérieure. */
+@media (prefers-color-scheme: dark) {
+    .marque__logo, .logo-page__image {
+        background: #f3f7f5;
+        border-radius: var(--rayon-sm);
+        padding: .25rem .5rem;
+        box-sizing: content-box;
+    }
+}

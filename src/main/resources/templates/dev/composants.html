@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Composants — Design System</title></head>
+<body>
+<main class="conteneur section">
+
+    <h1>Design System — Composants</h1>
+    <p class="texte-doux">Page de référence (profil dev uniquement).</p>
+
+    <!-- Typographie -->
+    <section class="demo-section">
+        <h2>Typographie</h2>
+        <p class="demo-typo-xs">texte-xs (0.75 rem)</p>
+        <p class="demo-typo-sm">texte-sm (0.875 rem)</p>
+        <p class="demo-typo-base">texte-base (1 rem)</p>
+        <p class="demo-typo-lg">texte-lg (1.125 rem)</p>
+        <p class="demo-typo-xl">texte-xl (1.25 rem)</p>
+        <p class="demo-typo-2xl"><strong>texte-2xl (1.75 rem)</strong></p>
+    </section>
+
+    <!-- Nuancier -->
+    <section class="demo-section">
+        <h2>Couleurs</h2>
+        <div class="demo-nuancier">
+            <div class="demo-nuance demo-nuance--primaire">primaire</div>
+            <div class="demo-nuance demo-nuance--primaire-fonce">primaire-fonce</div>
+            <div class="demo-nuance demo-nuance--accent">accent</div>
+            <div class="demo-nuance demo-nuance--danger">danger</div>
+            <div class="demo-nuance demo-nuance--succes">succes</div>
+            <div class="demo-nuance demo-nuance--attention">attention</div>
+            <div class="demo-nuance demo-nuance--fond-doux">fond-doux</div>
+            <div class="demo-nuance demo-nuance--bordure">bordure</div>
+            <div class="demo-nuance demo-nuance--texte">texte</div>
+            <div class="demo-nuance demo-nuance--texte-doux">texte-doux</div>
+        </div>
+    </section>
+
+    <!-- Boutons -->
+    <section class="demo-section">
+        <h2>Boutons</h2>
+        <div class="demo-ligne">
+            <button class="bouton bouton--principal" type="button">Principal</button>
+            <button class="bouton bouton--contour" type="button">Contour</button>
+            <button class="bouton bouton--danger" type="button">Danger</button>
+            <button class="bouton bouton--principal bouton--chargement" type="button" disabled>Chargement</button>
+        </div>
+        <div class="demo-ligne demo-fond-primaire">
+            <button class="bouton bouton--principal" type="button">Principal</button>
+            <button class="bouton bouton--secondaire" type="button">Secondaire</button>
+        </div>
+    </section>
+
+    <!-- Champs de formulaire -->
+    <section class="demo-section">
+        <h2>Champs de formulaire</h2>
+        <form class="formulaire">
+            <div class="champ">
+                <label for="demo-texte">Champ texte</label>
+                <input id="demo-texte" type="text" placeholder="Saisir du texte…">
+            </div>
+            <div class="champ">
+                <label for="demo-select">Liste déroulante</label>
+                <select id="demo-select">
+                    <option>Option A</option>
+                    <option>Option B</option>
+                </select>
+            </div>
+            <div class="champ">
+                <label for="demo-erreur">Champ en erreur</label>
+                <input id="demo-erreur" type="text" aria-invalid="true" value="valeur incorrecte">
+                <p class="champ__erreur">Ce champ est obligatoire.</p>
+            </div>
+            <div class="champ">
+                <label for="demo-readonly">Champ en lecture seule</label>
+                <input id="demo-readonly" type="text" readonly value="Lecture seule">
+            </div>
+            <div class="champ champ--case">
+                <input id="demo-case" type="checkbox">
+                <label for="demo-case">Case à cocher</label>
+            </div>
+        </form>
+    </section>
+
+    <!-- Cartes -->
+    <section class="demo-section">
+        <h2>Cartes</h2>
+        <div class="carte">
+            <h3>Carte simple</h3>
+            <p>Contenu de la carte avec ombre légère et coins arrondis.</p>
+        </div>
+    </section>
+
+    <!-- Alertes -->
+    <section class="demo-section">
+        <h2>Alertes</h2>
+        <div class="alerte alerte--info demo-espacement">
+            <strong>Info :</strong> message d'information.
+        </div>
+        <div class="alerte alerte--erreur demo-espacement">
+            <strong>Erreur :</strong> une erreur est survenue.
+        </div>
+        <div class="alerte alerte--succes demo-espacement">
+            <strong>Succès :</strong> opération réussie.
+        </div>
+        <div class="alerte alerte--attention">
+            <strong>Attention :</strong> vérifiez les informations.
+        </div>
+    </section>
+
+    <!-- Étiquettes / badges de statut -->
+    <section class="demo-section">
+        <h2>Étiquettes de statut</h2>
+
+        <h3>Statuts de dossier</h3>
+        <div class="demo-ligne">
+            <span th:text="#{client.demande.statut.DEMANDE_SOUMISE}" class="etiquette etiquette--sans-marge etiquette--neutre">DEMANDE_SOUMISE</span>
+            <span th:text="#{client.demande.statut.EN_ANALYSE}" class="etiquette etiquette--sans-marge etiquette--attention">EN_ANALYSE</span>
+            <span th:text="#{client.demande.statut.ACCEPTEE}" class="etiquette etiquette--sans-marge etiquette--favorable">ACCEPTEE</span>
+            <span th:text="#{client.demande.statut.REFUSEE}" class="etiquette etiquette--sans-marge etiquette--danger">REFUSEE</span>
+            <span th:text="#{client.demande.statut.ANNULEE}" class="etiquette etiquette--sans-marge etiquette--danger">ANNULEE</span>
+            <span th:text="#{client.demande.statut.APPORT_ET_AUTORISATION}" class="etiquette etiquette--sans-marge etiquette--neutre">APPORT_ET_AUTORISATION</span>
+            <span th:text="#{client.demande.statut.COMMANDEE}" class="etiquette etiquette--sans-marge etiquette--neutre">COMMANDEE</span>
+            <span th:text="#{client.demande.statut.LIVREE}" class="etiquette etiquette--sans-marge etiquette--neutre">LIVREE</span>
+            <span th:text="#{client.demande.statut.EN_REMBOURSEMENT}" class="etiquette etiquette--sans-marge etiquette--favorable">EN_REMBOURSEMENT</span>
+            <span th:text="#{client.demande.statut.SOLDEE}" class="etiquette etiquette--sans-marge etiquette--favorable">SOLDEE</span>
+            <span th:text="#{client.demande.statut.EN_RETARD}" class="etiquette etiquette--sans-marge etiquette--danger">EN_RETARD</span>
+            <span th:text="#{client.demande.statut.RECOUVREMENT}" class="etiquette etiquette--sans-marge etiquette--danger">RECOUVREMENT</span>
+        </div>
+
+        <h3>Statuts d'échéance</h3>
+        <div class="demo-ligne">
+            <span th:text="#{client.offre.echeance.statut.A_VENIR}" class="etiquette etiquette--sans-marge etiquette--neutre">A_VENIR</span>
+            <span th:text="#{client.offre.echeance.statut.PAYEE}" class="etiquette etiquette--sans-marge etiquette--favorable">PAYEE</span>
+            <span th:text="#{client.offre.echeance.statut.EN_RETARD}" class="etiquette etiquette--sans-marge etiquette--danger">EN_RETARD</span>
+        </div>
+
+        <h3>Recommandations du score</h3>
+        <div class="demo-ligne">
+            <span th:text="#{score.recommandation.FAVORABLE}" class="etiquette etiquette--sans-marge etiquette--favorable">FAVORABLE</span>
+            <span th:text="#{score.recommandation.A_EXAMINER}" class="etiquette etiquette--sans-marge etiquette--attention">A_EXAMINER</span>
+            <span th:text="#{score.recommandation.DEFAVORABLE}" class="etiquette etiquette--sans-marge etiquette--danger">DEFAVORABLE</span>
+        </div>
+    </section>
+
+    <!-- Tableaux -->
+    <section class="demo-section">
+        <h2>Tableaux</h2>
+
+        <h3>Tableau standard</h3>
+        <div class="tableau-defilant">
+            <table class="tableau">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Produit</th>
+                        <th class="nombre">Montant</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Moussa Diallo</td>
+                        <td>iPhone 15</td>
+                        <td class="nombre">20 800 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--favorable">ACCEPTEE</span></td>
+                    </tr>
+                    <tr>
+                        <td>Fatima Ba</td>
+                        <td>Samsung A54</td>
+                        <td class="nombre">8 320 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--attention">EN_ANALYSE</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ahmed Sy</td>
+                        <td>Réfrigérateur</td>
+                        <td class="nombre">15 600 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--danger">REFUSEE</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Tableau dense</h3>
+        <div class="tableau-defilant">
+            <table class="tableau tableau--dense">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Échéance</th>
+                        <th class="nombre">Montant</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2026-12-01</td>
+                        <td class="nombre">2 080 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--favorable">PAYEE</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2027-01-01</td>
+                        <td class="nombre">2 080 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--favorable">PAYEE</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>2027-02-01</td>
+                        <td class="nombre">2 080 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--neutre">A_VENIR</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>2027-03-01</td>
+                        <td class="nombre">2 080 MRU</td>
+                        <td><span class="etiquette etiquette--sans-marge etiquette--neutre">A_VENIR</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+</body>
+</html>

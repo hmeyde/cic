@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`27eb41a`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`fe7fdcf`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -11,8 +11,8 @@ Générée automatiquement depuis le code (`27eb41a`). Sert à se repérer vite 
 | `commun` (4) | domain | Fraction, Montant |
 | `comptabilite` (31) | adapter.in adapter.in.evenement adapter.in.web adapter.out adapter.out.persistence application domain | ApportCapitalJpaRepository, ApportCapitalPersistenceAdapter, ApportCapitalRepository, ApportCapitalService, CapitalBackOfficeController, ComptabiliteService, Compte, EcritureComptableJpaRepository, EcritureComptablePersistenceAdapter, EcritureComptableRepository, IndicateursFinanciersService, Sens |
 | `config` (5) | - | - |
-| `contrat` (60) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
-| `demande` (100) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
+| `contrat` (61) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
+| `demande` (101) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
 | `demonstration` (21) | adapter.in adapter.in.demarrage adapter.in.web adapter.out adapter.out.base adapter.out.demarrage adapter.out.horloge adapter.out.image application domain | DonneesDemonstrationService, ReinitialisationDemonstrationController, ReinitialisationDemonstrationService, Simulation |
 | `identite` (77) | adapter.in adapter.in.web adapter.out adapter.out.code adapter.out.persistence adapter.out.stockage application domain | Client, ClientJpaRepository, ClientPersistenceAdapter, ClientRepository, ClientService, CodeConnexionJpaRepository, CodeConnexionPersistenceAdapter, CodeConnexionRepository, CompteBackOfficeService, ConnexionBackOfficeController, ConnexionClientController, ConnexionClientService |
 | `inscription` (17) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | Inscription, InscriptionController, InscriptionJpaRepository, InscriptionPersistenceAdapter, InscriptionRepository, InscriptionsBackOfficeController, InscriptionService |
@@ -21,7 +21,7 @@ Générée automatiquement depuis le code (`27eb41a`). Sert à se repérer vite 
 | `parametrage` (13) | adapter.out adapter.out.persistence application domain | Parametre, ParametreJpaRepository, ParametrePersistenceAdapter, Parametres, ParametreService |
 | `pilotage` (11) | adapter.in adapter.in.web application domain | Concentration, TableauDeBordController, TableauDeBordService |
 | `recouvrement` (29) | adapter.in adapter.in.scheduling adapter.in.web adapter.out adapter.out.persistence application domain | NoteRecouvrementJpaRepository, NoteRecouvrementPersistenceAdapter, NoteRecouvrementRepository, RappelPrelevementJob, RappelPrelevementService, RecouvrementBackOfficeController, Relance, RelanceJpaRepository, RelancePersistenceAdapter, RelanceRepository, RetardEcheanceService, RetardsEtRelancesJob |
-| `web` (3) | - | AccueilController, BackOfficeAccueilController |
+| `web` (4) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
 
 ## Routes web
 
@@ -33,6 +33,7 @@ Générée automatiquement depuis le code (`27eb41a`). Sert à se repérer vite 
 | `CapitalBackOfficeController` (comptabilite) | `GET /bo/capital`, `POST /bo/capital` |
 | `CatalogueClientController` (catalogue) | `GET /client/catalogue`, `GET /client/catalogue/{id}`, `GET /client/catalogue/{id}/simulation` |
 | `CommandesFournisseurBackOfficeController` (demande) | `GET /bo/commandes`, `POST /bo/commandes/{id}/validation`, `GET /bo/commandes/{id}/bon-de-commande.pdf` |
+| `ComposantsDevController` (web) | `GET /dev/composants` |
 | `ConnexionBackOfficeController` (identite) | `GET /bo/login` |
 | `ConnexionClientController` (identite) | `GET /client/connexion`, `POST /client/connexion`, `GET /client/connexion/code`, `POST /client/connexion/code` |
 | `CreationCompteClientController` (identite) | `GET /client/connexion/compte`, `POST /client/connexion/compte` |
