@@ -113,7 +113,8 @@ class ParametresTest {
         StringBuilder migrations = new StringBuilder();
         for (String fichier : new String[] {"V2__parametre_regles_de_gestion.sql", "V7__code_connexion_client.sql",
                 "V15__autorisation_prelevement.sql", "V18__masrvi_code_marchand.sql", "V24__relance.sql",
-                "V28__parametre_alerte_prelevements.sql", "V30__marque_seheli.sql"}) {
+                "V28__parametre_alerte_prelevements.sql", "V30__marque_seheli.sql",
+                "V31__parametre_apport_simulation_max.sql"}) {
             try (var in = getClass().getResourceAsStream("/db/migration/" + fichier)) {
                 assertThat(in).as(fichier).isNotNull();
                 migrations.append(new String(in.readAllBytes(), StandardCharsets.UTF_8));

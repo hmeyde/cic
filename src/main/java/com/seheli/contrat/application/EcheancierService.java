@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.seheli.commun.domain.Fraction;
 import com.seheli.commun.domain.Montant;
 import com.seheli.contrat.domain.DureeAutorisee;
 import com.seheli.contrat.domain.Echeancier;
@@ -45,6 +46,11 @@ public class EcheancierService {
         echeancier.verifierEndettement(salaireNet, mensualitesCicEnCours,
                 p.fraction(CleParametre.ENDETTEMENT_MAX_FRACTION));
         return echeancier;
+    }
+
+    /** Part maximale du salaire net consacrée aux mensualités Seheli ({@code endettement.max.fraction}). */
+    public Fraction partMaxSalaire() {
+        return parametres.fraction(CleParametre.ENDETTEMENT_MAX_FRACTION);
     }
 
     public DureeAutorisee dureeAutorisee() {

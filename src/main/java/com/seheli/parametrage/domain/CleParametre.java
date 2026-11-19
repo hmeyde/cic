@@ -12,6 +12,7 @@ import static com.seheli.parametrage.domain.TypeParametre.TEXTE;
 public enum CleParametre {
 
     APPORT_MINIMUM_PCT("apport.minimum.pct", POURCENTAGE),
+    APPORT_SIMULATION_MAX_PCT("apport.simulation.max.pct", POURCENTAGE),
     MARGE_SEHELI_DEFAUT_PCT("marge.cic.defaut.pct", POURCENTAGE),
     REMISE_FOURNISSEUR_MIN_PCT("remise.fournisseur.min.pct", POURCENTAGE),
     REMISE_FOURNISSEUR_MAX_PCT("remise.fournisseur.max.pct", POURCENTAGE),

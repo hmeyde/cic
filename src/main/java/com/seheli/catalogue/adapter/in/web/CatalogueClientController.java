@@ -1,5 +1,6 @@
 package com.seheli.catalogue.adapter.in.web;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -21,12 +22,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.seheli.catalogue.application.CatalogueClientService;
 import com.seheli.catalogue.application.ProduitPropose;
+import com.seheli.catalogue.application.SimulationClient;
+import com.seheli.catalogue.application.SimulationClientService;
 import com.seheli.catalogue.domain.CategorieProduit;
-import com.seheli.contrat.domain.Simulation;
 
 /**
  * Espace client : catalogue des produits proposés (filtrable par catégorie) et page d'un produit
- * avec la simulation HTMX (durée → prix total, apport, mensualité) calculée par le module contrat,
+ * avec la simulation HTMX (durée et apport → échéancier daté, décomposition du prix, alerte
+ * d'endettement) calculée par le module contrat,
  * suivie du formulaire de demande (envoyé au module demande, {@code POST /client/demandes}).
  * Réservé au rôle CLIENT (chaîne de sécurité {@code /client/**}). Un produit non proposé répond 404.
  */
@@ -38,12 +41,14 @@ class CatalogueClientController {
     static final String VUE_PRODUIT = "client/catalogue/produit";
     static final String FRAGMENT_RESULTATS = VUE_LISTE + " :: resultats";
     static final int RECHERCHE_LONGUEUR_MAX = 100;
-    static final String FRAGMENT_SIMULATION = "client/catalogue/simulation :: resultat";
+    static final String FRAGMENT_SIMULATION = "client/catalogue/simulation :: reponse";
 
     private final CatalogueClientService catalogue;
+    private final SimulationClientService simulations;
 
-    CatalogueClientController(CatalogueClientService catalogue) {
+    CatalogueClientController(CatalogueClientService catalogue, SimulationClientService simulations) {
         this.catalogue = catalogue;
+        this.simulations = simulations;
     }
 
     /**
@@ -75,12 +80,13 @@ class CatalogueClientController {
     }
 
     /**
-     * Page du produit avec la simulation sur la durée demandée ; une durée absente ou hors bornes
-     * est remplacée par la durée maximale. Sans JavaScript, le formulaire de simulation renvoie ici.
+     * Page du produit avec la simulation sur la durée et l'apport demandés ; une durée absente ou
+     * hors bornes est remplacée par la durée maximale, un apport hors bornes est ramené dans les
+     * bornes du curseur. Sans JavaScript, le formulaire de simulation renvoie ici.
      */
     @GetMapping(CHEMIN + "/{id}")
     String produit(@PathVariable("id") UUID id, @RequestParam(name = "duree", required = false) Integer duree,
-            Model model) {
+            @RequestParam(name = "apport", required = false) Integer apport, Principal principal, Model model) {
         ProduitPropose produit = catalogue.propose(id).orElseThrow(CatalogueClientController::introuvable);
         int retenue = duree != null && duree >= produit.dureeMinMois() && duree <= produit.dureeMaxMois()
                 ? duree : produit.dureeMaxMois();
@@ -89,23 +95,32 @@ class CatalogueClientController {
         model.addAttribute("produitId", id);
         model.addAttribute("durees", IntStream.rangeClosed(produit.dureeMinMois(), produit.dureeMaxMois())
                 .boxed().toList());
-        model.addAttribute("simulation",
-                catalogue.simuler(id, retenue).orElseThrow(CatalogueClientController::introuvable));
+        model.addAttribute("simulation", simulations.simuler(id, clientId(principal), retenue, apport)
+                .orElseThrow(CatalogueClientController::introuvable));
         return VUE_PRODUIT;
     }
 
-    /** Fragment HTMX : résultat de la simulation, recalculé à chaque changement de durée. */
+    /**
+     * Fragment HTMX : frise de l'échéancier et décomposition du prix, recalculées à chaque
+     * changement de durée ou d'apport. Une durée hors bornes répond 400.
+     */
     @GetMapping(CHEMIN + "/{id}/simulation")
-    String simulation(@PathVariable("id") UUID id, @RequestParam("duree") int duree, Model model) {
-        Simulation simulation;
+    String simulation(@PathVariable("id") UUID id, @RequestParam("duree") int duree,
+            @RequestParam(name = "apport", required = false) Integer apport, Principal principal, Model model) {
+        SimulationClient simulation;
         try {
-            simulation = catalogue.simuler(id, duree).orElseThrow(CatalogueClientController::introuvable);
+            simulation = simulations.simuler(id, clientId(principal), duree, apport)
+                    .orElseThrow(CatalogueClientController::introuvable);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         model.addAttribute("simulation", simulation);
         model.addAttribute("produitId", id);
         return FRAGMENT_SIMULATION;
+    }
+
+    private static UUID clientId(Principal principal) {
+        return UUID.fromString(principal.getName());
     }
 
     private static ResponseStatusException introuvable() {

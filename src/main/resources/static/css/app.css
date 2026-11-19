@@ -534,14 +534,40 @@ html { scroll-behavior: smooth; }
 
 /* Simulation sur la page produit */
 .simulation { margin-block-end: 1rem; }
-.choix-duree { display: flex; flex-wrap: wrap; gap: .5rem; border: 0; padding: 0; margin: 0; }
-.choix-duree legend { font-weight: 600; margin-block-end: .5rem; padding: 0; }
-.choix-duree__option { position: relative; }
-.choix-duree__option input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-.choix-duree__option span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border: 1px solid var(--couleur-bordure); border-radius: 999px; color: var(--couleur-primaire); }
-.choix-duree__option input:checked + span { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
-.choix-duree__option input:focus-visible + span { outline: 3px solid var(--couleur-primaire); outline-offset: 2px; }
 .conditions__principale dd { font-size: 1.25rem; color: var(--couleur-primaire); }
+/* Durée en boutons segmentés (radios accessibles au clavier) */
+.segments { border: 0; padding: 0; margin: 0 0 1.25rem; min-width: 0; }
+.segments legend { font-weight: 600; margin-block-end: .5rem; padding: 0; }
+.segments__groupe { display: flex; border: 1px solid var(--couleur-primaire); border-radius: .75rem; overflow: hidden; }
+.segments__option { position: relative; flex: 1 1 0; }
+.segments__option + .segments__option { border-inline-start: 1px solid var(--couleur-primaire); }
+.segments__option input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.segments__option span { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 .5rem; color: var(--couleur-primaire); font-weight: 600; white-space: nowrap; }
+.segments__option input:checked + span { background: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
+.segments__option input:focus-visible + span { outline: 3px solid var(--couleur-accent); outline-offset: -3px; }
+
+/* Apport au curseur */
+.curseur-apport__entete { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.curseur-apport__entete label { font-weight: 600; }
+.curseur-apport__valeur { font-weight: 700; color: var(--couleur-primaire); font-variant-numeric: tabular-nums; }
+.curseur-apport input[type="range"] { width: 100%; min-height: 44px; margin: 0; accent-color: var(--couleur-primaire); cursor: pointer; }
+
+/* Échéancier en frise verticale (propriétés logiques : la frise passe à droite en arabe) */
+.simulation__sous-titre { font-size: 1rem; margin: 1.5rem 0 .75rem; }
+.frise { list-style: none; margin: 0; padding: 0; }
+.frise__etape { position: relative; padding-inline-start: 1.75rem; padding-block-end: 1rem; }
+.frise__etape::before { content: ""; position: absolute; inset-inline-start: .4375rem; inset-block: .5rem 0; border-inline-start: 2px solid var(--couleur-bordure); }
+.frise__etape:last-child::before { display: none; }
+.frise__etape::after { content: ""; position: absolute; inset-inline-start: 0; inset-block-start: .25rem; width: 1rem; height: 1rem; border-radius: 50%; background: var(--couleur-fond); border: 2px solid var(--couleur-primaire); box-sizing: border-box; }
+.frise__etape--apport::after, .frise__etape--derniere::after { background: var(--couleur-primaire); }
+.frise__date { margin: 0; font-weight: 700; }
+.frise__ligne { display: flex; justify-content: space-between; gap: .5rem; flex-wrap: wrap; margin: .125rem 0 0; color: var(--couleur-texte-doux); }
+.frise__ligne strong { color: var(--couleur-texte); font-variant-numeric: tabular-nums; }
+.frise__note { margin: .125rem 0 0; font-size: .875rem; }
+
+/* Décomposition du total payé */
+.decomposition__total { border-block-start: 2px solid var(--couleur-texte); padding-block-start: .5rem; }
+.decomposition__total dt { color: var(--couleur-texte); font-weight: 700; }
 
 /* Demande depuis la page produit */
 .formulaire-demande { margin-block-start: 1.5rem; padding-block-start: 1rem; border-block-start: 1px solid var(--couleur-bordure); }

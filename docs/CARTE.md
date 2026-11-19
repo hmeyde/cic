@@ -1,17 +1,17 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`dc13ab1`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`8d721d4`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
 | Module | Couches | Classes principales |
 |---|---|---|
 | `audit` (12) | adapter.out adapter.out.persistence application domain | Acteur, JournalAuditJpaRepository, JournalAuditPersistenceAdapter, JournalAuditRepository, JournalAuditService |
-| `catalogue` (33) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | CatalogueClientController, CatalogueClientService, Fournisseur, FournisseurBackOfficeController, FournisseurJpaRepository, FournisseurPersistenceAdapter, FournisseurRepository, FournisseurService, Produit, ProduitBackOfficeController, ProduitJpaRepository, ProduitPersistenceAdapter |
+| `catalogue` (35) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | CatalogueClientController, CatalogueClientService, Fournisseur, FournisseurBackOfficeController, FournisseurJpaRepository, FournisseurPersistenceAdapter, FournisseurRepository, FournisseurService, Produit, ProduitBackOfficeController, ProduitJpaRepository, ProduitPersistenceAdapter |
 | `commun` (4) | domain | Fraction, Montant |
 | `comptabilite` (31) | adapter.in adapter.in.evenement adapter.in.web adapter.out adapter.out.persistence application domain | ApportCapitalJpaRepository, ApportCapitalPersistenceAdapter, ApportCapitalRepository, ApportCapitalService, CapitalBackOfficeController, ComptabiliteService, Compte, EcritureComptableJpaRepository, EcritureComptablePersistenceAdapter, EcritureComptableRepository, IndicateursFinanciersService, Sens |
 | `config` (5) | - | - |
-| `contrat` (61) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
+| `contrat` (63) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
 | `demande` (101) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
 | `demonstration` (21) | adapter.in adapter.in.demarrage adapter.in.web adapter.out adapter.out.base adapter.out.demarrage adapter.out.horloge adapter.out.image application domain | DonneesDemonstrationService, ReinitialisationDemonstrationController, ReinitialisationDemonstrationService, Simulation |
 | `identite` (77) | adapter.in adapter.in.web adapter.out adapter.out.code adapter.out.persistence adapter.out.stockage application domain | Client, ClientJpaRepository, ClientPersistenceAdapter, ClientRepository, ClientService, CodeConnexionJpaRepository, CodeConnexionPersistenceAdapter, CodeConnexionRepository, CompteBackOfficeService, ConnexionBackOfficeController, ConnexionClientController, ConnexionClientService |
@@ -87,6 +87,7 @@ Générée automatiquement depuis le code (`dc13ab1`). Sert à se repérer vite 
 - V28__parametre_alerte_prelevements.sql
 - V29__inscription.sql
 - V30__marque_seheli.sql
+- V31__parametre_apport_simulation_max.sql
 
 ## Profils et configuration
 
@@ -106,4 +107,4 @@ Générée automatiquement depuis le code (`dc13ab1`). Sert à se repérer vite 
 
 ## Tests
 
-- 124 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 125 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

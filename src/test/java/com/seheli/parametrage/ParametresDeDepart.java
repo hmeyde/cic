@@ -7,11 +7,12 @@ import java.util.Map;
 import com.seheli.parametrage.domain.CleParametre;
 import com.seheli.parametrage.domain.Parametre;
 
-/** Valeurs de départ de CLAUDE.md, identiques aux migrations (V2, V7, V15, V18, V24, V28). */
+/** Valeurs de départ de CLAUDE.md, identiques aux migrations (V2, V7, V15, V18, V24, V28, V31). */
 public final class ParametresDeDepart {
 
     private static final Map<CleParametre, String> VALEURS = Map.ofEntries(
             Map.entry(CleParametre.APPORT_MINIMUM_PCT, "40"),
+            Map.entry(CleParametre.APPORT_SIMULATION_MAX_PCT, "80"),
             Map.entry(CleParametre.MARGE_SEHELI_DEFAUT_PCT, "4"),
             Map.entry(CleParametre.REMISE_FOURNISSEUR_MIN_PCT, "5"),
             Map.entry(CleParametre.REMISE_FOURNISSEUR_MAX_PCT, "10"),
