@@ -13,6 +13,7 @@ import org.openpdf.text.Element;
 import org.openpdf.text.Font;
 import org.openpdf.text.FontFactory;
 import org.openpdf.text.HeaderFooter;
+import org.openpdf.text.Image;
 import org.openpdf.text.PageSize;
 import org.openpdf.text.Paragraph;
 import org.openpdf.text.Phrase;
@@ -98,7 +99,11 @@ class OpenPdfRenduAutorisation implements RenduAutorisationPdf {
     }
 
     private static void entete(Document doc, ContenuAutorisation contenu) {
-        doc.add(LogoPdf.image(26));
+        // Logo en position absolue, à gauche du titre centré : il ne consomme pas de hauteur dans le flux,
+        // sinon l'autorisation (à remettre à la banque) déborde sur une deuxième page.
+        Image logo = LogoPdf.image(26);
+        logo.setAbsolutePosition(doc.left(), doc.top() - logo.getScaledHeight());
+        doc.add(logo);
         Paragraph titre = new Paragraph("AUTORISATION DE PRÉLÈVEMENT", TITRE);
         titre.setAlignment(Element.ALIGN_CENTER);
         doc.add(titre);
