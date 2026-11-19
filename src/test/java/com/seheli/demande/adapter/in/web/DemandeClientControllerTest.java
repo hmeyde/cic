@@ -48,6 +48,14 @@ import com.seheli.demande.application.EligibiliteService;
 import com.seheli.demande.application.ScoreService;
 import com.seheli.demande.application.RemiseNonConfirmeeException;
 import com.seheli.demande.application.RemiseProduitService;
+import com.seheli.demande.application.PrealablesCommandeService;
+import com.seheli.contrat.domain.Contrat;
+import com.seheli.contrat.domain.StatutAutorisation;
+import com.seheli.paiement.application.PaiementService;
+import com.seheli.paiement.application.PaiementsEnMemoire;
+import com.seheli.paiement.application.SaisiePaiement;
+import com.seheli.paiement.domain.ReferenceApport;
+import com.seheli.paiement.domain.ReferenceEcheance;
 import com.seheli.demande.domain.Demande;
 import com.seheli.demande.domain.ProchaineEtape;
 import com.seheli.demande.domain.StatutDossier;
@@ -83,6 +91,7 @@ class DemandeClientControllerTest {
             fournisseur.id(), Montant.de(20_000));
     private final DemandesEnMemoire demandes = new DemandesEnMemoire();
     private final DecisionsDeTest decisions;
+    private final PaiementService paiements;
     private final DemandeClientController controller;
 
     DemandeClientControllerTest() {
@@ -99,6 +108,8 @@ class DemandeClientControllerTest {
                 parametres, new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
         decisions = new DecisionsDeTest(demandes, new JournalAuditService(new JournalEnMemoire()), emplois,
                 evenement -> { }, clock);
+        paiements = new PaiementService(new PaiementsEnMemoire(), decisions.contratService,
+                new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock);
         controller = new DemandeClientController(service, decisions.contratService,
                 new ContratPdfService(decisions.contrats, new ClientService(clients), parametres,
                         contenu -> ("%PDF " + contenu.contrat().numero()).getBytes(StandardCharsets.US_ASCII), clock),
@@ -109,6 +120,7 @@ class DemandeClientControllerTest {
                 new InstructionsApportService(parametres),
                 new RemiseProduitService(demandes, decisions.contratService,
                         new JournalAuditService(new JournalEnMemoire()), evenement -> { }, clock),
+                new PrealablesCommandeService(decisions.contratService, paiements),
                 clock);
 
         clients.enregistrer(client);
@@ -357,6 +369,106 @@ class DemandeClientControllerTest {
 
         assertThat(redirection.getFlashAttributes().get("erreur")).isEqualTo("dossier.transition.interdite");
         assertThat(lignes().getFirst().statut()).isEqualTo(StatutDossier.EN_ANALYSE);
+    }
+
+    private ProchaineActionClient action() {
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.suivi(principal, model);
+        return (ProchaineActionClient) model.get("action");
+    }
+
+    private UUID dossierAccepte() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+        UUID demandeId = lignes().getFirst().id();
+        decisions.service.accepter(demandeId, "analyste");
+        return demandeId;
+    }
+
+    private void passerA(UUID demandeId, StatutDossier statut) {
+        Demande d = demandes.parId(demandeId).orElseThrow();
+        demandes.enregistrer(Demande.reconstituer(d.id(), d.clientId(), d.termes(), d.score(), d.soumiseLe(),
+                statut, clock.instant(), d.decision()));
+    }
+
+    @Test
+    void en_analyse_la_prochaine_action_n_a_pas_de_donnees_d_offre() {
+        controller.soumettre(principal, telephone.id(), 6, null, new RedirectAttributesModelMap());
+
+        ProchaineActionClient a = action();
+
+        assertThat(a.apport()).isNull();
+        assertThat(a.joursRestants()).isNull();
+        assertThat(a.documents()).isFalse();
+    }
+
+    @Test
+    void acceptee_la_prochaine_action_donne_la_reference_masrvi_le_compte_a_rebours_et_les_documents() {
+        dossierAccepte();
+
+        ProchaineActionClient a = action();
+
+        assertThat(a.apport().reference().valeur()).isEqualTo("AP20260000011");
+        assertThat(a.apport().montant()).isEqualTo(Montant.de(8_320));
+        assertThat(a.codeMarchand()).isEqualTo("012345");
+        assertThat(a.apportEncaisse()).isFalse();
+        assertThat(a.autorisation()).isEqualTo(StatutAutorisation.A_SIGNER);
+        assertThat(a.joursRestants()).isEqualTo(7L);
+        assertThat(a.delaiEcoule()).isZero();
+        assertThat(a.documents()).isTrue();
+        assertThat(a.prochaineEcheance()).isNull();
+    }
+
+    @Test
+    void acceptee_l_apport_recu_est_coche() {
+        dossierAccepte();
+        Contrat c = decisions.contrats.tous().getFirst();
+        paiements.saisir(new SaisiePaiement(ReferenceApport.pourContrat(c.numero()).valeur(), "8320",
+                "2026-11-12"), "recouvrement");
+
+        assertThat(action().apportEncaisse()).isTrue();
+    }
+
+    @Test
+    void annulee_plus_de_documents_ni_d_instructions() {
+        passerA(dossierAccepte(), StatutDossier.ANNULEE);
+
+        ProchaineActionClient a = action();
+
+        assertThat(a.apport()).isNull();
+        assertThat(a.documents()).isFalse();
+    }
+
+    @Test
+    void en_remboursement_la_prochaine_mensualite() {
+        passerA(dossierAccepte(), StatutDossier.EN_REMBOURSEMENT);
+
+        ProchaineActionClient a = action();
+
+        assertThat(a.apport()).isNull();
+        assertThat(a.joursRestants()).isNull();
+        assertThat(a.prochaineEcheance().rang()).isEqualTo(1);
+        assertThat(a.prochaineEcheance().montant()).isEqualTo(Montant.de(2_080));
+        assertThat(a.aRegulariser()).isNull();
+    }
+
+    @Test
+    void en_retard_l_echeance_a_regulariser_avec_sa_reference() {
+        UUID demandeId = dossierAccepte();
+        passerA(demandeId, StatutDossier.EN_RETARD);
+        Contrat c = decisions.contrats.parDemande(demandeId).orElseThrow();
+        for (int rang : List.of(1, 2)) {
+            Echeance e = c.echeance(rang).orElseThrow();
+            decisions.contrats.enregistrerStatut(c.id(), Echeance.reconstituer(e.id(), e.rang(), e.date(),
+                    e.montant(), StatutEcheance.EN_RETARD));
+        }
+
+        ProchaineActionClient a = action();
+
+        assertThat(a.prochaineEcheance()).isNull();
+        assertThat(a.aRegulariser().rang()).isEqualTo(1);
+        assertThat(a.referenceRegularisation()).isEqualTo(ReferenceEcheance.pourEcheance(c.numero(), 1).valeur());
+        assertThat(a.totalEnRetard()).isEqualTo(Montant.de(4_160));
+        assertThat(a.codeMarchand()).isEqualTo("012345");
     }
 
     @Test

@@ -13,25 +13,113 @@
 
         <p th:if="${suivi == null}" class="texte-doux" th:text="#{client.dossier.aucun}">Vous n’avez pas encore de dossier.</p>
 
-        <th:block th:if="${suivi != null}">
-            <div class="carte suivi-statut">
-                <p class="texte-doux suivi-statut__produit" th:text="${demande.designation()}">Galaxy A35</p>
-                <p class="suivi-statut__libelle">
-                    <span th:text="#{client.dossier.statut}">Statut :</span>
-                    <strong th:text="#{'client.demande.statut.' + ${suivi.statut().name()}}">En cours d’étude</strong>
-                </p>
-                <p class="texte-doux" th:text="#{client.dossier.depuis(${#temporals.format(suivi.statutDepuis(), 'dd/MM/yyyy')})}">Depuis le 12/11/2026</p>
-            </div>
+        <th:block th:if="${suivi != null}"
+                  th:with="statut=${suivi.statut().name()}, prochaine=${suivi.prochaine().name()},
+                           montant=${'client.catalogue.montant'}">
 
-            <section class="carte prochaine-etape" th:classappend="${suivi.prochaine().parClient()} ? 'prochaine-etape--client'"
-                 aria-labelledby="titre-prochaine">
-                <h2 id="titre-prochaine" th:text="#{client.dossier.prochaine}">Prochaine étape</h2>
-                <p class="etiquette etiquette--sans-marge"
-                   th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-cic}">À faire par Seheli</p>
-                <p th:text="#{'client.dossier.prochaine.' + ${suivi.prochaine().name()}}">L’équipe Seheli étudie votre demande.</p>
-                <p th:if="${suivi.dateLimite().isPresent()}" class="prochaine-etape__limite"
-                   th:text="#{client.dossier.date-limite(${#temporals.format(suivi.dateLimite().get(), 'dd/MM/yyyy')})}">Avant le 19/11/2026</p>
-                <form th:if="${suivi.statut().name() == 'COMMANDEE'}" class="formulaire remise" method="post"
+            <!-- Prochaine action : ce que le client doit faire maintenant, en haut de la page -->
+            <section class="carte action" aria-labelledby="titre-action"
+                     th:classappend="${suivi.statut().estEnRetard()} ? 'action--alerte' : (${suivi.prochaine().parClient()} ? 'action--client')"
+                     th:attr="data-statut=${statut}">
+                <div class="action__entete">
+                    <p class="action__produit">
+                        <span th:text="${demande.designation()}">Galaxy A35</span>
+                        <span class="etiquette etiquette--sans-marge"
+                              th:classappend="${suivi.statut().estEnRetard() or statut == 'REFUSEE' or statut == 'ANNULEE'} ? 'etiquette--danger' : (${statut == 'SOLDEE'} ? 'etiquette--favorable' : 'etiquette--neutre')"
+                              th:text="#{'client.demande.statut.' + ${statut}}">Acceptée</span>
+                    </p>
+                    <p class="texte-doux action__depuis" th:text="#{client.dossier.depuis(${#temporals.format(suivi.statutDepuis(), 'dd/MM/yyyy')})}">Depuis le 12/11/2026</p>
+                </div>
+                <h2 id="titre-action" th:text="#{client.action.titre}">Prochaine action</h2>
+                <p class="action__qui" th:text="${suivi.prochaine().parClient()} ? #{client.dossier.a-vous} : #{client.dossier.a-cic}">À faire par vous</p>
+                <p class="action__message" th:if="${prochaine != 'NOUVELLE_DEMANDE_POSSIBLE'}"
+                   th:text="#{'client.dossier.prochaine.' + ${prochaine}}">Payez votre apport avec la référence Masrvi et signez l’autorisation de prélèvement.</p>
+                <p class="action__message" th:if="${prochaine == 'NOUVELLE_DEMANDE_POSSIBLE'}"
+                   th:text="#{'client.action.clos.' + ${statut}}">Ce dossier est clos.</p>
+
+                <!-- ACCEPTEE : compte à rebours, apport par Masrvi, autorisation, documents -->
+                <th:block th:if="${statut == 'ACCEPTEE' and action.joursRestants() != null}">
+                    <div class="rebours" th:classappend="${action.joursRestants() <= 2} ? 'rebours--urgent'">
+                        <p class="rebours__jours"
+                           th:text="#{client.action.rebours.jours(${action.joursRestants()})}">5 jours restants</p>
+                        <p class="rebours__limite" th:if="${suivi.dateLimite().isPresent()}"
+                           th:text="#{client.dossier.date-limite(${#temporals.format(suivi.dateLimite().get(), 'dd/MM/yyyy')})}">À faire avant le 21/11/2026, sinon le dossier est annulé.</p>
+                        <progress class="rebours__barre" max="100" th:value="${action.delaiEcoule()}"
+                                  th:attr="aria-label=#{client.action.rebours.barre(${suivi.delaiApportJours()})}">30</progress>
+                    </div>
+
+                    <ol class="action__liste">
+                        <li class="action__tache" th:classappend="${action.apportEncaisse()} ? 'action__tache--faite'">
+                            <p class="action__tache-titre">
+                                <span th:text="#{client.action.apport.titre}">Payer mon apport par Masrvi</span>
+                                <span class="etiquette etiquette--sans-marge"
+                                      th:classappend="${action.apportEncaisse()} ? 'etiquette--favorable' : 'etiquette--attention'"
+                                      th:text="${action.apportEncaisse()} ? #{client.action.apport.recu} : #{client.action.apport.attendu}">En attente</span>
+                            </p>
+                            <th:block th:if="${!action.apportEncaisse() and action.apport() != null}">
+                                <dl class="conditions action__paiement">
+                                    <div class="conditions__principale">
+                                        <dt th:text="#{client.apport.montant}">Montant à payer</dt>
+                                        <dd th:text="#{${montant}(${#numbers.formatInteger(action.apport().montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                                    </div>
+                                    <div>
+                                        <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
+                                        <dd class="copiable">
+                                            <span class="code-copiable" dir="ltr" th:text="${action.apport().codeMarchand()}">012345</span>
+                                            <button type="button" class="bouton bouton--contour bouton--copier" hidden
+                                                    th:attr="data-copier=${action.apport().codeMarchand()},data-texte-copie=#{client.copier.fait},aria-label=#{client.copier.code-marchand}"
+                                                    th:text="#{client.copier}">Copier</button>
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt th:text="#{client.apport.reference}">Référence de mon dossier</dt>
+                                        <dd class="copiable">
+                                            <span class="code-copiable" dir="ltr" th:text="${action.apport().reference().valeur()}">AP20260000011</span>
+                                            <button type="button" class="bouton bouton--contour bouton--copier" hidden
+                                                    th:attr="data-copier=${action.apport().reference().valeur()},data-texte-copie=#{client.copier.fait},aria-label=#{client.copier.reference}"
+                                                    th:text="#{client.copier}">Copier</button>
+                                        </dd>
+                                    </div>
+                                </dl>
+                                <ol class="action__etapes">
+                                    <li th:text="#{client.apport.etape1}">Ouvrez Masrvi et choisissez le paiement à un marchand.</li>
+                                    <li th:text="#{client.apport.etape2}">Saisissez le code marchand Seheli et le montant exact de l’apport.</li>
+                                    <li th:text="#{client.apport.etape3}">Indiquez la référence de votre dossier dans le motif du paiement.</li>
+                                </ol>
+                                <p class="texte-doux" th:text="#{client.apport.aide}">Sans la bonne référence, nous ne pouvons pas rattacher votre paiement.</p>
+                            </th:block>
+                        </li>
+                        <li class="action__tache" th:classappend="${action.autorisation() != null and action.autorisation().estAcceptee()} ? 'action__tache--faite'">
+                            <p class="action__tache-titre">
+                                <span th:text="#{client.action.autorisation.titre}">Signer mon autorisation de prélèvement</span>
+                                <span th:if="${action.autorisation() != null}" class="etiquette etiquette--sans-marge"
+                                      th:classappend="${action.autorisation().estAcceptee()} ? 'etiquette--favorable' : (${action.autorisation().name() == 'REVOQUEE'} ? 'etiquette--danger' : 'etiquette--attention')"
+                                      th:text="#{'client.action.autorisation.statut.' + ${action.autorisation().name()}}">À signer</span>
+                            </p>
+                            <p class="texte-doux" th:if="${action.autorisation() == null or !action.autorisation().estAcceptee()}"
+                               th:text="#{client.offre.autorisation-pdf.aide}">Signez-la et remettez-la à votre banque.</p>
+                        </li>
+                    </ol>
+
+                    <div class="action__documents" th:if="${action.documents()}">
+                        <h3 th:text="#{client.action.documents}">Mes documents</h3>
+                        <ul class="liste-documents">
+                            <li><a class="bouton bouton--contour" th:href="@{/client/dossier/contrat.pdf}" download
+                                   th:text="#{client.offre.contrat-pdf}">Télécharger mon contrat (PDF)</a></li>
+                            <li><a class="bouton bouton--contour" th:href="@{/client/dossier/autorisation-prelevement.pdf}" download
+                                   th:text="#{client.offre.autorisation-pdf}">Télécharger mon autorisation de prélèvement (PDF)</a></li>
+                        </ul>
+                    </div>
+                </th:block>
+
+                <!-- APPORT_ET_AUTORISATION : les deux préalables sont réunis -->
+                <ul th:if="${statut == 'APPORT_ET_AUTORISATION'}" class="action__liste action__liste--cochee">
+                    <li class="action__tache action__tache--faite"><p class="action__tache-titre" th:text="#{client.action.apport.recu-long}">Apport reçu</p></li>
+                    <li class="action__tache action__tache--faite"><p class="action__tache-titre" th:text="#{client.action.autorisation.acceptee-long}">Autorisation acceptée par votre banque</p></li>
+                </ul>
+
+                <!-- COMMANDEE : confirmation de la remise -->
+                <form th:if="${statut == 'COMMANDEE'}" class="formulaire remise" method="post"
                       th:action="@{/client/dossier/remise}">
                     <div class="champ champ--case">
                         <input id="confirmation-remise" type="checkbox" name="confirmation" value="oui" required>
@@ -40,40 +128,67 @@
                     <p class="texte-doux" th:text="#{client.remise.aide}">En confirmant, votre remboursement démarre.</p>
                     <button type="submit" class="bouton bouton--principal" th:text="#{client.remise.bouton}">Confirmer la remise</button>
                 </form>
-                <a th:if="${suivi.prochaine().name() == 'NOUVELLE_DEMANDE_POSSIBLE'}" class="bouton bouton--principal"
+
+                <!-- LIVREE, EN_REMBOURSEMENT : prochaine mensualité -->
+                <dl th:if="${action.prochaineEcheance() != null}" class="conditions action__paiement">
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.action.echeance(${action.prochaineEcheance().rang()}, ${#temporals.format(action.prochaineEcheance().date(), 'dd/MM/yyyy')})}">Mensualité n° 2 du 25/12/2026</dt>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(action.prochaineEcheance().montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                    </div>
+                </dl>
+
+                <!-- EN_RETARD, RECOUVREMENT : échéance à régulariser par Masrvi -->
+                <th:block th:if="${action.aRegulariser() != null}">
+                    <dl class="conditions action__paiement">
+                        <div class="conditions__principale">
+                            <dt th:text="#{client.action.echeance(${action.aRegulariser().rang()}, ${#temporals.format(action.aRegulariser().date(), 'dd/MM/yyyy')})}">Mensualité n° 3 du 25/11/2026</dt>
+                            <dd th:text="#{${montant}(${#numbers.formatInteger(action.aRegulariser().montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        </div>
+                        <div>
+                            <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
+                            <dd class="copiable">
+                                <span class="code-copiable" dir="ltr" th:text="${action.codeMarchand()}">012345</span>
+                                <button type="button" class="bouton bouton--contour bouton--copier" hidden
+                                        th:attr="data-copier=${action.codeMarchand()},data-texte-copie=#{client.copier.fait},aria-label=#{client.copier.code-marchand}"
+                                        th:text="#{client.copier}">Copier</button>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt th:text="#{client.action.reference-echeance}">Référence de l’échéance</dt>
+                            <dd class="copiable">
+                                <span class="code-copiable" dir="ltr" th:text="${action.referenceRegularisation()}">EC2026000042037</span>
+                                <button type="button" class="bouton bouton--contour bouton--copier" hidden
+                                        th:attr="data-copier=${action.referenceRegularisation()},data-texte-copie=#{client.copier.fait},aria-label=#{client.copier.reference}"
+                                        th:text="#{client.copier}">Copier</button>
+                            </dd>
+                        </div>
+                        <div th:if="${action.totalEnRetard().compareTo(action.aRegulariser().montant()) > 0}">
+                            <dt th:text="#{client.action.total-retard}">Total en retard</dt>
+                            <dd th:text="#{${montant}(${#numbers.formatInteger(action.totalEnRetard().valeur(), 1, 'WHITESPACE')})}">6 240 MRU</dd>
+                        </div>
+                    </dl>
+                    <p class="texte-doux" th:text="#{client.action.regularisation.aide}">Payez par Masrvi avec la référence de l’échéance. Le prix ne change pas, sans pénalité.</p>
+                </th:block>
+
+                <a th:if="${prochaine == 'NOUVELLE_DEMANDE_POSSIBLE'}" class="bouton bouton--principal"
                    th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a>
             </section>
 
-            <section th:if="${paiementApport != null}" class="carte paiement-apport" aria-labelledby="titre-paiement-apport">
-                <h2 id="titre-paiement-apport" th:text="#{client.apport.titre}">Payer mon apport par Masrvi</h2>
-                <dl class="conditions">
-                    <div class="conditions__principale">
-                        <dt th:text="#{client.apport.montant}">Montant à payer</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(paiementApport.montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
-                    </div>
-                    <div>
-                        <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
-                        <dd class="paiement-apport__code" dir="ltr" th:text="${paiementApport.codeMarchand()}">012345</dd>
-                    </div>
-                    <div>
-                        <dt th:text="#{client.apport.reference}">Référence de mon dossier</dt>
-                        <dd class="paiement-apport__code" dir="ltr" th:text="${paiementApport.reference().valeur()}">AP20260000011</dd>
-                    </div>
-                </dl>
-                <ol class="paiement-apport__etapes">
-                    <li th:text="#{client.apport.etape1}">Ouvrez Masrvi et choisissez le paiement marchand.</li>
-                    <li th:text="#{client.apport.etape2}">Saisissez le code marchand Seheli et le montant exact.</li>
-                    <li th:text="#{client.apport.etape3}">Indiquez la référence de votre dossier dans le motif du paiement.</li>
-                </ol>
-                <p class="texte-doux" th:text="#{client.apport.aide}">Sans la bonne référence, nous ne pourrons pas rattacher votre paiement à votre dossier.</p>
-            </section>
-
+            <!-- Frise des jalons, façon suivi de livraison -->
             <h2 th:text="#{client.dossier.parcours}">Les étapes de mon dossier</h2>
-            <ol class="frise">
-                <li th:each="e : ${suivi.etapes()}" class="frise__etape" th:classappend="'frise__etape--' + ${#strings.toLowerCase(e.etat().name())}"
-                    th:attr="aria-current=${e.etat().name() == 'EN_COURS'} ? 'step' : null">
-                    <span class="frise__nom" th:text="#{'client.dossier.etape.' + ${e.etape().name()}}">Étude de la demande</span>
-                    <span class="frise__etat" th:text="#{'client.dossier.etat.' + ${e.etat().name()}}">En cours</span>
+            <ol class="suivi-frise">
+                <li th:each="e : ${suivi.etapes()}" class="suivi-frise__jalon"
+                    th:with="courant=${e.etape() == suivi.courante()}, etat=${e.etat().name()}"
+                    th:attr="data-etat=${#strings.toLowerCase(etat)},data-courant=${courant} ? 'oui' : null,aria-current=${courant} ? 'step' : null">
+                    <span class="suivi-frise__point" aria-hidden="true"></span>
+                    <span class="suivi-frise__texte">
+                        <span class="suivi-frise__nom"
+                              th:text="${etat == 'ARRETEE'} ? #{'client.demande.statut.' + ${statut}} : #{'client.dossier.jalon.' + ${e.etape().name()}}">Acceptée</span>
+                        <span class="suivi-frise__etat"
+                              th:text="${etat == 'EN_ALERTE'} ? #{'client.demande.statut.' + ${statut}} : #{'client.dossier.etat.' + ${etat}}">Étape actuelle</span>
+                        <span th:if="${courant}" class="suivi-frise__date"
+                              th:text="#{client.dossier.depuis(${#temporals.format(suivi.statutDepuis(), 'dd/MM/yyyy')})}">Depuis le 12/11/2026</span>
+                    </span>
                 </li>
             </ol>
 
@@ -82,19 +197,19 @@
                 <dl class="conditions">
                     <div>
                         <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
                     </div>
                     <div class="conditions__principale">
                         <dt th:text="#{client.simulation.mensualite(${demande.nombreMois()})}">Mensualité sur 6 mois</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
                     </div>
                     <div th:if="${demande.derniereDiffere()}">
                         <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(demande.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
                     </div>
                 </dl>
             </th:block>
@@ -110,15 +225,15 @@
                     </div>
                     <div class="conditions__principale">
                         <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(offre.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(offre.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.offre.reste(${offre.nombreMois()})}">Reste à rembourser en 6 mensualités</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
                     </div>
                 </dl>
 
@@ -135,32 +250,33 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="e : ${offre.echeances()}">
+                        <tr th:each="e : ${offre.echeances()}" th:classappend="${e.statut().name() == 'EN_RETARD'} ? 'ligne--echec'">
                             <td th:text="${e.rang()}">1</td>
                             <td th:text="${#temporals.format(e.date(), 'dd/MM/yyyy')}">25/12/2026</td>
-                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                            <td class="nombre" th:text="#{${montant}(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
                             <td th:text="#{'client.offre.echeance.statut.' + ${e.statut().name()}}">À venir</td>
                         </tr>
                         </tbody>
                         <tfoot>
                         <tr>
                             <th scope="row" colspan="2" th:text="#{client.offre.echeance.total}">Total</th>
-                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</td>
+                            <td class="nombre" th:text="#{${montant}(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</td>
                             <td></td>
                         </tr>
                         </tfoot>
                     </table>
                 </div>
-                <p class="offre__contrat">
-                    <a class="bouton bouton--principal" th:href="@{/client/dossier/contrat.pdf}" download
-                       th:text="#{client.offre.contrat-pdf}">Télécharger mon contrat (PDF)</a>
-                </p>
-                <p class="texte-doux" th:text="#{client.offre.contrat-pdf.aide}">Le contrat est rédigé en français.</p>
-                <p class="offre__contrat">
-                    <a class="bouton bouton--contour" th:href="@{/client/dossier/autorisation-prelevement.pdf}" download
-                       th:text="#{client.offre.autorisation-pdf}">Télécharger mon autorisation de prélèvement (PDF)</a>
-                </p>
-                <p class="texte-doux" th:text="#{client.offre.autorisation-pdf.aide}">Ordre de virement permanent à signer et à remettre à votre banque.</p>
+                <th:block th:if="${statut != 'ACCEPTEE'}">
+                    <p class="offre__contrat">
+                        <a class="bouton bouton--principal" th:href="@{/client/dossier/contrat.pdf}" download
+                           th:text="#{client.offre.contrat-pdf}">Télécharger mon contrat (PDF)</a>
+                    </p>
+                    <p class="texte-doux" th:text="#{client.offre.contrat-pdf.aide}">Le contrat est rédigé en français.</p>
+                    <p class="offre__contrat">
+                        <a class="bouton bouton--contour" th:href="@{/client/dossier/autorisation-prelevement.pdf}" download
+                           th:text="#{client.offre.autorisation-pdf}">Télécharger mon autorisation de prélèvement (PDF)</a>
+                    </p>
+                </th:block>
             </section>
         </th:block>
 

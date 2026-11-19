@@ -572,35 +572,6 @@ html { scroll-behavior: smooth; }
 /* Demande depuis la page produit */
 .formulaire-demande { margin-block-start: 1.5rem; padding-block-start: 1rem; border-block-start: 1px solid var(--couleur-bordure); }
 
-/* Espace client : suivi du dossier */
-.suivi-statut, .prochaine-etape { margin-block-end: 1rem; }
-.suivi-statut p, .prochaine-etape p { margin-block: .25rem; }
-.suivi-statut__libelle { font-size: 1.15rem; }
-.prochaine-etape { border-inline-start: 4px solid var(--couleur-bordure); }
-.prochaine-etape h2 { margin-block: 0 .5rem; font-size: 1.15rem; }
-.prochaine-etape--client { border-inline-start-color: var(--couleur-accent); }
-.prochaine-etape__limite { font-weight: 700; }
-.frise { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: .5rem; counter-reset: frise; }
-.frise__etape {
-    counter-increment: frise;
-    display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem .75rem;
-    padding-block: .6rem; padding-inline: 3rem .75rem; position: relative;
-    border: 1px solid var(--couleur-bordure); border-radius: var(--rayon);
-}
-.frise__etape::before {
-    content: counter(frise);
-    position: absolute; inset-inline-start: .6rem; inset-block-start: .55rem;
-    width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%;
-    background: var(--couleur-fond-doux); border: 1px solid var(--couleur-bordure); font-weight: 700; font-size: .9rem;
-}
-.frise__nom { font-weight: 600; }
-.frise__etat { color: var(--couleur-texte-doux); font-size: .9rem; }
-.frise__etape--faite::before { content: "✓"; background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
-.frise__etape--en_cours { border-color: var(--couleur-primaire); background: var(--couleur-fond-doux); }
-.frise__etape--en_cours::before { background: var(--couleur-accent); border-color: var(--couleur-accent); color: #1d1a00; }
-.frise__etape--arretee { border-color: var(--couleur-danger); }
-.frise__etape--arretee::before { content: "✕"; background: var(--couleur-danger); border-color: var(--couleur-danger); color: var(--couleur-sur-danger); }
-.frise__etape--a_venir .frise__nom { color: var(--couleur-texte-doux); font-weight: 400; }
 
 /* Fiche dossier du back-office */
 .fiche-bloc { margin-block: 0 1.5rem; }
@@ -610,10 +581,6 @@ html { scroll-behavior: smooth; }
 .tableau--retour td, .tableau--retour th { white-space: normal; }
 .tableau tfoot th, .tableau tfoot td { border-block-start: 2px solid var(--couleur-bordure); border-block-end: 0; }
 .ligne--echec th, .ligne--echec td { background: var(--couleur-danger-fond); color: var(--couleur-danger-texte); }
-.paiement-apport { margin-block-end: 1rem; border-inline-start: 4px solid var(--couleur-primaire); }
-.paiement-apport h2 { margin-block: 0 .75rem; font-size: 1.15rem; }
-.paiement-apport__code { font-family: ui-monospace, monospace; font-size: 1.1rem; letter-spacing: .05em; user-select: all; }
-.paiement-apport__etapes { padding-inline-start: 1.25rem; margin-block: 1rem .5rem; }
 
 /* Recouvrement : notes datées */
 .liste-notes { list-style: none; padding: 0; margin: 1rem 0 0; }
@@ -986,3 +953,90 @@ a.parcours__lien:hover .parcours__nom { text-decoration: underline; }
 .renvoi-code { display: grid; gap: .25rem; justify-items: start; margin-block-start: 1rem; }
 .renvoi-code__attente { margin: 0; font-variant-numeric: tabular-nums; }
 .renvoi-code .bouton-lien:disabled { color: var(--couleur-texte-doux, #6b7280); text-decoration: none; cursor: not-allowed; }
+
+/* Espace client : suivi du dossier — carte « Prochaine action » */
+.action { margin-block-end: 1.5rem; border-inline-start: 4px solid var(--couleur-bordure); }
+.action--client { border-inline-start-color: var(--couleur-accent); }
+.action--alerte { border-inline-start-color: var(--couleur-danger); }
+.action p { margin-block: .25rem; }
+.action h2 { margin-block: .5rem .25rem; font-size: 1.25rem; }
+.action h3 { margin-block: 1rem .5rem; font-size: 1rem; }
+.action__entete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .25rem .75rem; }
+.action__produit { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-weight: 600; }
+.action__depuis { font-size: .875rem; }
+.action__qui { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--couleur-texte-doux); }
+.action__message { font-size: 1.05rem; }
+.action > .bouton, .action .remise { margin-block-start: .75rem; }
+.action__liste { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .75rem; }
+.action__tache { border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); padding: .75rem; }
+.action__tache--faite { background: var(--couleur-succes-fond); border-color: var(--couleur-succes); }
+.action__tache-titre { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; font-weight: 700; }
+.action__liste--cochee .action__tache-titre::before { content: "✓"; color: var(--couleur-succes); }
+.action__liste--cochee .action__tache-titre { justify-content: flex-start; }
+.action__paiement { margin-block: .75rem 0; }
+.action__etapes { padding-inline-start: 1.25rem; margin-block: .75rem .5rem; }
+.liste-documents { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.liste-documents .bouton { width: 100%; }
+@media (min-width: 40rem) { .liste-documents { grid-template-columns: 1fr 1fr; } }
+
+/* Compte à rebours du délai de 7 jours (calculé côté serveur) */
+.rebours { margin-block: .75rem 0; padding: .75rem; border-radius: var(--rayon); background: var(--couleur-attention-fond); }
+.rebours p { margin: 0; }
+.rebours__jours { font-size: 1.35rem; font-weight: 700; }
+.rebours__limite { font-size: .9rem; }
+.rebours__barre { display: block; width: 100%; height: .5rem; margin-block-start: .5rem; border: 0; border-radius: var(--rayon-plein); background: var(--couleur-fond); accent-color: var(--couleur-attention); appearance: none; overflow: hidden; }
+.rebours__barre::-webkit-progress-bar { background: var(--couleur-fond); }
+.rebours__barre::-webkit-progress-value { background: var(--couleur-attention); }
+.rebours__barre::-moz-progress-bar { background: var(--couleur-attention); }
+.rebours--urgent { background: var(--couleur-danger-fond); color: var(--couleur-danger-texte); }
+.rebours--urgent .rebours__barre::-webkit-progress-value { background: var(--couleur-danger); }
+.rebours--urgent .rebours__barre::-moz-progress-bar { background: var(--couleur-danger); }
+
+/* Valeur à recopier dans Masrvi, avec son bouton Copier */
+.copiable { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.code-copiable { font-family: ui-monospace, monospace; font-size: 1.1rem; letter-spacing: .05em; user-select: all; }
+.bouton--copier { min-height: 36px; padding-block: .25rem; padding-inline: .75rem; font-size: .875rem; }
+.bouton--copier[data-copie] { border-color: var(--couleur-succes); color: var(--couleur-succes); }
+
+/* Frise des jalons, façon suivi de livraison : verticale sur mobile, horizontale sur grand écran */
+.suivi-frise { list-style: none; margin: 0 0 1.5rem; padding: 0; }
+.suivi-frise__jalon { position: relative; display: flex; gap: .75rem; padding-block-end: 1rem; }
+.suivi-frise__jalon::before {
+    content: ""; position: absolute; inset-inline-start: calc(.75rem - 1px); inset-block: 1.5rem 0;
+    border-inline-start: 2px solid var(--couleur-bordure);
+}
+.suivi-frise__jalon:last-child::before { display: none; }
+.suivi-frise__jalon[data-etat="faite"]::before { border-color: var(--couleur-primaire); }
+.suivi-frise__point {
+    flex: none; position: relative; z-index: 1; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    display: grid; place-items: center; font-size: .8rem; font-weight: 700;
+    background: var(--couleur-fond); border: 2px solid var(--couleur-bordure);
+}
+.suivi-frise__texte { display: flex; flex-direction: column; }
+.suivi-frise__nom { font-weight: 600; }
+.suivi-frise__etat, .suivi-frise__date { color: var(--couleur-texte-doux); font-size: .85rem; }
+.suivi-frise__jalon[data-etat="faite"] .suivi-frise__point { background: var(--couleur-primaire); border-color: var(--couleur-primaire); color: var(--couleur-sur-primaire); }
+.suivi-frise__jalon[data-etat="faite"] .suivi-frise__point::after { content: "✓"; }
+.suivi-frise__jalon[data-etat="a_venir"] .suivi-frise__nom { color: var(--couleur-texte-doux); font-weight: 400; }
+.suivi-frise__jalon[data-courant] .suivi-frise__point { width: 1.5rem; height: 1.5rem; box-shadow: 0 0 0 4px var(--couleur-fond-doux); }
+.suivi-frise__jalon[data-courant] .suivi-frise__nom { font-size: 1.1rem; font-weight: 700; }
+.suivi-frise__jalon[data-courant] .suivi-frise__etat { color: var(--couleur-texte); font-weight: 600; }
+.suivi-frise__jalon[data-etat="en_cours"] .suivi-frise__point { background: var(--couleur-accent); border-color: var(--couleur-accent); }
+.suivi-frise__jalon[data-etat="en_alerte"] .suivi-frise__point { background: var(--couleur-danger); border-color: var(--couleur-danger); color: var(--couleur-sur-danger); }
+.suivi-frise__jalon[data-etat="en_alerte"] .suivi-frise__point::after { content: "!"; }
+.suivi-frise__jalon[data-etat="en_alerte"] .suivi-frise__etat { color: var(--couleur-danger); }
+.suivi-frise__jalon[data-etat="arretee"] .suivi-frise__point { background: var(--couleur-danger); border-color: var(--couleur-danger); color: var(--couleur-sur-danger); }
+.suivi-frise__jalon[data-etat="arretee"] .suivi-frise__point::after { content: "✕"; }
+.suivi-frise__jalon[data-etat="arretee"] .suivi-frise__nom { color: var(--couleur-danger); }
+@media (min-width: 60rem) {
+    .suivi-frise { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); }
+    .suivi-frise__jalon { flex-direction: column; align-items: center; text-align: center; padding-block-end: 0; padding-inline: .25rem; }
+    .suivi-frise__jalon::before { inset-block: calc(.75rem - 1px) auto; inset-inline: calc(50% + .75rem) calc(-50% + .75rem); border-inline-start: 0; border-block-start: 2px solid var(--couleur-bordure); }
+    .suivi-frise__jalon[data-etat="faite"]::before { border-color: var(--couleur-primaire); }
+    .suivi-frise__texte { align-items: center; }
+}
+@media (prefers-color-scheme: dark) {
+    .action__tache--faite { background: transparent; }
+    .rebours { background: transparent; border: 1px solid var(--couleur-attention); }
+    .rebours--urgent { border-color: var(--couleur-danger); color: inherit; }
+}

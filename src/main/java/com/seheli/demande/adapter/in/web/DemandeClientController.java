@@ -2,6 +2,7 @@ package com.seheli.demande.adapter.in.web;
 
 import java.security.Principal;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +31,7 @@ import com.seheli.contrat.application.ContratPdfService;
 import com.seheli.contrat.application.ContratService;
 import com.seheli.demande.application.ApportInvalideException;
 import com.seheli.demande.application.DemandeService;
+import com.seheli.demande.application.PrealablesCommandeService;
 import com.seheli.demande.application.RemiseProduitService;
 import com.seheli.demande.domain.StatutDossier;
 import com.seheli.paiement.application.InstructionsApportService;
@@ -60,17 +62,21 @@ class DemandeClientController {
     private final AutorisationPdfService autorisationsPdf;
     private final InstructionsApportService instructionsApport;
     private final RemiseProduitService remises;
+    private final PrealablesCommandeService prealables;
+    private final Clock clock;
     private final ZoneId fuseau;
 
     DemandeClientController(DemandeService demandes, ContratService contrats, ContratPdfService contratsPdf,
             AutorisationPdfService autorisationsPdf, InstructionsApportService instructionsApport,
-            RemiseProduitService remises, Clock clock) {
+            RemiseProduitService remises, PrealablesCommandeService prealables, Clock clock) {
         this.demandes = demandes;
         this.contrats = contrats;
         this.contratsPdf = contratsPdf;
         this.autorisationsPdf = autorisationsPdf;
         this.instructionsApport = instructionsApport;
         this.remises = remises;
+        this.prealables = prealables;
+        this.clock = clock;
         this.fuseau = clock.getZone();
     }
 
@@ -82,24 +88,31 @@ class DemandeClientController {
     }
 
     /**
-     * Suivi du dossier en cours : statut, étapes du parcours et prochaine étape ; une fois le dossier
-     * accepté, l'offre (prix fixé, apport) et l'échéancier du contrat. Une offre annulée faute d'apport
-     * n'est plus montrée. Tant que le dossier attend son apport (ACCEPTEE), les instructions de paiement
-     * Masrvi : montant, code marchand de Seheli et référence du dossier. Aucun identifiant dans l'URL : le dossier est celui du client connecté.
+     * Suivi du dossier en cours : frise des huit jalons et carte « Prochaine action » ; une fois le
+     * dossier accepté, l'offre (prix fixé, apport) et l'échéancier du contrat. Une offre annulée faute
+     * d'apport n'est plus montrée. Tant que le dossier attend son apport (ACCEPTEE), les instructions de
+     * paiement Masrvi (montant, code marchand, référence du dossier), le compte à rebours du délai et
+     * l'état de l'apport et de l'autorisation. Le compte à rebours est calculé sur l'horloge du serveur
+     * (celle de la démonstration), pas sur celle du navigateur. Aucun identifiant dans l'URL : le
+     * dossier est celui du client connecté.
      */
     @GetMapping(CHEMIN_SUIVI)
     String suivi(Principal principal, Model model) {
         demandes.suiviDossierCourant(clientId(principal)).ifPresent(s -> {
             model.addAttribute("suivi", s);
             model.addAttribute("demande", LigneDemande.depuis(s.demande(), fuseau));
-            if (s.statut() != StatutDossier.ANNULEE) {
-                contrats.parDemande(s.demande().id()).ifPresent(c -> {
+            ProchaineActionClient action = contrats.parDemande(s.demande().id()).map(c -> {
+                if (s.statut() != StatutDossier.ANNULEE) {
                     model.addAttribute("offre", OffreClient.depuis(c, fuseau));
-                    if (s.statut() == StatutDossier.ACCEPTEE) {
-                        model.addAttribute("paiementApport", instructionsApport.pour(c.numero(), c.apport()));
-                    }
-                });
-            }
+                }
+                var instructions = instructionsApport.pour(c.numero(), c.apport());
+                if (s.statut() == StatutDossier.ACCEPTEE) {
+                    model.addAttribute("paiementApport", instructions);
+                }
+                return ProchaineActionClient.depuis(s, c, instructions, prealables.pour(s.demande().id()),
+                        contrats.autorisation(c.id()).map(a -> a.statut()).orElse(null), LocalDate.now(clock));
+            }).orElseGet(ProchaineActionClient::sansContrat);
+            model.addAttribute("action", action);
         });
         return VUE_SUIVI;
     }

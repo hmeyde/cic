@@ -678,3 +678,68 @@ if ("serviceWorker" in navigator) {
         document.querySelectorAll("[data-depot]").forEach(initialiserDepot);
     });
 })();
+
+// ---------------------------------------------------------------------------------------------
+// Bouton « Copier » ([data-copier]) : copie la valeur (référence Masrvi, code marchand) dans le
+// presse-papiers et affiche « Copié » quelques secondes. Caché sans JavaScript ou sans presse-papiers :
+// la valeur reste sélectionnable d'un geste (user-select: all).
+// ---------------------------------------------------------------------------------------------
+(function () {
+    "use strict";
+
+    // Presse-papiers moderne en contexte sécurisé ; sinon (démo servie en http sur le réseau local),
+    // copie par une zone de texte temporaire.
+    function copier(valeur) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(valeur);
+        }
+        return new Promise(function (ok, echec) {
+            var zone = document.createElement("textarea");
+            zone.value = valeur;
+            zone.setAttribute("readonly", "");
+            zone.className = "visuellement-cache";
+            document.body.appendChild(zone);
+            zone.select();
+            var reussi = false;
+            try {
+                reussi = document.execCommand("copy");
+            } catch (e) {
+                reussi = false;
+            }
+            zone.remove();
+            if (reussi) {
+                ok();
+            } else {
+                echec();
+            }
+        });
+    }
+
+    function initialiserCopier(bouton) {
+        var texte = bouton.textContent;
+        var libelle = bouton.getAttribute("aria-label");
+        var minuterie;
+        bouton.hidden = false;
+        bouton.addEventListener("click", function () {
+            copier(bouton.getAttribute("data-copier")).then(function () {
+                bouton.textContent = bouton.getAttribute("data-texte-copie") || texte;
+                bouton.setAttribute("data-copie", "");
+                bouton.setAttribute("aria-label", bouton.textContent);
+                clearTimeout(minuterie);
+                minuterie = setTimeout(function () {
+                    bouton.textContent = texte;
+                    bouton.removeAttribute("data-copie");
+                    if (libelle) {
+                        bouton.setAttribute("aria-label", libelle);
+                    }
+                }, 2500);
+            }, function () {
+                // Copie refusée : la valeur reste sélectionnable à la main.
+            });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("button[data-copier]").forEach(initialiserCopier);
+    });
+})();
