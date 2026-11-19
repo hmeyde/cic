@@ -1,5 +1,6 @@
 package com.seheli.comptabilite.application;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +46,16 @@ public class IndicateursFinanciersService {
     @Transactional(readOnly = true)
     public List<EncoursDossier> encoursParDossier() {
         return EncoursDossier.depuis(ecritures.soldesParDossier(), this::prixVente);
+    }
+
+    /**
+     * Encours tel qu'il était le soir de {@code date} : mêmes règles que {@link #indicateurs()}, en ne
+     * comptant que les écritures datées au plus tard de ce jour (courbe d'encours du tableau de bord).
+     */
+    @Transactional(readOnly = true)
+    public Montant encoursAu(LocalDate date) {
+        return EncoursDossier.depuis(ecritures.soldesParDossierAu(date), this::prixVente).stream()
+                .map(EncoursDossier::restantDu).reduce(Montant.ZERO, Montant::plus);
     }
 
     private Optional<Montant> prixVente(UUID demandeId) {

@@ -6,72 +6,280 @@
 </head>
 <body>
 <main id="contenu" class="contenu">
-    <section class="section conteneur" aria-labelledby="titre-pilotage"
+    <!--/*
+      Tableau de bord des associés : tuiles des quatre chiffres, bandeau des alertes de risque, puis
+      quatre graphiques SVG calculés côté serveur (Courbe, Barres). Chaque graphique a un titre, une
+      phrase de synthèse (nom accessible du SVG) et sa version texte : un tableau des valeurs sous « Voir les données ».
+      Les textes portent les couleurs de texte ; seules les marques portent la couleur des séries.
+      Les infobulles SVG <title> sont écrites par th:utext (texte échappé) : l'analyseur HTML sortirait
+      sinon une balise <title> littérale de la boucle th:each qui l'entoure.
+    */-->
+    <section class="section conteneur pilotage" aria-labelledby="titre-pilotage"
              th:with="t=${tableau}, r=${tableau.risque()}, s=${tableau.risque().seuils()}">
         <h1 id="titre-pilotage" th:text="#{bo.pilotage.titre}">Tableau de bord des associés</h1>
         <p class="texte-doux" th:text="#{bo.pilotage.texte}">Chiffres tirés de la comptabilité, à jour à chaque mouvement d’argent.</p>
 
-        <!--/* Alertes : une ligne par seuil dépassé. */-->
-        <div th:if="${r.aDesAlertes()}" class="alerte alerte--erreur alertes-risque" role="alert"
-             aria-labelledby="titre-alertes">
-            <h2 id="titre-alertes" class="alertes-risque__titre" th:text="#{bo.pilotage.alertes.titre}">Alertes de risque</h2>
-            <ul class="alertes-risque__liste">
-                <li th:if="${r.enAlerte('RETARD_30_JOURS')}" data-alerte="RETARD_30_JOURS"
-                    th:text="#{bo.pilotage.alerte.RETARD_30_JOURS(${r.dossiersRetard30()}, ${s.provisionPalier1Jours()},
-                        #{client.catalogue.montant(${#numbers.formatInteger(r.restantDuRetard30().valeur(), 1, 'WHITESPACE')})},
-                        #{client.catalogue.montant(${#numbers.formatInteger(r.provisions().valeur(), 1, 'WHITESPACE')})})}">
-                    1 dossier en retard depuis 30 jours ou plus.
-                </li>
-                <li th:if="${r.enAlerte('PERTE')}" data-alerte="PERTE"
-                    th:text="#{bo.pilotage.alerte.PERTE(${r.dossiersPerte()}, ${s.perteJours()},
-                        #{client.catalogue.montant(${#numbers.formatInteger(r.perte().valeur(), 1, 'WHITESPACE')})})}">
-                    1 dossier en retard depuis 180 jours ou plus.
-                </li>
-                <li th:if="${r.enAlerte('PRELEVEMENTS_REUSSIS')}" data-alerte="PRELEVEMENTS_REUSSIS"
-                    th:text="#{bo.pilotage.alerte.PRELEVEMENTS_REUSSIS(
-                        ${#numbers.formatDecimal(r.tauxPrelevementsReussisPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
-                        ${s.prelevementsReussisMinPct().stripTrailingZeros().toPlainString()})}">
-                    Prélèvements réussis sous le minimum.
-                </li>
-                <li th:if="${r.enAlerte('UTILISATION_CAPITAL')}" data-alerte="UTILISATION_CAPITAL"
-                    th:text="${r.utilisationCapitalPct().isPresent()}
-                        ? #{bo.pilotage.alerte.UTILISATION_CAPITAL(
-                            ${#numbers.formatDecimal(r.utilisationCapitalPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
-                            ${s.encoursCapitalMaxPct().stripTrailingZeros().toPlainString()})}
-                        : #{bo.pilotage.alerte.UTILISATION_CAPITAL.sans-capital}">
-                    L’encours dépasse le capital disponible autorisé.
-                </li>
-                <li th:if="${r.enAlerte('CONCENTRATION_EMPLOYEUR')}" data-alerte="CONCENTRATION_EMPLOYEUR"
-                    th:with="c=${r.employeurPrincipal().get()}"
-                    th:text="#{bo.pilotage.alerte.CONCENTRATION_EMPLOYEUR(
-                        ${c.libelle().isPresent()} ? ${c.libelle().get()} : #{bo.pilotage.employeur.inconnu},
-                        ${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
-                        ${s.employeurMaxPct().stripTrailingZeros().toPlainString()})}">
-                    Concentration sur un employeur.
-                </li>
-                <li th:if="${r.enAlerte('CONCENTRATION_FOURNISSEUR')}" data-alerte="CONCENTRATION_FOURNISSEUR"
-                    th:with="c=${r.fournisseurPrincipal().get()}"
-                    th:text="#{bo.pilotage.alerte.CONCENTRATION_FOURNISSEUR(${c.libelle().orElse('')},
-                        ${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
-                        ${s.fournisseurMaxPct().stripTrailingZeros().toPlainString()})}">
-                    Concentration sur un fournisseur.
-                </li>
-            </ul>
-        </div>
-        <p th:unless="${r.aDesAlertes()}" class="alerte alerte--info" role="status"
-           th:text="#{bo.pilotage.alertes.aucune}">Aucun seuil de risque n’est dépassé.</p>
-
-        <ul class="indicateurs">
-            <li class="carte indicateur" th:each="cle : ${ {'capitalApporte', 'capitalEngage', 'encours', 'beneficeRealise'} }"
+        <!--/* Tuiles des chiffres clés */-->
+        <h2 class="visuellement-cache" th:text="#{bo.pilotage.chiffres.titre}">Chiffres clés</h2>
+        <ul class="tuiles">
+            <li class="tuile" th:each="cle : ${ {'capitalApporte', 'capitalEngage', 'encours', 'beneficeRealise'} }"
+                th:attr="data-tuile=${cle}"
                 th:with="m=${cle == 'capitalApporte'} ? ${t.capitalApporte()} : (${cle == 'capitalEngage'} ? ${t.capitalEngage()} : (${cle == 'encours'} ? ${t.encours()} : ${t.beneficeRealise()}))">
-                <h2 class="indicateur__titre" th:id="'indicateur-' + ${cle}" th:text="#{'bo.pilotage.' + ${cle}}">Capital apporté</h2>
-                <p class="indicateur__valeur" th:attr="aria-describedby='indicateur-' + ${cle} + '-aide'"
+                <p class="tuile__libelle" th:id="'tuile-' + ${cle}" th:text="#{'bo.pilotage.' + ${cle}}">Capital apporté</p>
+                <p class="tuile__valeur" th:attr="aria-labelledby='tuile-' + ${cle} + ' tuile-' + ${cle} + '-valeur'"
+                   th:id="'tuile-' + ${cle} + '-valeur'"
                    th:text="#{client.catalogue.montant(${#numbers.formatInteger(m.valeur(), 1, 'WHITESPACE')})}">100 000 MRU</p>
-                <p class="indicateur__aide texte-doux" th:id="'indicateur-' + ${cle} + '-aide'"
-                   th:text="#{'bo.pilotage.' + ${cle} + '.aide'}">Somme des apports en capital des associés.</p>
+                <p class="tuile__aide texte-doux" th:text="#{'bo.pilotage.' + ${cle} + '.aide'}">Somme des apports en capital des associés.</p>
+                <p class="tuile__detail" th:if="${cle == 'encours' and r.utilisationCapitalPct().isPresent()}"
+                   th:text="#{bo.pilotage.encours.detail(${#numbers.formatDecimal(r.utilisationCapitalPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
+                       ${s.encoursCapitalMaxPct().stripTrailingZeros().toPlainString()})}">50 % du capital disponible (maximum 90 %)</p>
             </li>
         </ul>
 
+        <!--/* Bandeau des alertes : rouge si une alerte est critique, orange sinon, vert sans alerte. */-->
+        <section th:if="${r.aDesAlertes()}" class="bandeau-risque" role="alert" aria-labelledby="titre-alertes"
+                 th:classappend="${r.aUneAlerteCritique()} ? 'bandeau-risque--critique' : 'bandeau-risque--attention'">
+            <h2 id="titre-alertes" class="bandeau-risque__titre">
+                <svg class="bandeau-risque__icone" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+                    <path d="M12 3 2 21h20L12 3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M12 10v5M12 18v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span th:text="#{bo.pilotage.alertes.nombre(${#lists.size(r.alertes())})}">2 alertes de risque</span>
+            </h2>
+            <ul class="bandeau-risque__liste">
+                <li th:each="a : ${r.alertes()}" th:attr="data-alerte=${a.name()}" class="bandeau-risque__alerte">
+                    <span class="badge" th:classappend="${a.critique()} ? 'badge--danger' : 'badge--attention'"
+                          th:text="${a.critique()} ? #{bo.pilotage.alerte.critique} : #{bo.pilotage.alerte.attention}">Critique</span>
+                    <span th:switch="${a.name()}">
+                        <th:block th:case="'RETARD_30_JOURS'"
+                                  th:text="#{bo.pilotage.alerte.RETARD_30_JOURS(${r.dossiersRetard30()}, ${s.provisionPalier1Jours()},
+                                      #{client.catalogue.montant(${#numbers.formatInteger(r.restantDuRetard30().valeur(), 1, 'WHITESPACE')})},
+                                      #{client.catalogue.montant(${#numbers.formatInteger(r.provisions().valeur(), 1, 'WHITESPACE')})})}">Retard</th:block>
+                        <th:block th:case="'PERTE'"
+                                  th:text="#{bo.pilotage.alerte.PERTE(${r.dossiersPerte()}, ${s.perteJours()},
+                                      #{client.catalogue.montant(${#numbers.formatInteger(r.perte().valeur(), 1, 'WHITESPACE')})})}">Perte</th:block>
+                        <th:block th:case="'PRELEVEMENTS_REUSSIS'"
+                                  th:text="#{bo.pilotage.alerte.PRELEVEMENTS_REUSSIS(
+                                      ${#numbers.formatDecimal(r.tauxPrelevementsReussisPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
+                                      ${s.prelevementsReussisMinPct().stripTrailingZeros().toPlainString()})}">Prélèvements</th:block>
+                        <th:block th:case="'UTILISATION_CAPITAL'"
+                                  th:text="${r.utilisationCapitalPct().isPresent()}
+                                      ? #{bo.pilotage.alerte.UTILISATION_CAPITAL(
+                                          ${#numbers.formatDecimal(r.utilisationCapitalPct().get(), 1, 'WHITESPACE', 1, 'COMMA')},
+                                          ${s.encoursCapitalMaxPct().stripTrailingZeros().toPlainString()})}
+                                      : #{bo.pilotage.alerte.UTILISATION_CAPITAL.sans-capital}">Capital</th:block>
+                        <th:block th:case="'CONCENTRATION_EMPLOYEUR'" th:with="c=${r.employeurPrincipal().get()}"
+                                  th:text="#{bo.pilotage.alerte.CONCENTRATION_EMPLOYEUR(
+                                      ${c.libelle().isPresent()} ? ${c.libelle().get()} : #{bo.pilotage.employeur.inconnu},
+                                      ${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
+                                      ${s.employeurMaxPct().stripTrailingZeros().toPlainString()})}">Employeur</th:block>
+                        <th:block th:case="'CONCENTRATION_FOURNISSEUR'" th:with="c=${r.fournisseurPrincipal().get()}"
+                                  th:text="#{bo.pilotage.alerte.CONCENTRATION_FOURNISSEUR(${c.libelle().orElse('')},
+                                      ${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
+                                      ${s.fournisseurMaxPct().stripTrailingZeros().toPlainString()})}">Fournisseur</th:block>
+                    </span>
+                </li>
+            </ul>
+        </section>
+        <section th:unless="${r.aDesAlertes()}" class="bandeau-risque bandeau-risque--ok" role="status">
+            <p class="bandeau-risque__titre">
+                <svg class="bandeau-risque__icone" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="m8 12 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span th:text="#{bo.pilotage.alertes.aucune}">Aucun seuil de risque n’est dépassé.</span>
+            </p>
+        </section>
+
+        <!--/* Graphiques */-->
+        <h2 id="titre-evolution" th:text="#{bo.pilotage.graphiques.titre}">Évolution et concentration</h2>
+        <div class="graphiques">
+
+            <!--/* Courbe d'encours (montants) */-->
+            <figure class="carte graphique" data-graphique="encours" th:with="g=${courbeEncours}">
+                <figcaption>
+                    <h3 class="graphique__titre" id="graphique-encours-titre" th:text="#{bo.pilotage.graphique.encours.titre}">Encours en fin de mois (MRU)</h3>
+                    <p class="graphique__synthese texte-doux" id="graphique-encours-synthese"
+                       th:text="${g.dernier() != null}
+                           ? #{bo.pilotage.graphique.encours.synthese(${#temporals.format(g.dernier().mois(), 'MMMM yyyy')},
+                               #{client.catalogue.montant(${#numbers.formatInteger(g.dernier().valeur(), 1, 'WHITESPACE')})})}
+                           : #{bo.pilotage.graphique.vide}">Encours en novembre 2026 : 12 480 MRU.</p>
+                </figcaption>
+                <svg class="graphique__svg" th:attr="viewBox=${g.viewBox()}" viewBox="0 0 640 260" role="img"
+                     aria-labelledby="graphique-encours-titre graphique-encours-synthese" preserveAspectRatio="xMidYMid meet">
+                    <g class="graphique__grille">
+                        <th:block th:each="gr : ${g.graduations()}">
+                            <line th:attr="x1=${g.xAxe()}, x2=${g.xFin()}, y1=${gr.y()}, y2=${gr.y()}"/>
+                            <text class="graphique__graduation" th:attr="x=${g.xLibelles()}, y=${gr.y() + 4}" text-anchor="end"
+                                  th:text="${#numbers.formatInteger(gr.valeur(), 1, 'WHITESPACE')}">0</text>
+                        </th:block>
+                    </g>
+                    <line class="graphique__base" th:attr="x1=${g.xAxe()}, x2=${g.xFin()}, y1=${g.yBase()}, y2=${g.yBase()}"/>
+                    <path class="graphique__aire" th:if="${!#strings.isEmpty(g.aire())}" th:attr="d=${g.aire()}"/>
+                    <path class="graphique__trait" th:attr="d=${g.trace()}"/>
+                    <g th:each="p : ${g.points()}" class="graphique__point">
+                        <text class="graphique__mois" th:attr="x=${p.x()}, y=${g.yMois()}" text-anchor="middle"
+                              th:text="${#temporals.format(p.mois(), 'MMM yy')}">nov. 26</text>
+                        <th:block th:if="${p.aValeur()}">
+                            <circle class="graphique__cible" th:attr="cx=${p.x()}, cy=${p.y()}" r="14">
+                                <th:block th:with="infobulle=#{bo.pilotage.graphique.encours.point(${#temporals.format(p.mois(), 'MMMM yyyy')},
+                                    #{client.catalogue.montant(${#numbers.formatInteger(p.valeur(), 1, 'WHITESPACE')})})}"
+                                  th:utext="${'<title>' + #strings.escapeXml(infobulle) + '</title>'}"></th:block>
+                            </circle>
+                            <circle class="graphique__marqueur" th:attr="cx=${p.x()}, cy=${p.y()}" r="4"/>
+                        </th:block>
+                    </g>
+                    <text th:if="${g.dernier() != null}" class="graphique__etiquette"
+                          th:attr="x=${g.dernier().x()}, y=${g.dernier().y() - 12}" text-anchor="end"
+                          th:text="${#numbers.formatInteger(g.dernier().valeur(), 1, 'WHITESPACE')}">12 480</text>
+                </svg>
+                <details class="graphique__donnees">
+                    <summary th:text="#{bo.pilotage.graphique.donnees}">Voir les données</summary>
+                    <table class="tableau tableau--dense">
+                        <caption class="visuellement-cache" th:text="#{bo.pilotage.graphique.encours.titre}">Encours</caption>
+                        <thead><tr>
+                            <th scope="col" th:text="#{bo.pilotage.graphique.mois}">Mois</th>
+                            <th scope="col" class="nombre" th:text="#{bo.pilotage.encours}">Encours</th>
+                        </tr></thead>
+                        <tbody>
+                        <tr th:each="p : ${t.courbeEncours()}">
+                            <th scope="row" th:text="${#temporals.format(p.mois().atDay(1), 'MMMM yyyy')}">novembre 2026</th>
+                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.encours().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </figure>
+
+            <!--/* Courbe de recouvrement (taux des échéances échues du mois), seuil minimal en référence */-->
+            <figure class="carte graphique" data-graphique="recouvrement" th:with="g=${courbeRecouvrement}">
+                <figcaption>
+                    <h3 class="graphique__titre" id="graphique-recouvrement-titre" th:text="#{bo.pilotage.graphique.recouvrement.titre}">Recouvrement des échéances du mois (%)</h3>
+                    <p class="graphique__synthese texte-doux" id="graphique-recouvrement-synthese"
+                       th:text="${g.dernier() != null}
+                           ? #{bo.pilotage.graphique.recouvrement.synthese(${#temporals.format(g.dernier().mois(), 'MMMM yyyy')},
+                               ${#numbers.formatDecimal(g.dernier().valeur(), 1, 'WHITESPACE', 1, 'COMMA')},
+                               ${s.prelevementsReussisMinPct().stripTrailingZeros().toPlainString()})}
+                           : #{bo.pilotage.graphique.recouvrement.vide}">Novembre 2026 : 100 % des échéances échues encaissées (minimum 90 %).</p>
+                </figcaption>
+                <svg class="graphique__svg" th:attr="viewBox=${g.viewBox()}" viewBox="0 0 640 260" role="img"
+                     aria-labelledby="graphique-recouvrement-titre graphique-recouvrement-synthese" preserveAspectRatio="xMidYMid meet">
+                    <g class="graphique__grille">
+                        <th:block th:each="gr : ${g.graduations()}">
+                            <line th:attr="x1=${g.xAxe()}, x2=${g.xFin()}, y1=${gr.y()}, y2=${gr.y()}"/>
+                            <text class="graphique__graduation" th:attr="x=${g.xLibelles()}, y=${gr.y() + 4}" text-anchor="end"
+                                  th:text="#{bo.pilotage.pct(${gr.valeur().toPlainString()})}">0 %</text>
+                        </th:block>
+                    </g>
+                    <line class="graphique__base" th:attr="x1=${g.xAxe()}, x2=${g.xFin()}, y1=${g.yBase()}, y2=${g.yBase()}"/>
+                    <g class="graphique__seuil" th:if="${g.seuil() != null}">
+                        <line th:attr="x1=${g.xAxe()}, x2=${g.xFin()}, y1=${g.seuil().y()}, y2=${g.seuil().y()}"/>
+                        <text th:attr="x=${g.xFin()}, y=${g.seuil().y() + 16}" text-anchor="end"
+                              th:text="#{bo.pilotage.graphique.seuil-minimum(${g.seuil().valeur().toPlainString()})}">Minimum 90 %</text>
+                    </g>
+                    <path class="graphique__trait" th:attr="d=${g.trace()}"/>
+                    <g th:each="p : ${g.points()}" class="graphique__point">
+                        <text class="graphique__mois" th:attr="x=${p.x()}, y=${g.yMois()}" text-anchor="middle"
+                              th:text="${#temporals.format(p.mois(), 'MMM yy')}">nov. 26</text>
+                        <th:block th:if="${p.aValeur()}">
+                            <circle class="graphique__cible" th:attr="cx=${p.x()}, cy=${p.y()}" r="14">
+                                <th:block th:with="infobulle=#{bo.pilotage.graphique.recouvrement.point(${#temporals.format(p.mois(), 'MMMM yyyy')},
+                                    ${#numbers.formatDecimal(p.valeur(), 1, 'WHITESPACE', 1, 'COMMA')})}"
+                                  th:utext="${'<title>' + #strings.escapeXml(infobulle) + '</title>'}"></th:block>
+                            </circle>
+                            <circle class="graphique__marqueur" th:attr="cx=${p.x()}, cy=${p.y()}" r="4"/>
+                        </th:block>
+                    </g>
+                    <text th:if="${g.dernier() != null}" class="graphique__etiquette"
+                          th:attr="x=${g.dernier().x()}, y=${g.dernier().y() - 12}" text-anchor="end"
+                          th:text="#{bo.pilotage.pct(${#numbers.formatDecimal(g.dernier().valeur(), 1, 'WHITESPACE', 1, 'COMMA')})}">100 %</text>
+                </svg>
+                <details class="graphique__donnees">
+                    <summary th:text="#{bo.pilotage.graphique.donnees}">Voir les données</summary>
+                    <table class="tableau tableau--dense">
+                        <caption class="visuellement-cache" th:text="#{bo.pilotage.graphique.recouvrement.titre}">Recouvrement</caption>
+                        <thead><tr>
+                            <th scope="col" th:text="#{bo.pilotage.graphique.mois}">Mois</th>
+                            <th scope="col" class="nombre" th:text="#{bo.pilotage.graphique.attendu}">Attendu</th>
+                            <th scope="col" class="nombre" th:text="#{bo.pilotage.graphique.encaisse}">Encaissé</th>
+                            <th scope="col" class="nombre" th:text="#{bo.pilotage.graphique.taux}">Taux</th>
+                        </tr></thead>
+                        <tbody>
+                        <tr th:each="p : ${t.courbeRecouvrement()}">
+                            <th scope="row" th:text="${#temporals.format(p.mois().atDay(1), 'MMMM yyyy')}">novembre 2026</th>
+                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.attendu().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.encaisse().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                            <td class="nombre" th:text="${p.tauxPct().isPresent()}
+                                ? #{bo.pilotage.pct(${#numbers.formatDecimal(p.tauxPct().get(), 1, 'WHITESPACE', 1, 'COMMA')})}
+                                : #{bo.pilotage.sans-valeur}">100 %</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </figure>
+
+            <!--/* Barres de concentration : employeurs puis fournisseurs */-->
+            <figure class="carte graphique" th:each="type : ${ {'employeur', 'fournisseur'} }"
+                    th:attr="data-graphique='concentration-' + ${type}"
+                    th:with="b=${type == 'employeur'} ? ${barresEmployeurs} : ${barresFournisseurs},
+                             principal=${type == 'employeur'} ? ${r.employeurPrincipal()} : ${r.fournisseurPrincipal()}">
+                <figcaption>
+                    <h3 class="graphique__titre" th:id="'graphique-' + ${type} + '-titre'"
+                        th:text="#{'bo.pilotage.concentration.' + ${type}}">Concentration par employeur</h3>
+                    <p class="graphique__synthese texte-doux" th:id="'graphique-' + ${type} + '-synthese'"
+                       th:text="${principal.isPresent()}
+                           ? #{bo.pilotage.graphique.concentration.synthese(
+                               ${principal.get().libelle().isPresent()} ? ${principal.get().libelle().get()} : #{bo.pilotage.employeur.inconnu},
+                               ${#numbers.formatDecimal(principal.get().partPct(), 1, 'WHITESPACE', 1, 'COMMA')},
+                               ${b.seuilPct().toPlainString()})}
+                           : #{bo.pilotage.concentration.aucune}">Ministère de la Santé porte 35 % de l’encours (maximum 20 %).</p>
+                </figcaption>
+                <svg th:if="${!b.lignes().isEmpty()}" class="graphique__svg" th:attr="viewBox=${b.viewBox()},
+                         aria-labelledby='graphique-' + ${type} + '-titre graphique-' + ${type} + '-synthese'"
+                     viewBox="0 0 640 100" role="img" preserveAspectRatio="xMidYMid meet">
+                    <g th:each="l : ${b.lignes()}" class="graphique__ligne-barre" th:classappend="${l.depasse()} ? 'graphique__ligne-barre--depasse'"
+                       th:with="nom=${l.autres()} ? #{bo.pilotage.graphique.autres(${l.nombreAutres()})}
+                                 : (${l.libelle() != null} ? ${l.libelle()} : #{bo.pilotage.employeur.inconnu})">
+                        <th:block th:with="infobulle=#{bo.pilotage.graphique.concentration.barre(${nom},
+                            #{client.catalogue.montant(${#numbers.formatInteger(l.montant().valeur(), 1, 'WHITESPACE')})},
+                            ${#numbers.formatDecimal(l.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}"
+                                  th:utext="${'<title>' + #strings.escapeXml(infobulle) + '</title>'}"></th:block>
+                        <text class="graphique__libelle" th:attr="x=${b.xDepart()}, y=${l.yLibelle()}" text-anchor="start"
+                              th:text="${nom}">Ministère de la Santé</text>
+                        <path class="graphique__barre" th:attr="d=${l.forme()}"/>
+                        <text class="graphique__valeur" th:attr="x=${l.xValeur()}, y=${l.yValeur()}" text-anchor="start"
+                              th:text="${l.depasse()}
+                                  ? #{bo.pilotage.graphique.part-depasse(${#numbers.formatDecimal(l.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}
+                                  : #{bo.pilotage.pct(${#numbers.formatDecimal(l.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}">35 %</text>
+                    </g>
+                    <g class="graphique__seuil">
+                        <line th:attr="x1=${b.xSeuil()}, x2=${b.xSeuil()}, y2=${b.ySeuilBas()}" y1="0"/>
+                        <text th:attr="x=${b.xSeuil()}, y=${b.yLibelleSeuil()}" text-anchor="middle"
+                              th:text="#{bo.pilotage.graphique.seuil-maximum(${b.seuilPct().toPlainString()})}">Maximum 20 %</text>
+                    </g>
+                </svg>
+                <details class="graphique__donnees" th:if="${!b.lignes().isEmpty()}">
+                    <summary th:text="#{bo.pilotage.graphique.donnees}">Voir les données</summary>
+                    <table class="tableau tableau--dense">
+                        <caption class="visuellement-cache" th:text="#{'bo.pilotage.concentration.' + ${type}}">Concentration</caption>
+                        <thead><tr>
+                            <th scope="col" th:text="#{'bo.pilotage.graphique.' + ${type}}">Employeur</th>
+                            <th scope="col" class="nombre" th:text="#{bo.pilotage.encours}">Encours</th>
+                            <th scope="col" class="nombre" th:text="#{bo.pilotage.graphique.part}">Part</th>
+                        </tr></thead>
+                        <tbody>
+                        <tr th:each="c : ${type == 'employeur'} ? ${r.repartitionEmployeurs()} : ${r.repartitionFournisseurs()}">
+                            <th scope="row" th:text="${c.libelle().isPresent()} ? ${c.libelle().get()} : #{bo.pilotage.employeur.inconnu}">Ministère de la Santé</th>
+                            <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.montant().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</td>
+                            <td class="nombre" th:text="#{bo.pilotage.pct(${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}">35 %</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </figure>
+        </div>
+
+        <!--/* Détail des indicateurs de risque */-->
         <h2 id="titre-risque" th:text="#{bo.pilotage.risque.titre}">Indicateurs de risque</h2>
         <p class="texte-doux" th:text="#{bo.pilotage.risque.texte}">Seuils lus dans les paramètres.</p>
         <ul class="indicateurs" aria-labelledby="titre-risque">
@@ -111,34 +319,6 @@
                    th:text="#{bo.pilotage.utilisation.aide(
                        #{client.catalogue.montant(${#numbers.formatInteger(r.capitalDisponible().valeur(), 1, 'WHITESPACE')})},
                        ${s.encoursCapitalMaxPct().stripTrailingZeros().toPlainString()})}">Encours / capital disponible.</p>
-            </li>
-            <li class="carte indicateur" th:classappend="${r.enAlerte('CONCENTRATION_EMPLOYEUR')} ? 'indicateur--alerte'">
-                <h3 class="indicateur__titre" th:text="#{bo.pilotage.concentration.employeur}">Concentration par employeur</h3>
-                <th:block th:if="${r.employeurPrincipal().isPresent()}" th:with="c=${r.employeurPrincipal().get()}">
-                    <p class="indicateur__valeur" th:text="#{bo.pilotage.pct(${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}">0 %</p>
-                    <p class="indicateur__aide texte-doux"
-                       th:text="#{bo.pilotage.concentration.aide(${c.libelle().isPresent()} ? ${c.libelle().get()} : #{bo.pilotage.employeur.inconnu},
-                           #{client.catalogue.montant(${#numbers.formatInteger(c.montant().valeur(), 1, 'WHITESPACE')})},
-                           ${s.employeurMaxPct().stripTrailingZeros().toPlainString()})}">Employeur principal.</p>
-                </th:block>
-                <th:block th:unless="${r.employeurPrincipal().isPresent()}">
-                    <p class="indicateur__valeur" th:text="#{bo.pilotage.sans-valeur}">—</p>
-                    <p class="indicateur__aide texte-doux" th:text="#{bo.pilotage.concentration.aucune}">Aucun encours.</p>
-                </th:block>
-            </li>
-            <li class="carte indicateur" th:classappend="${r.enAlerte('CONCENTRATION_FOURNISSEUR')} ? 'indicateur--alerte'">
-                <h3 class="indicateur__titre" th:text="#{bo.pilotage.concentration.fournisseur}">Concentration par fournisseur</h3>
-                <th:block th:if="${r.fournisseurPrincipal().isPresent()}" th:with="c=${r.fournisseurPrincipal().get()}">
-                    <p class="indicateur__valeur" th:text="#{bo.pilotage.pct(${#numbers.formatDecimal(c.partPct(), 1, 'WHITESPACE', 1, 'COMMA')})}">0 %</p>
-                    <p class="indicateur__aide texte-doux"
-                       th:text="#{bo.pilotage.concentration.aide(${c.libelle().orElse('')},
-                           #{client.catalogue.montant(${#numbers.formatInteger(c.montant().valeur(), 1, 'WHITESPACE')})},
-                           ${s.fournisseurMaxPct().stripTrailingZeros().toPlainString()})}">Fournisseur principal.</p>
-                </th:block>
-                <th:block th:unless="${r.fournisseurPrincipal().isPresent()}">
-                    <p class="indicateur__valeur" th:text="#{bo.pilotage.sans-valeur}">—</p>
-                    <p class="indicateur__aide texte-doux" th:text="#{bo.pilotage.concentration.aucune}">Aucun encours.</p>
-                </th:block>
             </li>
         </ul>
 

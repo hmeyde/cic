@@ -1,5 +1,6 @@
 package com.seheli.comptabilite.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +24,9 @@ public interface EcritureComptableRepository {
 
     /** Soldes banque et achats de chaque dossier ayant au moins une écriture. */
     List<SoldesDossier> soldesParDossier();
+
+    /** Soldes de chaque dossier en ne comptant que les écritures datées au plus tard de {@code date}. */
+    List<SoldesDossier> soldesParDossierAu(LocalDate date);
 
     /** Écritures les plus récentes d'abord. */
     List<EcritureComptable> dernieres(int limite);

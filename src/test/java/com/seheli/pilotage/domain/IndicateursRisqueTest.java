@@ -133,4 +133,31 @@ class IndicateursRisqueTest {
         assertThat(r.alertes()).containsExactly(TypeAlerte.CONCENTRATION_EMPLOYEUR,
                 TypeAlerte.CONCENTRATION_FOURNISSEUR);
     }
+
+    @Test
+    void la_repartition_classe_les_groupes_du_plus_gros_au_plus_petit_a_egalite_dans_l_ordre_de_rencontre() {
+        List<PositionDossier> positions = List.of(dossier(3_000, "SNIM", "F1", null),
+                dossier(2_000, " snim ", "F2", null), dossier(2_500, "Mauritel", "F3", null),
+                dossier(2_500, null, "F3", null));
+
+        IndicateursRisque r = IndicateursRisque.calculer(positions, 0, 0, Montant.de(1_000_000), SEUILS,
+                AUJOURDHUI);
+
+        assertThat(r.repartitionEmployeurs()).extracting(Concentration::libelle)
+                .containsExactly(Optional.of("SNIM"), Optional.of("Mauritel"), Optional.empty());
+        assertThat(r.repartitionEmployeurs()).extracting(Concentration::partPct)
+                .containsExactly(new BigDecimal("50.0"), new BigDecimal("25.0"), new BigDecimal("25.0"));
+        assertThat(r.repartitionFournisseurs()).extracting(c -> c.libelle().orElseThrow())
+                .containsExactly("F3", "F1", "F2");
+        assertThat(r.aUneAlerteCritique()).isFalse();
+    }
+
+    @Test
+    void la_perte_et_le_depassement_du_capital_sont_des_alertes_critiques() {
+        IndicateursRisque r = IndicateursRisque.calculer(List.of(dossier(10_000, "SNIM", "F1", 200)), 0, 0,
+                Montant.de(1_000), SEUILS, AUJOURDHUI);
+
+        assertThat(r.alertes()).contains(TypeAlerte.PERTE, TypeAlerte.UTILISATION_CAPITAL);
+        assertThat(r.aUneAlerteCritique()).isTrue();
+    }
 }

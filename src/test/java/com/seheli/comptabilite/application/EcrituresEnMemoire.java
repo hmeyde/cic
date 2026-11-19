@@ -1,5 +1,6 @@
 package com.seheli.comptabilite.application;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -51,6 +52,11 @@ public class EcrituresEnMemoire implements EcritureComptableRepository {
     @Override
     public List<SoldesDossier> soldesParDossier() {
         return SoldesDossier.depuis(ecritures);
+    }
+
+    @Override
+    public List<SoldesDossier> soldesParDossierAu(LocalDate date) {
+        return SoldesDossier.depuis(ecritures.stream().filter(e -> !e.date().isAfter(date)).toList());
     }
 
     public List<EcritureComptable> toutes() {

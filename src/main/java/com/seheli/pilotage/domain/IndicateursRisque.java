@@ -29,8 +29,9 @@ import com.seheli.commun.domain.Montant;
  *       EN_RETARD). Pas de taux tant qu'aucune échéance n'est échue.</li>
  *   <li><b>Utilisation du capital</b> : encours / capital disponible, le capital disponible étant le
  *       capital apporté plus le bénéfice réalisé.</li>
- *   <li><b>Concentration</b> : plus forte part de l'encours portée par un même employeur (nom comparé
- *       sans tenir compte de la casse ni des espaces autour) et par un même fournisseur.</li>
+ *   <li><b>Concentration</b> : répartition de l'encours par employeur (nom comparé
+ *       sans tenir compte de la casse ni des espaces autour) et par fournisseur, du plus gros au plus
+ *       petit ; la plus forte part est comparée au seuil.</li>
  * </ul>
  *
  * <p>Une alerte est levée quand un seuil est dépassé strictement (au moins un dossier pour les retards).
@@ -39,8 +40,8 @@ import com.seheli.commun.domain.Montant;
 public record IndicateursRisque(int dossiersRetard30, Montant restantDuRetard30, Montant provisions,
         int dossiersPerte, Montant perte, int prelevementsReussis, int prelevementsEchoues,
         Optional<BigDecimal> tauxPrelevementsReussisPct, Montant capitalDisponible,
-        Optional<BigDecimal> utilisationCapitalPct, Optional<Concentration> employeurPrincipal,
-        Optional<Concentration> fournisseurPrincipal, SeuilsRisque seuils, List<TypeAlerte> alertes) {
+        Optional<BigDecimal> utilisationCapitalPct, List<Concentration> repartitionEmployeurs,
+        List<Concentration> repartitionFournisseurs, SeuilsRisque seuils, List<TypeAlerte> alertes) {
 
     private static final BigDecimal CENT = BigDecimal.valueOf(100);
 
@@ -51,8 +52,8 @@ public record IndicateursRisque(int dossiersRetard30, Montant restantDuRetard30,
         Objects.requireNonNull(tauxPrelevementsReussisPct, "tauxPrelevementsReussisPct");
         Objects.requireNonNull(capitalDisponible, "capitalDisponible");
         Objects.requireNonNull(utilisationCapitalPct, "utilisationCapitalPct");
-        Objects.requireNonNull(employeurPrincipal, "employeurPrincipal");
-        Objects.requireNonNull(fournisseurPrincipal, "fournisseurPrincipal");
+        repartitionEmployeurs = List.copyOf(repartitionEmployeurs);
+        repartitionFournisseurs = List.copyOf(repartitionFournisseurs);
         Objects.requireNonNull(seuils, "seuils");
         alertes = List.copyOf(alertes);
     }
@@ -102,9 +103,11 @@ public record IndicateursRisque(int dossiersRetard30, Montant restantDuRetard30,
                 : Optional.of(part(BigDecimal.valueOf(prelevementsReussis), BigDecimal.valueOf(echus)));
         Optional<BigDecimal> utilisation = capitalDisponible.estZero() ? Optional.empty()
                 : Optional.of(part(encours.valeur(), capitalDisponible.valeur()));
-        Optional<Concentration> employeur = plusForte(positions, encours,
+        List<Concentration> employeurs = repartition(positions, encours,
                 p -> p.employeur().map(String::strip).filter(e -> !e.isEmpty()));
-        Optional<Concentration> fournisseur = plusForte(positions, encours, p -> Optional.of(p.fournisseur()));
+        List<Concentration> fournisseurs = repartition(positions, encours, p -> Optional.of(p.fournisseur()));
+        Optional<Concentration> employeur = employeurs.stream().findFirst();
+        Optional<Concentration> fournisseur = fournisseurs.stream().findFirst();
 
         List<TypeAlerte> alertes = new ArrayList<>();
         if (dossiersRetard30 > 0) {
@@ -129,12 +132,17 @@ public record IndicateursRisque(int dossiersRetard30, Montant restantDuRetard30,
         }
 
         return new IndicateursRisque(dossiersRetard30, restantDuRetard30, provisions, dossiersPerte, perte,
-                prelevementsReussis, prelevementsEchoues, tauxReussis, capitalDisponible, utilisation, employeur,
-                fournisseur, seuils, alertes);
+                prelevementsReussis, prelevementsEchoues, tauxReussis, capitalDisponible, utilisation, employeurs,
+                fournisseurs, seuils, alertes);
     }
 
     public boolean aDesAlertes() {
         return !alertes.isEmpty();
+    }
+
+    /** Au moins une alerte appelle une décision immédiate (voir {@link TypeAlerte#critique()}). */
+    public boolean aUneAlerteCritique() {
+        return alertes.stream().anyMatch(TypeAlerte::critique);
     }
 
     public boolean alerte(TypeAlerte type) {
@@ -146,14 +154,24 @@ public record IndicateursRisque(int dossiersRetard30, Montant restantDuRetard30,
         return alerte(TypeAlerte.valueOf(type));
     }
 
+    /** Plus forte concentration de l'encours sur un même employeur ; vide s'il n'y a pas d'encours. */
+    public Optional<Concentration> employeurPrincipal() {
+        return repartitionEmployeurs.stream().findFirst();
+    }
+
+    /** Plus forte concentration de l'encours sur un même fournisseur ; vide s'il n'y a pas d'encours. */
+    public Optional<Concentration> fournisseurPrincipal() {
+        return repartitionFournisseurs.stream().findFirst();
+    }
+
     /**
-     * Regroupe l'encours par libellé (casse et espaces ignorés ; vide = non renseigné) et retient le
-     * plus gros groupe ; à égalité, le premier rencontré. Vide s'il n'y a pas d'encours.
+     * Regroupe l'encours par libellé (casse et espaces ignorés ; vide = non renseigné), du plus gros
+     * groupe au plus petit ; à égalité, le premier rencontré d'abord. Vide s'il n'y a pas d'encours.
      */
-    private static Optional<Concentration> plusForte(List<PositionDossier> positions, Montant encours,
+    private static List<Concentration> repartition(List<PositionDossier> positions, Montant encours,
             Function<PositionDossier, Optional<String>> libelle) {
         if (encours.estZero()) {
-            return Optional.empty();
+            return List.of();
         }
         Map<String, Optional<String>> libelles = new LinkedHashMap<>();
         Map<String, Montant> montants = new LinkedHashMap<>();
@@ -163,11 +181,12 @@ public record IndicateursRisque(int dossiersRetard30, Montant restantDuRetard30,
             libelles.putIfAbsent(cle, l);
             montants.merge(cle, p.restantDu(), Montant::plus);
         }
-        // max garde le premier élément en cas d'égalité.
+        // Tri stable : à égalité, l'ordre de première rencontre est conservé.
         return montants.entrySet().stream()
-                .max(Map.Entry.comparingByValue(Comparator.naturalOrder()))
+                .sorted(Map.Entry.<String, Montant>comparingByValue(Comparator.naturalOrder()).reversed())
                 .map(e -> new Concentration(libelles.get(e.getKey()), e.getValue(),
-                        part(e.getValue().valeur(), encours.valeur())));
+                        part(e.getValue().valeur(), encours.valeur())))
+                .toList();
     }
 
     /** {@code numerateur / denominateur} en %, arrondi au dixième. */

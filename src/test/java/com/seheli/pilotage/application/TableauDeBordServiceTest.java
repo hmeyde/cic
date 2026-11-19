@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +41,8 @@ import com.seheli.identite.domain.TypeContrat;
 import com.seheli.parametrage.ParametresDeDepart;
 import com.seheli.parametrage.application.ParametreService;
 import com.seheli.pilotage.domain.IndicateursRisque;
+import com.seheli.pilotage.domain.PointEncours;
+import com.seheli.pilotage.domain.PointRecouvrement;
 import com.seheli.pilotage.domain.TypeAlerte;
 
 /**
@@ -132,5 +135,35 @@ class TableauDeBordServiceTest {
         assertThat(r.alertes()).containsExactly(TypeAlerte.RETARD_30_JOURS, TypeAlerte.PRELEVEMENTS_REUSSIS,
                 TypeAlerte.UTILISATION_CAPITAL, TypeAlerte.CONCENTRATION_EMPLOYEUR,
                 TypeAlerte.CONCENTRATION_FOURNISSEUR);
+    }
+
+    @Test
+    void les_courbes_couvrent_les_six_derniers_mois_et_finissent_sur_les_chiffres_du_jour() {
+        capital.saisir(new SaisieApportCapital("Sidi", "10000", "2026-06-01"), "admin");
+        Contrat c = dossierCommande(Instant.parse("2026-07-01T10:00:00Z"));
+        var premiere = c.echeances().getFirst();
+        comptabilite.echeanceEncaissee(UUID.randomUUID(), c.demandeId(), c.id(), c.numero(), premiere.rang(),
+                premiere.montant(), premiere.date());
+        contrats.constaterEcheancePayee(c.id(), premiere.rang());
+        for (EcheanceAPrelever e : contrats.echeancesAVenirAvant(AUJOURDHUI)) {
+            contrats.constaterEcheanceEnRetard(e.contratId(), e.echeance().rang());
+        }
+
+        TableauDeBord t = service.tableau();
+
+        assertThat(t.courbeEncours()).extracting(PointEncours::mois).containsExactly(YearMonth.of(2026, 6),
+                YearMonth.of(2026, 7), YearMonth.of(2026, 8), YearMonth.of(2026, 9), YearMonth.of(2026, 10),
+                YearMonth.of(2026, 11));
+        assertThat(t.courbeEncours().getFirst().encours()).isEqualTo(Montant.ZERO);
+        assertThat(t.courbeEncours().getLast().encours()).isEqualTo(t.encours());
+        YearMonth moisPremiere = YearMonth.from(premiere.date());
+        PointRecouvrement paye = t.courbeRecouvrement().stream().filter(p -> p.mois().equals(moisPremiere))
+                .findFirst().orElseThrow();
+        assertThat(paye.tauxPct()).contains(new BigDecimal("100.0"));
+        assertThat(t.courbeRecouvrement().stream().map(PointRecouvrement::attendu).reduce(Montant.ZERO, Montant::plus))
+                .isEqualTo(Montant.de(4 * 2_080));
+        assertThat(t.courbeRecouvrement().stream().map(PointRecouvrement::encaisse).reduce(Montant.ZERO, Montant::plus))
+                .isEqualTo(Montant.de(2_080));
+        assertThat(t.courbeRecouvrement().getFirst().tauxPct()).isEmpty();
     }
 }

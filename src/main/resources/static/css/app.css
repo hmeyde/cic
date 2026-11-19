@@ -594,12 +594,71 @@ html { scroll-behavior: smooth; }
 .indicateur__titre { margin: 0; font-size: 1rem; }
 .indicateur__valeur { margin: 0; font-size: 1.6rem; font-weight: 700; direction: ltr; text-align: start; unicode-bidi: plaintext; }
 .indicateur__aide { margin: 0; font-size: .9rem; }
-
-/* Tableau de bord : alertes de risque */
-.alertes-risque { margin-block-end: 1.5rem; }
-.alertes-risque__titre { margin: 0 0 .5rem; font-size: 1.1rem; }
-.alertes-risque__liste { margin: 0; padding-inline-start: 1.25rem; display: grid; gap: .35rem; }
 .indicateur--alerte { border-inline-start-color: var(--couleur-danger); background: var(--couleur-danger-fond); }
+
+/* Tableau de bord : tuiles des chiffres clés */
+.tuiles { display: grid; gap: 1rem; padding: 0; margin: 1rem 0 1.25rem; list-style: none; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.tuile { display: grid; gap: .25rem; align-content: start; padding: 1rem 1.125rem; background: var(--couleur-fond); border: 1px solid var(--couleur-bordure); border-radius: var(--rayon); box-shadow: var(--ombre-sm); }
+.tuile__libelle { margin: 0; font-size: var(--texte-sm); font-weight: 600; color: var(--couleur-texte-doux); }
+.tuile__valeur { margin: 0; font-size: 1.85rem; line-height: 1.2; font-weight: 700; color: var(--couleur-texte); direction: ltr; text-align: start; unicode-bidi: plaintext; }
+.tuile__aide { margin: 0; font-size: var(--texte-sm); }
+.tuile__detail { margin: .25rem 0 0; font-size: var(--texte-sm); font-weight: 600; }
+
+/* Tableau de bord : bandeau des alertes de risque (icône + libellé, jamais la couleur seule) */
+.bandeau-risque { margin-block-end: 1.75rem; padding: .875rem 1.125rem; border-radius: var(--rayon); border: 1px solid; border-inline-start-width: 6px; }
+.bandeau-risque__titre { display: flex; align-items: center; gap: .5rem; margin: 0; font-size: 1.05rem; font-weight: 700; }
+.bandeau-risque__icone { flex: none; }
+.bandeau-risque__liste { list-style: none; margin: .625rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.bandeau-risque__alerte { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; color: var(--couleur-texte); }
+.bandeau-risque__alerte .badge { flex: none; }
+.bandeau-risque--critique { background: var(--couleur-danger-fond); border-color: var(--couleur-danger); }
+.bandeau-risque--critique .bandeau-risque__titre { color: var(--couleur-danger-texte); }
+.bandeau-risque--attention { background: var(--couleur-attention-fond); border-color: var(--couleur-attention); }
+.bandeau-risque--attention .bandeau-risque__titre { color: #7a5d00; }
+.bandeau-risque--ok { background: var(--couleur-succes-fond); border-color: var(--couleur-succes); }
+.bandeau-risque--ok .bandeau-risque__titre { color: var(--couleur-succes); }
+@media (prefers-color-scheme: dark) { .bandeau-risque--attention .bandeau-risque__titre { color: var(--couleur-attention); } }
+
+/* Tableau de bord : graphiques SVG dessinés côté serveur */
+.pilotage {
+    --graphique-serie: var(--couleur-primaire);
+    --graphique-alerte: var(--couleur-danger);
+    --graphique-grille: var(--couleur-bordure);
+    --graphique-base: #b9c4c0;
+    --graphique-seuil: #5a6662;
+}
+@media (prefers-color-scheme: dark) {
+    .pilotage { --graphique-base: #4a5a55; --graphique-seuil: #9ca9a5; }
+}
+.graphiques { display: grid; gap: 1rem; margin-block-end: 1.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); }
+.graphique { margin: 0; display: grid; gap: .5rem; align-content: start; min-width: 0; }
+.graphique__titre { margin: 0; font-size: 1rem; }
+.graphique__synthese { margin: 0; font-size: var(--texte-sm); }
+.graphique__svg { display: block; inline-size: 100%; block-size: auto; overflow: visible; font-family: var(--police); }
+.graphique__grille line { stroke: var(--graphique-grille); stroke-width: 1; shape-rendering: crispEdges; }
+.graphique__base { stroke: var(--graphique-base); stroke-width: 1; shape-rendering: crispEdges; }
+.graphique__graduation, .graphique__mois { fill: var(--couleur-texte-doux); font-size: 12px; font-variant-numeric: tabular-nums; }
+.graphique__trait { fill: none; stroke: var(--graphique-serie); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.graphique__aire { fill: var(--graphique-serie); fill-opacity: .1; stroke: none; }
+.graphique__marqueur { fill: var(--graphique-serie); stroke: var(--couleur-fond-doux); stroke-width: 2; pointer-events: none; }
+.graphique__cible { fill: transparent; cursor: default; }
+.graphique__point:hover .graphique__marqueur { r: 6; }
+.graphique__etiquette { fill: var(--couleur-texte); font-size: 13px; font-weight: 700; }
+.graphique__seuil line { stroke: var(--graphique-seuil); stroke-width: 1; stroke-dasharray: 4 3; }
+.graphique__seuil text { fill: var(--couleur-texte-doux); font-size: 12px; }
+.graphique__libelle { fill: var(--couleur-texte); font-size: 13px; }
+.graphique__valeur { fill: var(--couleur-texte); font-size: 13px; font-weight: 700; }
+.graphique__barre { fill: var(--graphique-serie); }
+.graphique__ligne-barre--depasse .graphique__barre { fill: var(--graphique-alerte); }
+.graphique__ligne-barre:hover .graphique__barre { opacity: .85; }
+.graphique__donnees summary { cursor: pointer; font-size: var(--texte-sm); font-weight: 600; color: var(--couleur-primaire); min-height: 44px; display: flex; align-items: center; }
+.graphique__donnees .tableau { font-size: var(--texte-sm); }
+@media (forced-colors: active) {
+    .graphique__trait, .graphique__seuil line { stroke: CanvasText; }
+    .graphique__marqueur, .graphique__barre { fill: CanvasText; }
+    .graphique__ligne-barre--depasse .graphique__barre { fill: Highlight; }
+    .graphique__aire { fill: none; }
+}
 
 /* Inscription : champ piège anti-robot, invisible pour les humains */
 .champ-piege { position: absolute; inset-inline-start: -10000px; width: 1px; height: 1px; overflow: hidden; }

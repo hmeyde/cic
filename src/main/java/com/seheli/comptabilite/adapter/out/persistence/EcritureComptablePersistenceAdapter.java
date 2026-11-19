@@ -2,7 +2,9 @@ package com.seheli.comptabilite.adapter.out.persistence;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ import com.seheli.comptabilite.domain.NatureEcriture;
 import com.seheli.comptabilite.domain.SoldesDossier;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 /**
  * Insertion seule, par requêtes natives : l'en-tête est inséré avec {@code ON CONFLICT DO NOTHING} sur
@@ -101,8 +104,18 @@ class EcritureComptablePersistenceAdapter implements EcritureComptableRepository
     @Override
     @Transactional(readOnly = true)
     public List<SoldesDossier> soldesParDossier() {
-        @SuppressWarnings("unchecked")
-        List<Object[]> lignes = entityManager.createNativeQuery("""
+        return soldes(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SoldesDossier> soldesParDossierAu(LocalDate date) {
+        return soldes(Objects.requireNonNull(date, "date"));
+    }
+
+    /** Soldes par dossier : toutes les écritures, ou seulement celles datées au plus tard de {@code au}. */
+    private List<SoldesDossier> soldes(LocalDate au) {
+        Query requete = entityManager.createNativeQuery("""
                 SELECT e.demande_id,
                        coalesce(sum(CASE WHEN l.compte = :banque
                                          THEN CASE WHEN l.sens = 'DEBIT' THEN l.montant ELSE -l.montant END END), 0),
@@ -111,11 +124,16 @@ class EcritureComptablePersistenceAdapter implements EcritureComptableRepository
                   FROM ecriture_comptable e
                   JOIN ligne_ecriture l ON l.ecriture_id = e.id
                  WHERE e.demande_id IS NOT NULL
+                """ + (au == null ? "" : "   AND e.date_ecriture <= :au\n") + """
                  GROUP BY e.demande_id
                 """)
                 .setParameter("banque", Compte.BANQUE.numero())
-                .setParameter("achats", Compte.ACHATS.numero())
-                .getResultList();
+                .setParameter("achats", Compte.ACHATS.numero());
+        if (au != null) {
+            requete.setParameter("au", au);
+        }
+        @SuppressWarnings("unchecked")
+        List<Object[]> lignes = requete.getResultList();
         return lignes.stream().map(l -> new SoldesDossier((UUID) l[0], (BigDecimal) l[1], (BigDecimal) l[2]))
                 .toList();
     }

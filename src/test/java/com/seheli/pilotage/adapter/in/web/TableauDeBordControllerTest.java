@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
@@ -50,12 +51,15 @@ class TableauDeBordControllerTest {
                 new FournisseurService(new FournisseursEnMemoire(), parametres), parametres, clock));
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertThat(controller.tableau(model)).isEqualTo("bo/pilotage/tableau");
+        assertThat(controller.tableau(model, Locale.FRENCH)).isEqualTo("bo/pilotage/tableau");
         TableauDeBord t = (TableauDeBord) model.get("tableau");
         assertThat(t.capitalApporte()).isEqualTo(Montant.de(500_000));
         assertThat(t.capitalEngage()).isEqualTo(Montant.ZERO);
         assertThat(t.encours()).isEqualTo(Montant.ZERO);
         assertThat(t.beneficeRealise()).isEqualTo(Montant.ZERO);
         assertThat(t.risque().alertes()).isEmpty();
+        assertThat(model.get("courbeEncours")).isInstanceOf(Courbe.class);
+        assertThat(((Courbe) model.get("courbeRecouvrement")).seuil().valeur()).isEqualByComparingTo("90");
+        assertThat(((Barres) model.get("barresEmployeurs")).lignes()).isEmpty();
     }
 }

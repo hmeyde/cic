@@ -2,6 +2,7 @@ package com.seheli.pilotage.application;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,10 @@ import com.seheli.identite.domain.Emploi;
 import com.seheli.parametrage.application.ParametreService;
 import com.seheli.parametrage.domain.CleParametre;
 import com.seheli.parametrage.domain.Parametres;
+import com.seheli.commun.domain.Montant;
 import com.seheli.pilotage.domain.IndicateursRisque;
+import com.seheli.pilotage.domain.PointEncours;
+import com.seheli.pilotage.domain.PointRecouvrement;
 import com.seheli.pilotage.domain.PositionDossier;
 import com.seheli.pilotage.domain.SeuilsRisque;
 
@@ -36,9 +40,15 @@ import com.seheli.pilotage.domain.SeuilsRisque;
  *
  * <p>Les échéances échues sont celles dont la date est passée (aujourd'hui exclu : le prélèvement du
  * jour peut encore arriver). Le capital disponible est le capital apporté plus le bénéfice réalisé.
+ *
+ * <p>Les courbes couvrent les {@value #MOIS_AFFICHES} derniers mois, mois en cours compris : encours le
+ * dernier jour de chaque mois (aujourd'hui pour le mois en cours) et recouvrement des échéances échues
+ * de chaque mois. Ce nombre de mois est un choix d'affichage, pas une règle de gestion.
  */
 @Service
 public class TableauDeBordService {
+
+    static final int MOIS_AFFICHES = 6;
 
     private final IndicateursFinanciersService indicateurs;
     private final ContratService contrats;
@@ -87,7 +97,43 @@ public class TableauDeBordService {
 
         IndicateursRisque risque = IndicateursRisque.calculer(positions, reussis, enRetard.size(),
                 i.capitalApporte().plus(i.beneficeRealise()), seuils(parametres.courants()), aujourdhui);
-        return new TableauDeBord(i.capitalApporte(), i.capitalEngage(), i.encours(), i.beneficeRealise(), risque);
+        return new TableauDeBord(i.capitalApporte(), i.capitalEngage(), i.encours(), i.beneficeRealise(), risque,
+                courbeEncours(aujourdhui), courbeRecouvrement(aujourdhui));
+    }
+
+    private List<PointEncours> courbeEncours(LocalDate aujourdhui) {
+        List<PointEncours> points = new ArrayList<>();
+        for (YearMonth mois : moisAffiches(aujourdhui)) {
+            LocalDate fin = mois.equals(YearMonth.from(aujourdhui)) ? aujourdhui : mois.atEndOfMonth();
+            points.add(new PointEncours(mois, indicateurs.encoursAu(fin)));
+        }
+        return points;
+    }
+
+    private List<PointRecouvrement> courbeRecouvrement(LocalDate aujourdhui) {
+        LocalDate hier = aujourdhui.minusDays(1);
+        List<PointRecouvrement> points = new ArrayList<>();
+        for (YearMonth mois : moisAffiches(aujourdhui)) {
+            LocalDate debut = mois.atDay(1);
+            LocalDate fin = mois.atEndOfMonth().isAfter(hier) ? hier : mois.atEndOfMonth();
+            Montant encaisse = debut.isAfter(fin) ? Montant.ZERO : total(contrats.echeancesPayeesEntre(debut, fin));
+            Montant impaye = debut.isAfter(fin) ? Montant.ZERO : total(contrats.echeancesEnRetardEntre(debut, fin));
+            points.add(new PointRecouvrement(mois, encaisse.plus(impaye), encaisse));
+        }
+        return points;
+    }
+
+    private static List<YearMonth> moisAffiches(LocalDate aujourdhui) {
+        YearMonth courant = YearMonth.from(aujourdhui);
+        List<YearMonth> mois = new ArrayList<>();
+        for (int i = MOIS_AFFICHES - 1; i >= 0; i--) {
+            mois.add(courant.minusMonths(i));
+        }
+        return mois;
+    }
+
+    private static Montant total(List<EcheanceAPrelever> echeances) {
+        return echeances.stream().map(e -> e.echeance().montant()).reduce(Montant.ZERO, Montant::plus);
     }
 
     private static SeuilsRisque seuils(Parametres p) {
