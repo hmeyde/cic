@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -61,7 +62,7 @@ class CatalogueClientControllerTest {
     void affiche_tout_le_catalogue_sans_filtre() {
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertThat(controller.liste(null, model)).isEqualTo("client/catalogue/liste");
+        assertThat(controller.liste(null, null, null, null, model, new MockHttpServletResponse())).isEqualTo("client/catalogue/liste");
         assertThat(produitsAffiches(model)).extracting(ProduitPropose::designation)
                 .containsExactly("Climatiseur", "Galaxy A35");
         assertThat(model.get("categorieChoisie")).isEqualTo("");
@@ -71,7 +72,7 @@ class CatalogueClientControllerTest {
     void filtre_par_categorie() {
         ExtendedModelMap model = new ExtendedModelMap();
 
-        controller.liste("TELEPHONE", model);
+        controller.liste("TELEPHONE", null, null, null, model, new MockHttpServletResponse());
 
         assertThat(produitsAffiches(model)).extracting(ProduitPropose::designation).containsExactly("Galaxy A35");
         assertThat(model.get("categorieChoisie")).isEqualTo("TELEPHONE");
@@ -81,10 +82,43 @@ class CatalogueClientControllerTest {
     void ignore_une_categorie_inconnue() {
         ExtendedModelMap model = new ExtendedModelMap();
 
-        controller.liste("VOITURE", model);
+        controller.liste("VOITURE", null, null, null, model, new MockHttpServletResponse());
 
         assertThat(produitsAffiches(model)).hasSize(2);
         assertThat(model.get("categorieChoisie")).isEqualTo("");
+    }
+
+    @Test
+    void recherche_sans_tenir_compte_des_accents_ni_de_la_casse() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.liste(null, "  samsung ", null, null, model, new MockHttpServletResponse());
+
+        assertThat(produitsAffiches(model)).extracting(ProduitPropose::designation).containsExactly("Galaxy A35");
+        assertThat(model.get("recherche")).isEqualTo("samsung");
+    }
+
+    @Test
+    void une_requete_htmx_ne_recoit_que_les_resultats_sauf_restauration_d_historique() {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        assertThat(controller.liste(null, "gal", "true", null, new ExtendedModelMap(), response))
+                .isEqualTo("client/catalogue/liste :: resultats");
+        assertThat(response.getHeader("Vary")).isEqualTo("HX-Request");
+        assertThat(controller.liste(null, "gal", "true", "true", new ExtendedModelMap(),
+                new MockHttpServletResponse())).isEqualTo("client/catalogue/liste");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void chaque_produit_affiche_a_une_illustration() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.liste(null, null, null, null, model, new MockHttpServletResponse());
+
+        assertThat((java.util.Map<UUID, String>) model.get("illustrations"))
+                .containsEntry(telephone.id(), "/img/produits/telephone.svg")
+                .containsEntry(climatiseur.id(), "/img/produits/climatiseur.svg");
     }
 
     @Test
@@ -93,6 +127,17 @@ class CatalogueClientControllerTest {
 
         assertThat(controller.produit(telephone.id(), null, model)).isEqualTo("client/catalogue/produit");
         assertThat(((ProduitPropose) model.get("produit")).prixVente()).isEqualTo(Montant.de(20_800));
+    }
+
+    @Test
+    void la_mensualite_a_partir_de_est_celle_de_la_simulation_sur_six_mois() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.produit(telephone.id(), null, model);
+
+        ProduitPropose produit = (ProduitPropose) model.get("produit");
+        assertThat(produit.mensualiteIndicative()).isEqualTo(Montant.de(2_080))
+                .isEqualTo(((Simulation) model.get("simulation")).mensualite());
     }
 
     @Test

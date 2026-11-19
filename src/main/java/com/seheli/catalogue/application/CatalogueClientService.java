@@ -1,6 +1,8 @@
 package com.seheli.catalogue.application;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,9 +55,22 @@ public class CatalogueClientService {
     /** Produits proposés, triés par désignation ; tous si la catégorie est vide. */
     @Transactional(readOnly = true)
     public List<ProduitPropose> proposes(Optional<CategorieProduit> categorie) {
+        return proposes(categorie, "");
+    }
+
+    /**
+     * Produits proposés, triés par désignation, filtrés par catégorie (toutes si vide) et par une
+     * recherche libre sur la désignation et la marque. La recherche ignore la casse et les accents
+     * (« refrigerateur » trouve « Réfrigérateur ») ; chaque mot doit apparaître. Vide : pas de filtre.
+     */
+    @Transactional(readOnly = true)
+    public List<ProduitPropose> proposes(Optional<CategorieProduit> categorie, String recherche) {
         Objects.requireNonNull(categorie, "categorie");
+        List<String> mots = mots(recherche == null ? "" : recherche);
         List<Produit> candidats = categorie.map(produits::disponibles).orElseGet(produits::disponibles);
-        return candidats.stream().map(this::proposer).flatMap(Optional::stream).toList();
+        return candidats.stream()
+                .filter(produit -> correspond(produit, mots))
+                .map(this::proposer).flatMap(Optional::stream).toList();
     }
 
     /** Le produit s'il est proposé au client, vide sinon (inconnu, indisponible ou fournisseur inactif). */
@@ -90,15 +105,39 @@ public class CatalogueClientService {
                         prix)));
     }
 
+    /**
+     * La mensualité « à partir de » est celle que calcule le module contrat pour la durée maximale
+     * avec l'apport minimum : la plus basse proposée, identique à la simulation de la page produit.
+     */
     private Optional<ProduitPropose> proposer(Produit produit) {
-        return prix(produit).map(prix -> {
+        return prix(produit).flatMap(prix -> {
             int dureeMin = parametres.entier(CleParametre.DUREE_MIN_MOIS);
             int dureeMax = parametres.entier(CleParametre.DUREE_MAX_MOIS);
-            var reste = prix.resteAFinancer();
-            return new ProduitPropose(produit.id(), produit.designation(), produit.marque(),
-                    produit.categorie(), prix.prixVente(), prix.apportMinimum(), reste, dureeMin, dureeMax,
-                    reste.repartir(dureeMax).getFirst());
+            Simulation laPlusLongue;
+            try {
+                laPlusLongue = simulation.simuler(prix, dureeMax);
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Produit {} non proposé : simulation impossible ({})", produit.id(), e.getMessage());
+                return Optional.empty();
+            }
+            return Optional.of(new ProduitPropose(produit.id(), produit.designation(), produit.marque(),
+                    produit.categorie(), prix.prixVente(), prix.apportMinimum(), prix.resteAFinancer(),
+                    dureeMin, dureeMax, laPlusLongue.mensualite()));
         });
+    }
+
+    private static boolean correspond(Produit produit, List<String> mots) {
+        String texte = normaliser(produit.designation() + " " + produit.marque());
+        return mots.stream().allMatch(texte::contains);
+    }
+
+    private static List<String> mots(String recherche) {
+        String normalisee = normaliser(recherche).strip();
+        return normalisee.isEmpty() ? List.of() : List.of(normalisee.split("\\s+"));
+    }
+
+    private static String normaliser(String texte) {
+        return Normalizer.normalize(texte, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").toLowerCase(Locale.ROOT);
     }
 
     /** Prix du produit si son fournisseur est actif et si sa remise est dans les bornes en vigueur. */

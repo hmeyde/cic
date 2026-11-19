@@ -1,15 +1,21 @@
 package com.seheli.catalogue.adapter.in.web;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +36,8 @@ class CatalogueClientController {
     static final String CHEMIN = "/client/catalogue";
     static final String VUE_LISTE = "client/catalogue/liste";
     static final String VUE_PRODUIT = "client/catalogue/produit";
+    static final String FRAGMENT_RESULTATS = VUE_LISTE + " :: resultats";
+    static final int RECHERCHE_LONGUEUR_MAX = 100;
     static final String FRAGMENT_SIMULATION = "client/catalogue/simulation :: resultat";
 
     private final CatalogueClientService catalogue;
@@ -38,14 +46,32 @@ class CatalogueClientController {
         this.catalogue = catalogue;
     }
 
-    /** Une catégorie inconnue est ignorée : tout le catalogue est affiché. */
+    /**
+     * Catalogue filtré par catégorie (puces) et par recherche libre. Une catégorie inconnue est
+     * ignorée ; la recherche est tronquée à {@value #RECHERCHE_LONGUEUR_MAX} caractères.
+     * Une requête HTMX (recherche au fil de la frappe, clic sur une puce) ne reçoit que la zone des
+     * résultats ; la restauration d'historique HTMX et la navigation classique reçoivent la page.
+     */
     @GetMapping(CHEMIN)
-    String liste(@RequestParam(name = "categorie", required = false) String categorie, Model model) {
+    String liste(@RequestParam(name = "categorie", required = false) String categorie,
+            @RequestParam(name = "q", required = false) String q,
+            @RequestHeader(name = "HX-Request", required = false) String htmx,
+            @RequestHeader(name = "HX-History-Restore-Request", required = false) String restauration,
+            Model model, HttpServletResponse response) {
         Optional<CategorieProduit> choisie = categorieOuVide(categorie);
-        model.addAttribute("produits", catalogue.proposes(choisie));
+        String recherche = q == null ? "" : q.strip();
+        if (recherche.length() > RECHERCHE_LONGUEUR_MAX) {
+            recherche = recherche.substring(0, RECHERCHE_LONGUEUR_MAX);
+        }
+        List<ProduitPropose> produits = catalogue.proposes(choisie, recherche);
+        model.addAttribute("produits", produits);
+        model.addAttribute("illustrations", produits.stream()
+                .collect(Collectors.toMap(ProduitPropose::id, IllustrationProduit::pour)));
         model.addAttribute("categories", CategorieProduit.values());
         model.addAttribute("categorieChoisie", choisie.map(Enum::name).orElse(""));
-        return VUE_LISTE;
+        model.addAttribute("recherche", recherche);
+        response.setHeader(HttpHeaders.VARY, "HX-Request");
+        return "true".equals(htmx) && !"true".equals(restauration) ? FRAGMENT_RESULTATS : VUE_LISTE;
     }
 
     /**
@@ -59,6 +85,7 @@ class CatalogueClientController {
         int retenue = duree != null && duree >= produit.dureeMinMois() && duree <= produit.dureeMaxMois()
                 ? duree : produit.dureeMaxMois();
         model.addAttribute("produit", produit);
+        model.addAttribute("illustration", IllustrationProduit.pour(produit));
         model.addAttribute("produitId", id);
         model.addAttribute("durees", IntStream.rangeClosed(produit.dureeMinMois(), produit.dureeMaxMois())
                 .boxed().toList());

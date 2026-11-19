@@ -11,8 +11,9 @@ import com.seheli.commun.domain.Montant;
  * et conditions indicatives avec l'apport minimum. Le prix d'achat et la remise fournisseur
  * ne sont jamais exposés au client.
  *
- * @param mensualiteIndicative mensualité sur la durée maximale avec l'apport minimum ;
- *                             la simulation donne le montant exact
+ * @param mensualiteIndicative mensualité « à partir de » : celle de la simulation sur la durée
+ *                             maximale avec l'apport minimum (la plus basse proposée) ; la dernière
+ *                             peut différer de quelques ouguiyas (écart d'arrondi)
  */
 public record ProduitPropose(UUID id, String designation, String marque, CategorieProduit categorie,
         Montant prixVente, Montant apportMinimum, Montant resteAFinancer, int dureeMinMois, int dureeMaxMois,

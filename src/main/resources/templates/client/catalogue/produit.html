@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<!--/*
+  Fiche produit : visuel, prix comptant, mensualité « à partir de » (durée maximale, apport minimum),
+  disponibilité, puis le simulateur (ancre #simuler) et le formulaire de demande.
+*/-->
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
@@ -6,18 +10,53 @@
 </head>
 <body>
 <main id="contenu" class="contenu">
-    <section class="section conteneur" aria-labelledby="titre-produit">
-        <p><a th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
+    <section class="section conteneur fiche-produit" aria-labelledby="titre-produit">
+        <p class="fiche-produit__retour"><a th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Vous avez déjà un dossier en cours.</p>
-        <span class="etiquette etiquette--sans-marge" th:text="#{'bo.produit.categorie.' + ${produit.categorie().name()}}">Téléphone</span>
-        <h1 id="titre-produit" th:text="${produit.designation()}">Galaxy A35 128 Go</h1>
-        <p class="texte-doux" th:text="${produit.marque()}">Samsung</p>
 
-        <div class="carte" aria-labelledby="titre-simulation">
-            <h2 id="titre-simulation" th:text="#{client.simulation.titre}">Simuler mon crédit</h2>
+        <div class="fiche-produit__entete">
+            <div class="fiche-produit__visuel">
+                <img th:src="@{${illustration}}" alt="" width="240" height="240">
+            </div>
+            <div class="fiche-produit__resume">
+                <p class="fiche-produit__categorie">
+                    <span class="etiquette etiquette--sans-marge etiquette--neutre" th:text="#{'bo.produit.categorie.' + ${produit.categorie().name()}}">Téléphone</span>
+                    <span class="etiquette etiquette--favorable" th:text="#{client.produit.disponible}">Disponible</span>
+                </p>
+                <p class="vignette__marque" th:text="${produit.marque()}">Samsung</p>
+                <h1 id="titre-produit" class="fiche-produit__titre" th:text="${produit.designation()}">Galaxy A35 128 Go</h1>
+
+                <p class="fiche-produit__mensualite">
+                    <span class="vignette__a-partir" th:text="#{client.catalogue.a-partir}">À partir de</span>
+                    <strong th:text="#{client.catalogue.par-mois(${#numbers.formatInteger(produit.mensualiteIndicative().valeur(), 1, 'WHITESPACE')})}">2 080 MRU / mois</strong>
+                </p>
+                <p class="texte-doux" th:text="#{client.catalogue.detail(${produit.dureeMaxMois()}, ${#numbers.formatInteger(produit.apportMinimum().valeur(), 1, 'WHITESPACE')})}">sur 6 mois, après un apport de 8 320 MRU</p>
+
+                <dl class="conditions fiche-produit__conditions">
+                    <div>
+                        <dt th:text="#{client.catalogue.prix}">Prix comptant</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.produit.apport-minimum}">Apport minimum</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.apportMinimum().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.produit.disponibilite}">Disponibilité</dt>
+                        <dd th:text="#{client.produit.disponibilite.texte}">En stock</dd>
+                    </div>
+                </dl>
+                <p class="texte-doux" th:text="#{client.produit.disponibilite.remise}">Remis dès votre apport payé et votre autorisation de prélèvement acceptée.</p>
+
+                <a class="bouton bouton--principal fiche-produit__action" href="#simuler" th:text="#{client.produit.simuler}">Simuler mon paiement</a>
+            </div>
+        </div>
+
+        <div id="simuler" class="carte simulateur" aria-labelledby="titre-simulation">
+            <h2 id="titre-simulation" th:text="#{client.simulation.titre}">Simuler mon paiement</h2>
             <!--/* Sans JavaScript, le formulaire recharge la page ; avec HTMX, seul le résultat est remplacé. */-->
             <form class="simulation" method="get"
-                  th:action="@{/client/catalogue/{id}(id=${produit.id()})}"
+                  th:action="@{/client/catalogue/{id}(id=${produit.id()})} + '#simuler'"
                   th:attr="hx-get=@{/client/catalogue/{id}/simulation(id=${produit.id()})}"
                   hx-trigger="change" hx-target="#simulation" hx-swap="outerHTML">
                 <fieldset class="choix-duree">

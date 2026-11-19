@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--/*
+  Catalogue client. La recherche (au fil de la frappe) et les puces de catégorie interrogent
+  GET /client/catalogue en HTMX et ne remplacent que la zone « resultats » (puces + grille) ;
+  le champ de recherche reste en place et garde le focus. Sans JavaScript, le formulaire et les
+  puces sont des liens et formulaires GET ordinaires.
+*/-->
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
@@ -6,41 +12,86 @@
 </head>
 <body>
 <main id="contenu" class="contenu">
-    <section class="section conteneur" aria-labelledby="titre-catalogue">
+    <section class="section conteneur catalogue" aria-labelledby="titre-catalogue">
         <h1 id="titre-catalogue" th:text="#{client.catalogue.titre}">Catalogue</h1>
         <p class="texte-doux" th:text="#{client.catalogue.texte}">Choisissez un produit : vous payez un apport, nous vous le remettons, puis vous remboursez le reste par mensualités, sans intérêt ni pénalité.</p>
 
-        <nav class="filtres" th:attr="aria-label=#{client.catalogue.filtrer}">
-            <a class="filtre" th:href="@{/client/catalogue}"
-               th:classappend="${categorieChoisie == ''} ? 'filtre--actif'"
-               th:attr="aria-current=${categorieChoisie == ''} ? 'page'"
-               th:text="#{client.catalogue.tout}">Tout</a>
-            <a th:each="c : ${categories}" class="filtre"
-               th:href="@{/client/catalogue(categorie=${c.name()})}"
-               th:classappend="${categorieChoisie == c.name()} ? 'filtre--actif'"
-               th:attr="aria-current=${categorieChoisie == c.name()} ? 'page'"
-               th:text="#{'bo.produit.categorie.' + ${c.name()}}">Téléphone</a>
-        </nav>
+        <form id="recherche-catalogue" class="recherche" role="search" method="get"
+              th:action="@{/client/catalogue}"
+              th:attr="hx-get=@{/client/catalogue}"
+              hx-trigger="input changed delay:300ms from:#q, search from:#q, submit"
+              hx-target="#resultats-catalogue" hx-swap="outerHTML" hx-push-url="true">
+            <label for="q" class="visuellement-cache" th:text="#{client.catalogue.recherche}">Rechercher un produit</label>
+            <input id="q" name="q" type="search" class="recherche__champ" maxlength="100" autocomplete="off"
+                   enterkeyhint="search" th:value="${recherche}"
+                   th:placeholder="#{client.catalogue.recherche.exemple}" placeholder="Rechercher : Galaxy, climatiseur…">
+            <button type="submit" class="bouton bouton--contour recherche__bouton" th:text="#{client.catalogue.recherche.bouton}">Rechercher</button>
+        </form>
 
-        <p th:if="${#lists.isEmpty(produits)}" class="texte-doux" th:text="#{client.catalogue.aucun}">Aucun produit disponible pour l’instant.</p>
+        <div th:fragment="resultats" id="resultats-catalogue" class="catalogue__resultats">
+            <!--/* Catégorie retenue, envoyée avec la recherche (attribut form : le champ suit chaque échange HTMX). */-->
+            <input type="hidden" name="categorie" form="recherche-catalogue" th:value="${categorieChoisie}">
 
-        <ul th:unless="${#lists.isEmpty(produits)}" class="grille-produits">
-            <li th:each="p : ${produits}" class="carte carte-produit">
-                <span class="etiquette etiquette--sans-marge" th:text="#{'bo.produit.categorie.' + ${p.categorie().name()}}">Téléphone</span>
-                <h2 class="carte-produit__titre">
-                    <a th:href="@{/client/catalogue/{id}(id=${p.id()})}" th:text="${p.designation()}">Galaxy A35</a>
-                </h2>
-                <p class="texte-doux carte-produit__marque" th:text="${p.marque()}">Samsung</p>
-                <p class="carte-produit__prix">
-                    <span th:text="#{client.catalogue.prix}">Prix</span>
-                    <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</strong>
-                </p>
-                <p class="texte-doux"
-                   th:text="#{client.catalogue.apercu(${#numbers.formatInteger(p.apportMinimum().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(p.mensualiteIndicative().valeur(), 1, 'WHITESPACE')}, ${p.dureeMaxMois()})}">Apport 8 320 MRU, puis environ 2 080 MRU par mois sur 6 mois</p>
-            </li>
-        </ul>
+            <nav class="puces" th:attr="aria-label=#{client.catalogue.filtrer}">
+                <a class="puce"
+                   th:with="lien=${recherche == ''} ? @{/client/catalogue} : @{/client/catalogue(q=${recherche})}"
+                   th:href="${lien}"
+                   th:attr="hx-get=${lien},aria-current=${categorieChoisie == ''} ? 'page'"
+                   hx-target="#resultats-catalogue" hx-swap="outerHTML" hx-push-url="true"
+                   th:classappend="${categorieChoisie == ''} ? 'puce--active'"
+                   th:text="#{client.catalogue.tout}">Tout</a>
+                <a th:each="c : ${categories}" class="puce"
+                   th:with="lien=${recherche == ''} ? @{/client/catalogue(categorie=${c.name()})} : @{/client/catalogue(categorie=${c.name()},q=${recherche})}"
+                   th:href="${lien}"
+                   th:attr="hx-get=${lien},aria-current=${categorieChoisie == c.name()} ? 'page'"
+                   hx-target="#resultats-catalogue" hx-swap="outerHTML" hx-push-url="true"
+                   th:classappend="${categorieChoisie == c.name()} ? 'puce--active'"
+                   th:text="#{'bo.produit.categorie.' + ${c.name()}}">Téléphone</a>
+            </nav>
 
-        <p><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></p>
+            <p class="texte-doux catalogue__compte" role="status"
+               th:unless="${#lists.isEmpty(produits)}"
+               th:text="#{client.catalogue.compte(${#lists.size(produits)})}">15 produits</p>
+
+            <div th:if="${#lists.isEmpty(produits)}" class="etat-vide" role="status">
+                <img class="etat-vide__visuel" th:src="@{/img/produits/recherche-vide.svg}" alt="" width="96" height="96">
+                <th:block th:if="${recherche != '' or categorieChoisie != ''}">
+                    <h2 class="etat-vide__titre" th:text="#{client.catalogue.vide.titre}">Aucun produit ne correspond</h2>
+                    <p class="texte-doux" th:if="${recherche != ''}" th:text="#{client.catalogue.vide.recherche(${recherche})}">Aucun résultat pour « tablette ». Vérifiez l’orthographe ou essayez un autre mot.</p>
+                    <p class="texte-doux" th:if="${recherche == ''}" th:text="#{client.catalogue.vide.categorie}">Aucun produit dans cette catégorie pour l’instant.</p>
+                    <a class="bouton bouton--contour" th:href="@{/client/catalogue}" th:text="#{client.catalogue.vide.tout}">Voir tout le catalogue</a>
+                </th:block>
+                <th:block th:unless="${recherche != '' or categorieChoisie != ''}">
+                    <h2 class="etat-vide__titre" th:text="#{client.catalogue.aucun}">Aucun produit disponible pour l’instant.</h2>
+                    <p class="texte-doux" th:text="#{client.catalogue.aucun.texte}">Notre catalogue est en cours de mise à jour : revenez bientôt.</p>
+                </th:block>
+            </div>
+
+            <ul th:unless="${#lists.isEmpty(produits)}" class="grille-catalogue">
+                <li th:each="p : ${produits}" class="vignette">
+                    <div class="vignette__visuel">
+                        <img th:src="@{${illustrations.get(p.id())}}" alt="" width="160" height="160" loading="lazy">
+                    </div>
+                    <div class="vignette__corps">
+                        <p class="vignette__marque" th:text="${p.marque()}">Samsung</p>
+                        <h2 class="vignette__titre">
+                            <!--/* Lien étiré sur toute la carte (pseudo-élément) : une seule cible, un seul nom accessible. */-->
+                            <a class="vignette__lien" th:href="@{/client/catalogue/{id}(id=${p.id()})}" th:text="${p.designation()}">Galaxy A35 128 Go</a>
+                        </h2>
+                        <p class="vignette__mensualite">
+                            <span class="vignette__a-partir" th:text="#{client.catalogue.a-partir}">À partir de</span>
+                            <strong th:text="#{client.catalogue.par-mois(${#numbers.formatInteger(p.mensualiteIndicative().valeur(), 1, 'WHITESPACE')})}">2 080 MRU / mois</strong>
+                        </p>
+                        <p class="vignette__detail texte-doux"
+                           th:text="#{client.catalogue.detail(${p.dureeMaxMois()}, ${#numbers.formatInteger(p.apportMinimum().valeur(), 1, 'WHITESPACE')})}">sur 6 mois, après un apport de 8 320 MRU</p>
+                        <p class="vignette__prix">
+                            <span th:text="#{client.catalogue.prix}">Prix comptant</span>
+                            <span class="vignette__montant" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</span>
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </div>
     </section>
 </main>
 </body>

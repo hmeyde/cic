@@ -1,13 +1,13 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`ccab505`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`dc13ab1`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
 | Module | Couches | Classes principales |
 |---|---|---|
 | `audit` (12) | adapter.out adapter.out.persistence application domain | Acteur, JournalAuditJpaRepository, JournalAuditPersistenceAdapter, JournalAuditRepository, JournalAuditService |
-| `catalogue` (32) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | CatalogueClientController, CatalogueClientService, Fournisseur, FournisseurBackOfficeController, FournisseurJpaRepository, FournisseurPersistenceAdapter, FournisseurRepository, FournisseurService, Produit, ProduitBackOfficeController, ProduitJpaRepository, ProduitPersistenceAdapter |
+| `catalogue` (33) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | CatalogueClientController, CatalogueClientService, Fournisseur, FournisseurBackOfficeController, FournisseurJpaRepository, FournisseurPersistenceAdapter, FournisseurRepository, FournisseurService, Produit, ProduitBackOfficeController, ProduitJpaRepository, ProduitPersistenceAdapter |
 | `commun` (4) | domain | Fraction, Montant |
 | `comptabilite` (31) | adapter.in adapter.in.evenement adapter.in.web adapter.out adapter.out.persistence application domain | ApportCapitalJpaRepository, ApportCapitalPersistenceAdapter, ApportCapitalRepository, ApportCapitalService, CapitalBackOfficeController, ComptabiliteService, Compte, EcritureComptableJpaRepository, EcritureComptablePersistenceAdapter, EcritureComptableRepository, IndicateursFinanciersService, Sens |
 | `config` (5) | - | - |
@@ -21,7 +21,7 @@ Générée automatiquement depuis le code (`ccab505`). Sert à se repérer vite 
 | `parametrage` (13) | adapter.out adapter.out.persistence application domain | Parametre, ParametreJpaRepository, ParametrePersistenceAdapter, Parametres, ParametreService |
 | `pilotage` (11) | adapter.in adapter.in.web application domain | Concentration, TableauDeBordController, TableauDeBordService |
 | `recouvrement` (29) | adapter.in adapter.in.scheduling adapter.in.web adapter.out adapter.out.persistence application domain | NoteRecouvrementJpaRepository, NoteRecouvrementPersistenceAdapter, NoteRecouvrementRepository, RappelPrelevementJob, RappelPrelevementService, RecouvrementBackOfficeController, Relance, RelanceJpaRepository, RelancePersistenceAdapter, RelanceRepository, RetardEcheanceService, RetardsEtRelancesJob |
-| `web` (6) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
+| `web` (7) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
 
 ## Routes web
 
@@ -106,4 +106,4 @@ Générée automatiquement depuis le code (`ccab505`). Sert à se repérer vite 
 
 ## Tests
 
-- 123 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 124 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

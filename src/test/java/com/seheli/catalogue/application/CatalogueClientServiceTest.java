@@ -73,6 +73,35 @@ class CatalogueClientServiceTest {
     }
 
     @Test
+    void recherche_dans_la_designation_et_la_marque_sans_accents_ni_casse() {
+        Fournisseur f = fournisseur("8");
+        produit("ELM-001", "Réfrigérateur combiné 300 L", CategorieProduit.ELECTROMENAGER, f, 28_000);
+        produit("ELM-002", "Climatiseur split", CategorieProduit.ELECTROMENAGER, f, 24_000);
+        produit("TEL-001", "Galaxy A35", CategorieProduit.TELEPHONE, f, 20_000);
+
+        assertThat(catalogue.proposes(Optional.empty(), "REFRIGERATEUR")).extracting(ProduitPropose::designation)
+                .containsExactly("Réfrigérateur combiné 300 L");
+        assertThat(catalogue.proposes(Optional.empty(), "combine 300")).hasSize(1);
+        assertThat(catalogue.proposes(Optional.empty(), "marque")).hasSize(3);
+        assertThat(catalogue.proposes(Optional.of(CategorieProduit.TELEPHONE), "climatiseur")).isEmpty();
+        assertThat(catalogue.proposes(Optional.empty(), "  ")).hasSize(3);
+    }
+
+    @Test
+    void la_mensualite_a_partir_de_est_celle_de_la_simulation_sur_la_duree_maximale() {
+        Fournisseur f = fournisseur("8");
+        // Prix variés : restes divisibles par 6 ou non, arrondi vers le haut ou vers le bas.
+        for (long prixPublic : new long[] {20_000, 12_500, 9_500, 7_000, 6_500, 13_333}) {
+            Produit p = produit("REF-" + prixPublic, "Produit " + prixPublic, CategorieProduit.TELEPHONE, f,
+                    prixPublic);
+            ProduitPropose propose = catalogue.propose(p.id()).orElseThrow();
+            var simulation = catalogue.simuler(p.id(), 6).orElseThrow();
+            assertThat(propose.mensualiteIndicative()).isEqualTo(simulation.mensualite());
+            assertThat(propose.prixVente()).isEqualTo(propose.apportMinimum().plus(propose.resteAFinancer()));
+        }
+    }
+
+    @Test
     void ne_propose_pas_un_produit_indisponible() {
         Produit p = produit("TEL-001", "Galaxy A35", CategorieProduit.TELEPHONE, fournisseur("8"), 20_000);
         p.rendreIndisponible();
