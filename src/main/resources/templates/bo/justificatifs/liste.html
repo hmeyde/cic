@@ -7,13 +7,12 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-justificatifs">
-        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
         <h1 id="titre-justificatifs" th:text="#{bo.justificatifs.titre}">Justificatifs reçus</h1>
         <p class="texte-doux" th:text="#{bo.justificatifs.texte(${limite})}">Les 100 derniers justificatifs envoyés par les clients.</p>
 
         <th:block th:if="${#lists.isEmpty(documents)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-document', #{bo.justificatifs.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(documents)}" class="tableau-defilant">
-            <table class="tableau">
+            <table class="tableau tableau--dense" data-tableau>
                 <thead>
                 <tr>
                     <th scope="col" th:text="#{bo.justificatifs.client}">Client</th>

@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`d33662e`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`c4a0f8f`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -21,7 +21,7 @@ Générée automatiquement depuis le code (`d33662e`). Sert à se repérer vite 
 | `parametrage` (13) | adapter.out adapter.out.persistence application domain | Parametre, ParametreJpaRepository, ParametrePersistenceAdapter, Parametres, ParametreService |
 | `pilotage` (11) | adapter.in adapter.in.web application domain | Concentration, TableauDeBordController, TableauDeBordService |
 | `recouvrement` (29) | adapter.in adapter.in.scheduling adapter.in.web adapter.out adapter.out.persistence application domain | NoteRecouvrementJpaRepository, NoteRecouvrementPersistenceAdapter, NoteRecouvrementRepository, RappelPrelevementJob, RappelPrelevementService, RecouvrementBackOfficeController, Relance, RelanceJpaRepository, RelancePersistenceAdapter, RelanceRepository, RetardEcheanceService, RetardsEtRelancesJob |
-| `web` (10) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
+| `web` (12) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
 
 ## Routes web
 
@@ -107,4 +107,4 @@ Générée automatiquement depuis le code (`d33662e`). Sert à se repérer vite 
 
 ## Tests
 
-- 127 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 128 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

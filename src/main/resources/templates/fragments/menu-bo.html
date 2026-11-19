@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  Menu latéral du back-office (ordinateur d'abord). « menuBo » est fourni par
+  NavigationBackOfficeAdvice (MenuBackOffice) : groupes et liens visibles pour le rôle connecté.
+  Sur petit écran, le menu se replie derrière un bouton « Menu » (details/summary, sans JavaScript).
+  Icônes SVG inline, décoratives (le libellé est toujours visible).
+*/-->
+<aside th:fragment="menu" class="bo-menu" th:attr="aria-label=#{bo.menu.libelle}">
+    <div class="bo-menu__entete">
+        <a class="marque bo-menu__marque" th:href="@{/bo}" th:attr="aria-label=#{bo.menu.retour-accueil}">
+            <th:block th:replace="~{fragments/logo :: logo('marque__logo', true)}"></th:block>
+        </a>
+        <span class="bo-menu__espace" th:text="#{bo.accueil.titre}">Back-office</span>
+    </div>
+    <details class="bo-menu__repli" open data-menu-bo>
+        <summary class="bo-menu__bouton" th:text="#{bo.menu.ouvrir}">Menu</summary>
+        <nav class="bo-menu__nav" th:attr="aria-label=#{bo.menu.libelle}">
+            <th:block th:each="g : ${menuBo.groupes()}">
+                <p th:if="${g.code().name() != 'GENERAL'}" class="bo-menu__groupe"
+                   th:id="'menu-groupe-' + ${g.code().name()}" th:text="#{'bo.menu.groupe.' + ${g.code().name()}}">Analyse</p>
+                <ul class="bo-menu__liste"
+                    th:attr="aria-labelledby=${g.code().name() != 'GENERAL'} ? 'menu-groupe-' + ${g.code().name()}">
+                    <li th:each="l : ${g.liens()}">
+                        <a class="bo-menu__lien" th:href="@{${l.chemin()}}"
+                           th:classappend="${l.actif()} ? 'bo-menu__lien--actif'"
+                           th:attr="aria-current=${l.actif()} ? 'page'">
+                            <svg th:replace="~{fragments/menu-bo :: icone(${l.code()})}"></svg>
+                            <span th:text="#{'bo.menu.' + ${l.code()}}">Dossiers à analyser</span>
+                        </a>
+                    </li>
+                </ul>
+            </th:block>
+        </nav>
+    </details>
+    <div class="bo-menu__pied">
+        <p class="bo-menu__utilisateur">
+            <span class="bo-menu__identifiant" dir="ltr" th:text="${menuBo.identifiant()}">analyste</span>
+            <span class="badge badge--neutre" th:text="#{'bo.role.' + ${menuBo.role()}}">Analyste</span>
+        </p>
+        <div class="choix-langue" role="group" th:attr="aria-label=#{nav-client.langue}">
+            <a class="choix-langue__option" th:href="@{''(lang='fr')}" lang="fr" hreflang="fr"
+               th:classappend="${#locale.language != 'ar'} ? 'choix-langue__option--actif'"
+               th:attr="aria-current=${#locale.language != 'ar'} ? 'true'" aria-label="Français">FR</a>
+            <a class="choix-langue__option" th:href="@{''(lang='ar')}" lang="ar" hreflang="ar"
+               th:classappend="${#locale.language == 'ar'} ? 'choix-langue__option--actif'"
+               th:attr="aria-current=${#locale.language == 'ar'} ? 'true'" aria-label="العربية">ع</a>
+        </div>
+        <form method="post" th:action="@{/bo/logout}">
+            <button type="submit" class="bouton-lien bo-menu__deconnexion" th:text="#{bo.accueil.deconnexion}">Se déconnecter</button>
+        </form>
+    </div>
+</aside>
+<svg th:fragment="icone(code)" class="bo-menu__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+     th:switch="${code}">
+                                <path th:case="'ACCUEIL'" d="M3 10.5 12 3l9 7.5M5 9.5V20h5v-6h4v6h5V9.5"/>
+                                <path th:case="'DOSSIERS'" d="M3 6h7l2 2h9v11H3zM3 10h18"/>
+                                <path th:case="'JUSTIFICATIFS'" d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h4"/>
+                                <path th:case="'AUTORISATIONS'" d="M4 4h16v16H4zM8 12l3 3 5-6"/>
+                                <path th:case="'COMMANDES'" d="M3 4h2l2 11h12l2-8H6M9 20a1 1 0 1 0 0-.1M18 20a1 1 0 1 0 0-.1"/>
+                                <path th:case="'RECOUVREMENT'" d="M12 3v18M7 7h7a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h8"/>
+                                <path th:case="'PAIEMENTS'" d="M3 6h18v12H3zM3 10h18M7 15h4"/>
+                                <path th:case="'IMPORT_PAIEMENTS'" d="M12 3v12M7 10l5 5 5-5M4 21h16"/>
+                                <path th:case="'PILOTAGE'" d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+                                <path th:case="'CAPITAL'" d="M3 10 12 4l9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/>
+                                <path th:case="'INSCRIPTIONS'" d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/>
+                                <path th:case="'FOURNISSEURS'" d="M3 21V9l6-4v4l6-4v4l6-4v16zM7 17h2M12 17h2M17 17h1"/>
+                                <path th:case="'PRODUITS'" d="M7 2h10v20H7zM11 18h2"/>
+                                <path th:case="*" d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/>
+                            </svg>
+</body>
+</html>

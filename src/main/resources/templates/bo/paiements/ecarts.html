@@ -12,7 +12,7 @@
         <p class="texte-doux" th:text="#{bo.ecarts.texte(${limite})}">Paiements reçus dont la référence ne désigne aucun dossier, ou dont le montant diffère de l’apport attendu.</p>
         <th:block th:if="${#lists.isEmpty(ecarts)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-ok', #{bo.ecarts.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(ecarts)}" class="tableau-defilant">
-            <table class="tableau">
+            <table class="tableau tableau--dense" data-tableau>
                 <thead>
                 <tr>
                     <th scope="col" th:text="#{bo.paiement.recu-le}">Date du paiement</th>
@@ -29,7 +29,7 @@
                 <tr th:each="p : ${ecarts}">
                     <td dir="ltr" th:text="${p.recuLe()}">12/11/2026</td>
                     <td dir="ltr" th:text="${p.reference()}">AP20260000011</td>
-                    <td><span class="etiquette etiquette--sans-marge" th:text="#{'bo.ecarts.type.' + ${p.ecart().get().name()}}">Montant différent</span></td>
+                    <td><span class="badge badge--danger" th:text="#{'bo.ecarts.type.' + ${p.ecart().get().name()}}">Montant différent</span></td>
                     <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 000 MRU</td>
                     <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
                     <td th:text="${p.difference().isPresent()} ? (${p.tropPercu()} ? #{bo.ecarts.trop-percu(${#numbers.formatInteger(p.difference().get().valeur(), 1, 'WHITESPACE')})} : #{bo.ecarts.manque(${#numbers.formatInteger(p.difference().get().valeur(), 1, 'WHITESPACE')})}) : '—'">Manque 320 MRU</td>

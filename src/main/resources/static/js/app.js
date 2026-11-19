@@ -944,3 +944,229 @@ if ("serviceWorker" in navigator) {
         });
     });
 })();
+
+// Back-office : tableaux interactifs, en amélioration progressive (sans JavaScript, le tableau
+// complet reste lisible, dans l'ordre du serveur).
+//   <table data-tableau [data-par-page="10"]> : tri par colonne (bouton dans chaque <th scope="col">
+//   qui a un libellé visible ; [data-sans-tri] pour l'exclure), recherche plein texte, pagination.
+//   <th data-filtre> : liste déroulante des valeurs distinctes de la colonne.
+//   Clé de tri ou de filtre : [data-valeur] de la cellule (ou d'un élément qu'elle contient), sinon
+//   son texte (dates jj/mm/aaaa [hh:mm] et nombres « 20 800 MRU » reconnus).
+//   <tr data-lien="/url"> : toute la ligne ouvre l'URL (le lien de la ligne reste pour le clavier).
+//   Libellés traduits : attributs data-texte-* de l'élément .bo (layout).
+(function () {
+    "use strict";
+
+    var DATE = /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/;
+    var TAILLES = [10, 25, 50];
+
+    function libelle(nom, defaut) {
+        var racine = document.querySelector(".bo");
+        var v = racine && racine.getAttribute("data-texte-" + nom);
+        return v || defaut;
+    }
+
+    function format(modele, valeurs) {
+        return modele.replace(/\{(\d+)\}/g, function (m, i) { return valeurs[Number(i)]; });
+    }
+
+    function normaliser(texte) {
+        return (texte || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
+    function valeurBrute(cellule) {
+        if (!cellule) { return ""; }
+        var v = cellule.getAttribute("data-valeur");
+        if (v === null) {
+            var porteur = cellule.querySelector("[data-valeur]");
+            if (porteur) { v = porteur.getAttribute("data-valeur"); }
+        }
+        return (v !== null ? v : cellule.textContent).replace(/\s+/g, " ").trim();
+    }
+
+    function cleTri(cellule) {
+        var t = valeurBrute(cellule);
+        var d = DATE.exec(t);
+        if (d) { return Number(d[3] + d[2] + d[1] + (d[4] || "00") + (d[5] || "00")); }
+        var n = t.replace(/[\s  ]/g, "");
+        if (/^-?\d/.test(n)) { return parseFloat(n.replace(",", ".")); }
+        return t;
+    }
+
+    function comparer(a, b) {
+        if (typeof a === "number" && typeof b === "number") { return a - b; }
+        return String(a).localeCompare(String(b), document.documentElement.lang || "fr", { numeric: true, sensitivity: "base" });
+    }
+
+    function initialiser(table) {
+        var corps = table.tBodies[0];
+        if (!corps || !table.tHead || table.hasAttribute("data-tableau-pret")) { return; }
+        table.setAttribute("data-tableau-pret", "");
+        var entetes = Array.prototype.slice.call(table.tHead.rows[0].cells);
+        var lignes = Array.prototype.slice.call(corps.rows);
+        var parPage = Number(table.getAttribute("data-par-page")) || TAILLES[0];
+        var page = 0;
+        var recherche = "";
+        var filtres = {};
+
+        var conteneur = table.closest(".tableau-defilant") || table;
+        var outils = document.createElement("div");
+        outils.className = "tableau-outils";
+        outils.setAttribute("role", "group");
+        outils.setAttribute("aria-label", libelle("filtres", "Filtres"));
+        conteneur.parentNode.insertBefore(outils, conteneur);
+
+        var champ = document.createElement("label");
+        champ.className = "tableau-outils__champ";
+        champ.appendChild(document.createTextNode(libelle("rechercher", "Rechercher")));
+        var saisie = document.createElement("input");
+        saisie.type = "search";
+        saisie.autocomplete = "off";
+        champ.appendChild(saisie);
+        outils.appendChild(champ);
+        saisie.addEventListener("input", function () { recherche = normaliser(saisie.value); page = 0; afficher(); });
+
+        entetes.forEach(function (th, index) {
+            if (!th.hasAttribute("data-filtre")) { return; }
+            var valeurs = {};
+            lignes.forEach(function (tr) {
+                var c = tr.cells[index];
+                var v = valeurBrute(c);
+                if (v !== "" && !(v in valeurs)) { valeurs[v] = c.textContent.replace(/\s+/g, " ").trim(); }
+            });
+            var l = document.createElement("label");
+            l.className = "tableau-outils__champ";
+            l.appendChild(document.createTextNode(th.textContent.replace(/\s+/g, " ").trim()));
+            var select = document.createElement("select");
+            var tous = document.createElement("option");
+            tous.value = "";
+            tous.textContent = libelle("tous", "Tous");
+            select.appendChild(tous);
+            Object.keys(valeurs).sort(function (a, b) { return comparer(valeurs[a], valeurs[b]); }).forEach(function (v) {
+                var o = document.createElement("option");
+                o.value = v;
+                o.textContent = valeurs[v];
+                select.appendChild(o);
+            });
+            l.appendChild(select);
+            outils.appendChild(l);
+            select.addEventListener("change", function () {
+                if (select.value) { filtres[index] = select.value; } else { delete filtres[index]; }
+                page = 0;
+                afficher();
+            });
+        });
+
+        var compte = document.createElement("p");
+        compte.className = "tableau-outils__compte";
+        compte.setAttribute("aria-live", "polite");
+        outils.appendChild(compte);
+
+        var aucun = document.createElement("p");
+        aucun.className = "tableau-aucun";
+        aucun.hidden = true;
+        aucun.textContent = libelle("aucun", "Aucun résultat.");
+        var pagination = document.createElement("nav");
+        pagination.className = "tableau-pagination";
+        pagination.setAttribute("aria-label", libelle("pagination", "Pagination"));
+        conteneur.parentNode.insertBefore(aucun, conteneur.nextSibling);
+        conteneur.parentNode.insertBefore(pagination, aucun.nextSibling);
+
+        entetes.forEach(function (th, index) {
+            if (th.getAttribute("scope") !== "col" || th.hasAttribute("data-sans-tri")
+                    || th.querySelector(".visuellement-cache") || th.textContent.trim() === "") { return; }
+            var bouton = document.createElement("button");
+            bouton.type = "button";
+            bouton.className = "tableau__tri";
+            while (th.firstChild) { bouton.appendChild(th.firstChild); }
+            th.appendChild(bouton);
+            bouton.addEventListener("click", function () {
+                var sens = th.getAttribute("aria-sort") === "ascending" ? "descending" : "ascending";
+                entetes.forEach(function (autre) { autre.removeAttribute("aria-sort"); });
+                th.setAttribute("aria-sort", sens);
+                var facteur = sens === "ascending" ? 1 : -1;
+                lignes.sort(function (a, b) {
+                    return facteur * comparer(cleTri(a.cells[index]), cleTri(b.cells[index]));
+                });
+                lignes.forEach(function (tr) { corps.appendChild(tr); });
+                page = 0;
+                afficher();
+            });
+        });
+
+        function retenue(tr) {
+            for (var i in filtres) {
+                if (valeurBrute(tr.cells[i]) !== filtres[i]) { return false; }
+            }
+            return recherche === "" || normaliser(tr.textContent).indexOf(recherche) !== -1;
+        }
+
+        function bouton(texte, cible, actuel, desactive) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.textContent = texte;
+            if (actuel) { b.setAttribute("aria-current", "page"); }
+            b.disabled = !!desactive;
+            b.addEventListener("click", function () { page = cible; afficher(); });
+            return b;
+        }
+
+        function afficher() {
+            var retenues = lignes.filter(retenue);
+            var pages = Math.max(1, Math.ceil(retenues.length / parPage));
+            page = Math.min(page, pages - 1);
+            var debut = page * parPage;
+            var fin = Math.min(debut + parPage, retenues.length);
+            lignes.forEach(function (tr) { tr.hidden = true; });
+            retenues.slice(debut, fin).forEach(function (tr) { tr.hidden = false; });
+            compte.textContent = retenues.length === 0 ? ""
+                : format(libelle("resultats", "{0}–{1} sur {2}"), [debut + 1, fin, retenues.length]);
+            aucun.hidden = retenues.length !== 0;
+
+            pagination.textContent = "";
+            if (retenues.length > TAILLES[0]) {
+                var l = document.createElement("label");
+                l.className = "tableau-outils__champ";
+                l.appendChild(document.createTextNode(libelle("par-page", "Lignes par page")));
+                var s = document.createElement("select");
+                TAILLES.forEach(function (t) {
+                    var o = document.createElement("option");
+                    o.value = String(t);
+                    o.textContent = String(t);
+                    o.selected = t === parPage;
+                    s.appendChild(o);
+                });
+                s.addEventListener("change", function () { parPage = Number(s.value); page = 0; afficher(); });
+                l.appendChild(s);
+                pagination.appendChild(l);
+            }
+            if (pages > 1) {
+                pagination.appendChild(bouton(libelle("precedente", "Précédente"), page - 1, false, page === 0));
+                for (var p = 0; p < pages; p++) {
+                    pagination.appendChild(bouton(String(p + 1), p, p === page, false));
+                }
+                pagination.appendChild(bouton(libelle("suivante", "Suivante"), page + 1, false, page === pages - 1));
+            }
+        }
+
+        corps.addEventListener("click", function (event) {
+            var tr = event.target.closest("tr[data-lien]");
+            if (!tr || event.target.closest("a, button, input, select, textarea, label, form")) { return; }
+            if (window.getSelection && String(window.getSelection()) !== "") { return; }
+            window.location.href = tr.getAttribute("data-lien");
+        });
+
+        afficher();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("table[data-tableau]").forEach(initialiser);
+        // Menu du back-office : replié par défaut sur petit écran (toujours ouvert sur ordinateur).
+        var menu = document.querySelector("[data-menu-bo]");
+        if (menu && window.matchMedia && window.matchMedia("(max-width: 63.99rem)").matches) { menu.open = false; }
+    });
+    // Liste rechargée par HTMX : ses nouveaux tableaux reçoivent aussi tri, filtres et pagination.
+    document.addEventListener("htmx:afterSettle", function (event) {
+        event.target.querySelectorAll("table[data-tableau]").forEach(initialiser);
+    });
+})();

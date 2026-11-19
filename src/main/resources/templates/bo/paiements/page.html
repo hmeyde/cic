@@ -7,7 +7,6 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-paiements">
-        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
         <h1 id="titre-paiements" th:text="#{bo.paiements.titre}">Paiements reçus</h1>
         <p class="texte-doux" th:text="#{bo.paiements.texte}">Saisissez chaque paiement Masrvi reçu : il est rattaché au dossier par sa référence.</p>
         <p class="actions-formulaire">
@@ -57,13 +56,13 @@
         <p class="texte-doux" th:text="#{bo.paiements.liste.texte(${limite})}">Les 100 derniers paiements saisis, du plus récent au plus ancien.</p>
         <th:block th:if="${#lists.isEmpty(paiements)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-paiement', #{bo.paiements.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(paiements)}" class="tableau-defilant">
-            <table class="tableau">
+            <table class="tableau tableau--dense" data-tableau>
                 <thead>
                 <tr>
                     <th scope="col" th:text="#{bo.paiement.reference.courte}">Référence</th>
                     <th scope="col" th:text="#{bo.paiement.montant.court}">Montant</th>
                     <th scope="col" th:text="#{bo.paiement.recu-le}">Date du paiement</th>
-                    <th scope="col" th:text="#{bo.paiement.statut}">Rapprochement</th>
+                    <th scope="col" data-filtre th:text="#{bo.paiement.statut}">Rapprochement</th>
                     <th scope="col" th:text="#{bo.autorisation.contrat}">Contrat</th>
                     <th scope="col" th:text="#{bo.paiement.attendu}">Apport attendu</th>
                     <th scope="col" th:text="#{bo.paiement.saisi}">Saisi le, par</th>
@@ -75,8 +74,8 @@
                     <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</td>
                     <td dir="ltr" th:text="${p.recuLe()}">12/11/2026</td>
                     <td>
-                        <span class="etiquette etiquette--sans-marge" th:text="#{'bo.paiement.statut.' + ${p.statut().name()}}">Rapproché</span>
-                        <span th:if="${p.ecartDeMontant()}" class="etiquette etiquette--sans-marge" th:text="#{bo.paiement.ecart}">Écart de montant</span>
+                        <span class="badge" th:classappend="${p.statut().name() == 'RAPPROCHE'} ? 'badge--succes' : 'badge--attention'" th:attr="data-valeur=${p.statut().name()}" th:text="#{'bo.paiement.statut.' + ${p.statut().name()}}">Rapproché</span>
+                        <span th:if="${p.ecartDeMontant()}" class="badge badge--danger" th:text="#{bo.paiement.ecart}">Écart de montant</span>
                     </td>
                     <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">SEH-2026-000001</td>
                     <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>

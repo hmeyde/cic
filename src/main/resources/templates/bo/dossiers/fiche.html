@@ -5,323 +5,319 @@
     <title th:text="#{bo.fiche.titre-page}">Fiche dossier — Back-office Seheli</title>
 </head>
 <body>
+<!--/*
+  Fiche dossier du back-office, pour ordinateur : en-tête et résumé chiffré, puis deux colonnes
+  (identité, emploi, justificatifs et conditions à gauche ; score et décision à droite), et le
+  journal sur toute la largeur. Sous 64rem, les colonnes s'empilent (score et décision après l'identité).
+  Barres du score en SVG (attribut width) : la politique CSP interdit les styles en ligne.
+*/-->
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-fiche" th:with="c=${fiche.conditions()}, s=${fiche.score()}">
-        <p><a th:href="@{/bo/dossiers}" th:text="#{bo.fiche.retour}">Retour à la file des dossiers</a></p>
-        <h1 id="titre-fiche" th:text="#{bo.fiche.titre(${c.designation()})}">Dossier — Galaxy A35</h1>
-        <p>
-            <span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${fiche.statut().name()}}">En cours d’étude</span>
-            <span class="texte-doux" dir="auto" th:text="#{bo.fiche.soumise(${fiche.soumiseLe()}, ${fiche.statutChangeLe()})}">Soumise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
-        </p>
-
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Dossier accepté.</p>
-        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
-
-        <!-- Score -->
-        <section class="carte fiche-bloc" aria-labelledby="titre-score">
-            <h2 id="titre-score" th:text="#{bo.fiche.score}">Score</h2>
-            <p class="fiche-score">
-                <strong class="fiche-score__note" th:text="#{bo.dossiers.note.valeur(${s.note()})}">85 / 100</strong>
-                <span class="etiquette" th:text="#{'score.recommandation.' + ${s.recommandation()}}">Favorable</span>
-                <span class="texte-doux" th:text="#{bo.fiche.grille(${s.versionGrille()})}">Grille v1</span>
-            </p>
-            <p th:unless="${s.eligible()}" class="alerte alerte--erreur" role="status"
-               th:text="#{bo.fiche.non-eligible}">Dossier non éligible.</p>
-            <p class="texte-doux" th:text="#{bo.fiche.score.aide}">Le score recommande, l’analyste décide.</p>
-
-            <h3 th:text="#{bo.fiche.eliminatoires}">Conditions éliminatoires</h3>
-            <div class="tableau-defilant">
-                <table class="tableau tableau--retour">
-                    <thead>
-                    <tr>
-                        <th scope="col" th:text="#{bo.fiche.condition}">Condition</th>
-                        <th scope="col" th:text="#{bo.fiche.resultat}">Résultat</th>
-                        <th scope="col" th:text="#{bo.fiche.raison}">Raison</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="r : ${s.conditions()}" th:classappend="${!r.satisfaite()} ? 'ligne--echec'">
-                        <th scope="row" th:text="#{${r.condition().code()}}">18 ans ou plus</th>
-                        <td th:text="${r.satisfaite()} ? #{bo.fiche.satisfaite} : #{bo.fiche.non-satisfaite}">Satisfaite</td>
-                        <td dir="auto" th:text="${r.raison()}">36 ans</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h3 th:text="#{bo.fiche.criteres}">Note critère par critère</h3>
-            <div class="tableau-defilant">
-                <table class="tableau tableau--retour">
-                    <thead>
-                    <tr>
-                        <th scope="col" th:text="#{bo.fiche.critere}">Critère</th>
-                        <th scope="col" class="nombre" th:text="#{bo.fiche.points}">Points</th>
-                        <th scope="col" th:text="#{bo.fiche.raison}">Raison</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="r : ${s.criteres()}">
-                        <th scope="row" th:text="#{${r.critere().code()}}">Type de contrat</th>
-                        <td class="nombre" th:text="#{bo.fiche.points.valeur(${r.points()}, ${r.pointsMax()})}">25 / 25</td>
-                        <td dir="auto" th:text="${r.raison()}">CDI</td>
-                    </tr>
-                    </tbody>
-                    <tfoot>
-                    <tr>
-                        <th scope="row" th:text="#{bo.fiche.total}">Total</th>
-                        <td class="nombre"><strong th:text="#{bo.dossiers.note.valeur(${s.note()})}">85 / 100</strong></td>
-                        <td th:text="#{'score.recommandation.' + ${s.recommandationNote()}}">Favorable</td>
-                    </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </section>
-
-        <!-- Décision -->
-        <section class="carte fiche-bloc" aria-labelledby="titre-decision">
-            <h2 id="titre-decision" th:text="#{bo.decision.titre}">Décision</h2>
-            <div th:if="${fiche.decision().isPresent()}" th:with="dec=${fiche.decision().get()}">
-                <p th:text="#{bo.decision.prise(${dec.analyste()}, ${dec.le()})}">Décision prise par analyste le 12/11/2026 10:00.</p>
-                <p th:if="${dec.motif().isPresent()}">
-                    <strong th:text="#{bo.decision.motif}">Motif du refus</strong> :
-                    <span dir="auto" th:text="${dec.motif().get()}">Revenus insuffisants</span>
+        <header class="bo-entete">
+            <div class="bo-entete__titres">
+                <p class="fil-ariane"><a th:href="@{/bo/dossiers}" th:text="#{bo.fiche.retour}">Retour à la file des dossiers</a></p>
+                <h1 id="titre-fiche" th:text="#{bo.fiche.titre(${c.designation()})}">Dossier — Galaxy A35</h1>
+                <p class="bo-entete__sous-titre">
+                    <span th:replace="~{fragments/badge :: statut-dossier(${fiche.statut().name()})}">En cours d’étude</span>
+                    <span dir="auto" th:text="#{bo.fiche.soumise(${fiche.soumiseLe()}, ${fiche.statutChangeLe()})}">Soumise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
                 </p>
             </div>
-            <p th:if="${fiche.decision().isEmpty() and !fiche.decisionPossible()}" class="texte-doux"
-               th:text="#{bo.decision.aucune}">Aucune décision à prendre à ce stade du dossier.</p>
+        </header>
 
-            <div th:if="${fiche.decisionPossible()}" class="formulaire">
-                <p class="texte-doux" th:text="#{bo.fiche.score.aide}">Le score recommande, l’analyste décide toujours.</p>
+        <p th:if="${succes != null}" class="alerte alerte--succes" role="status" data-toast th:text="#{${succes}}">Dossier accepté.</p>
+        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
 
-                <form method="post" th:action="@{/bo/dossiers/{id}/acceptation(id=${fiche.id()})}">
-                    <button type="submit" class="bouton bouton--principal" th:text="#{bo.decision.accepter}">Accepter le dossier</button>
-                </form>
+        <ul class="resume-dossier" th:attr="aria-label=#{bo.fiche.conditions}">
+            <li><span th:text="#{client.simulation.prix-total}">Prix total</span>
+                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</strong></li>
+            <li><span th:text="#{client.simulation.apport}">Apport</span>
+                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</strong></li>
+            <li><span th:text="#{bo.fiche.reste}">Reste à financer</span>
+                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</strong></li>
+            <li><span th:text="#{bo.dossiers.mensualites}">Mensualités</span>
+                <strong th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#numbers.formatInteger(c.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</strong></li>
+            <li th:if="${fiche.emploi().isPresent()}"><span th:text="#{bo.fiche.emploi.part}">Part du salaire</span>
+                <strong th:text="#{bo.fiche.emploi.part.valeur(${fiche.emploi().get().partSalairePourcent()})}">7 %</strong></li>
+            <li><span th:text="#{bo.dossiers.note}">Note</span>
+                <strong dir="ltr" th:text="#{bo.dossiers.note.valeur(${s.note()})}">85 / 100</strong></li>
+        </ul>
 
-                <form method="post" class="formulaire" th:action="@{/bo/dossiers/{id}/refus(id=${fiche.id()})}">
-                    <div class="champ">
-                        <label for="motif" th:text="#{bo.decision.motif}">Motif du refus</label>
-                        <textarea id="motif" name="motif" rows="3" required th:maxlength="${longueurMotifMax}"
-                                  aria-describedby="motif-aide"></textarea>
-                        <p id="motif-aide" class="champ__aide texte-doux" th:text="#{bo.decision.motif.aide(${longueurMotifMax})}">Obligatoire, 500 caractères au plus.</p>
+        <div class="fiche-dossier">
+            <!-- Colonne de gauche : identité et documents -->
+            <div class="fiche-dossier__colonne">
+                <section class="panneau" aria-labelledby="titre-client">
+                    <h2 id="titre-client" class="panneau__titre" th:text="#{bo.fiche.client}">Client</h2>
+                    <p th:if="${fiche.client().isEmpty()}" class="alerte alerte--erreur" th:text="#{bo.fiche.client.introuvable}">Client introuvable.</p>
+                    <dl th:if="${fiche.client().isPresent()}" th:with="cl=${fiche.client().get()}" class="donnees">
+                        <dt th:text="#{bo.fiche.client.nom}">Nom</dt>
+                        <dd th:text="${cl.nomComplet()}">Mohamed Ould Ahmed</dd>
+                        <dt th:text="#{bo.fiche.client.nni}">NNI</dt>
+                        <dd>
+                            <span dir="ltr" th:text="${cl.nni()}">1000000001</span>
+                            <span th:replace="~{fragments/badge :: badge(${cl.nniVerifie()} ? #{bo.fiche.verifie} : #{bo.fiche.non-verifie}, ${cl.nniVerifie()} ? 'succes' : 'danger')}">vérifié</span>
+                        </dd>
+                        <dt th:text="#{bo.fiche.client.piece}">Pièce d’identité</dt>
+                        <dd><span th:replace="~{fragments/badge :: badge(${cl.pieceIdentiteVerifiee()} ? #{bo.fiche.verifiee} : #{bo.fiche.non-verifiee}, ${cl.pieceIdentiteVerifiee()} ? 'succes' : 'danger')}">vérifiée</span></dd>
+                        <dt th:text="#{bo.fiche.client.naissance}">Date de naissance</dt>
+                        <dd th:text="#{bo.fiche.client.naissance.valeur(${cl.dateNaissance()}, ${cl.age()})}">01/05/1990 (36 ans)</dd>
+                        <dt th:text="#{bo.fiche.client.telephone}">Téléphone</dt>
+                        <dd dir="ltr" th:text="${cl.telephone()}">22120001</dd>
+                        <dt th:text="#{bo.fiche.client.consentement}">Consentement aux données</dt>
+                        <dd dir="ltr" th:text="${cl.consentementLe()}">12/11/2026 10:00</dd>
+                    </dl>
+                </section>
+
+                <section class="panneau" aria-labelledby="titre-emploi">
+                    <h2 id="titre-emploi" class="panneau__titre" th:text="#{bo.fiche.emploi}">Emploi</h2>
+                    <p th:if="${fiche.emploi().isEmpty()}" class="alerte alerte--erreur" th:text="#{bo.fiche.emploi.aucun}">Aucun emploi déclaré.</p>
+                    <dl th:if="${fiche.emploi().isPresent()}" th:with="e=${fiche.emploi().get()}" class="donnees">
+                        <dt th:text="#{client.emploi.employeur}">Employeur</dt>
+                        <dd th:text="${e.employeur()}">SOMELEC</dd>
+                        <dt th:text="#{client.emploi.type-contrat}">Type de contrat</dt>
+                        <dd th:text="#{'client.emploi.type-contrat.' + ${e.typeContrat()}}">CDI</dd>
+                        <dt th:text="#{bo.fiche.emploi.debut}">Embauche</dt>
+                        <dd th:text="#{bo.fiche.emploi.anciennete(${e.dateDebut()}, ${e.ancienneteAnnees()}, ${e.ancienneteMois()})}">01/01/2020 (6 ans 10 mois)</dd>
+                        <th:block th:if="${e.dateFin().isPresent()}">
+                            <dt th:text="#{client.emploi.date-fin}">Fin du contrat</dt>
+                            <dd dir="ltr" th:text="${e.dateFin().get()}">31/12/2027</dd>
+                        </th:block>
+                        <dt th:text="#{bo.fiche.emploi.salaire}">Salaire net mensuel</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.salaireNet().valeur(), 1, 'WHITESPACE')})}">30 000 MRU</dd>
+                        <dt th:text="#{bo.fiche.emploi.part}">Part du salaire (ce dossier)</dt>
+                        <dd th:text="#{bo.fiche.emploi.part.valeur(${e.partSalairePourcent()})}">7 %</dd>
+                        <dt th:text="#{client.emploi.jour-paie}">Jour de paie</dt>
+                        <dd th:text="${e.jourPaie()}">25</dd>
+                        <dt th:text="#{bo.fiche.emploi.versement}">Versement du salaire</dt>
+                        <dd th:text="${e.salaireDomicilieBmci()} ? #{bo.fiche.emploi.versement.bmci} : (${e.salaireVerseSurCompte()} ? #{bo.fiche.emploi.versement.compte} : #{bo.fiche.emploi.versement.aucun})">Compte BMCI</dd>
+                        <dt th:text="#{client.emploi.mode}">Mode de remboursement</dt>
+                        <dd th:text="#{'client.emploi.mode.' + ${e.modeRemboursement()}}">Retenue sur salaire</dd>
+                    </dl>
+                    <p class="champ__aide texte-doux" th:text="#{bo.fiche.emploi.aide}">Emploi actuellement déclaré par le client.</p>
+                </section>
+
+                <section class="panneau" aria-labelledby="titre-justificatifs">
+                    <h2 id="titre-justificatifs" class="panneau__titre" th:text="#{bo.fiche.justificatifs}">Justificatifs</h2>
+                    <p th:unless="${#lists.isEmpty(fiche.typesManquants())}" class="alerte alerte--attention">
+                        <span th:text="#{bo.fiche.justificatifs.manquants}">Pièces manquantes :</span>
+                        <span th:each="t, it : ${fiche.typesManquants()}"
+                              th:text="#{'client.justificatifs.type.' + ${t.name()}} + (${it.last} ? '' : ' · ')">RIB</span>
+                    </p>
+                    <th:block th:if="${#lists.isEmpty(fiche.justificatifs())}"><div th:replace="~{fragments/etat-vide :: compact('vide-document', #{client.justificatifs.aucun})}"></div></th:block>
+                    <div th:unless="${#lists.isEmpty(fiche.justificatifs())}" class="tableau-defilant">
+                        <table class="tableau tableau--dense">
+                            <thead>
+                            <tr>
+                                <th scope="col" th:text="#{client.justificatifs.type}">Type</th>
+                                <th scope="col" th:text="#{bo.justificatifs.date}">Reçu le</th>
+                                <th scope="col" th:text="#{client.justificatifs.format}">Format</th>
+                                <th scope="col" class="nombre" th:text="#{client.justificatifs.taille}">Taille</th>
+                                <th scope="col"><span class="visuellement-cache" th:text="#{client.justificatifs.actions}">Actions</span></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="j : ${fiche.justificatifs()}">
+                                <td class="cellule-libre" th:text="#{'client.justificatifs.type.' + ${j.type().name()}}">Pièce d’identité</td>
+                                <td dir="ltr" th:text="${j.recuLe()}">11/11/2026 10:00</td>
+                                <td th:text="${j.format()}">PDF</td>
+                                <td class="nombre" th:text="#{client.justificatifs.taille.ko(${j.tailleKo()})}">120 Ko</td>
+                                <td><a th:href="@{/bo/justificatifs/{id}(id=${j.id()})}" target="_blank" rel="noopener"
+                                       th:text="#{client.justificatifs.voir}">Voir</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.decision.refuser}">Refuser le dossier</button>
-                </form>
+                </section>
 
-                <form method="post" class="formulaire" th:action="@{/bo/dossiers/{id}/justificatif(id=${fiche.id()})}">
-                    <div class="champ">
-                        <label for="type-justificatif" th:text="#{bo.decision.justificatif.type}">Justificatif à demander</label>
-                        <select id="type-justificatif" name="type" required>
-                            <option th:each="t : ${typesJustificatif}" th:value="${t.name()}"
-                                    th:selected="${#lists.contains(fiche.typesManquants(), t)}"
-                                    th:text="#{'client.justificatifs.type.' + ${t.name()}}">RIB</option>
-                        </select>
+                <section class="panneau" aria-labelledby="titre-conditions">
+                    <h2 id="titre-conditions" class="panneau__titre" th:text="#{bo.fiche.conditions}">Conditions demandées</h2>
+                    <dl class="donnees">
+                        <dt th:text="#{bo.fiche.prix-public}">Prix public</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixPublic().valeur(), 1, 'WHITESPACE')})}">20 000 MRU</dd>
+                        <dt th:text="#{bo.fiche.prix-achat}">Prix d’achat fournisseur</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixAchat().valeur(), 1, 'WHITESPACE')})}">18 400 MRU</dd>
+                        <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dt th:text="#{client.simulation.apport}">Apport</dt>
+                        <dd>
+                            <span th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</span>
+                            <span class="texte-doux" th:text="#{bo.fiche.apport-minimum(${#numbers.formatInteger(c.apportMinimum().valeur(), 1, 'WHITESPACE')})}">(minimum 8 320 MRU)</span>
+                        </dd>
+                        <dt th:text="#{bo.fiche.reste}">Reste à financer</dt>
+                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                        <dt th:text="#{bo.dossiers.mensualites}">Mensualités</dt>
+                        <dd th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#numbers.formatInteger(c.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</dd>
+                        <th:block th:if="${c.derniereDiffere()}">
+                            <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
+                            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        </th:block>
+                    </dl>
+                </section>
+            </div>
+
+            <!-- Colonne de droite : score et décision -->
+            <div class="fiche-dossier__colonne">
+                <section class="panneau" aria-labelledby="titre-score">
+                    <h2 id="titre-score" class="panneau__titre">
+                        <span th:text="#{bo.fiche.score}">Score</span>
+                        <span class="badge badge--neutre" th:text="#{bo.fiche.grille(${s.versionGrille()})}">Grille v1</span>
+                    </h2>
+
+                    <div class="score-lecture" th:classappend="'score-lecture--' + ${s.recommandation()}">
+                        <p class="score-lecture__note" dir="ltr"><span th:text="${s.note()}">85</span><small> / 100</small></p>
+                        <p class="score-lecture__libelle" th:text="#{'score.recommandation.' + ${s.recommandation()}}">Favorable</p>
+                        <p class="score-lecture__aide" th:text="#{bo.fiche.score.aide}">Le score recommande, l’analyste décide toujours.</p>
+                        <svg class="jauge" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                            <rect class="jauge__fond" width="100" height="10"/>
+                            <rect class="jauge__valeur" th:attr="width=${s.note()}" width="85" height="10"/>
+                        </svg>
                     </div>
-                    <div class="champ">
-                        <label for="precision" th:text="#{bo.decision.justificatif.precision}">Précision pour le client (facultatif)</label>
-                        <textarea id="precision" name="precision" rows="2" th:maxlength="${longueurPrecisionMax}"></textarea>
+                    <p th:unless="${s.eligible()}" class="alerte alerte--erreur" role="status"
+                       th:text="#{bo.fiche.non-eligible}">Dossier non éligible.</p>
+
+                    <h3 class="panneau__sous-titre" th:text="#{bo.fiche.eliminatoires}">Conditions éliminatoires</h3>
+                    <ul class="conditions-elim">
+                        <li th:each="r : ${s.conditions()}" th:classappend="${!r.satisfaite()} ? 'conditions-elim__ko'">
+                            <span class="conditions-elim__icone" aria-hidden="true" th:text="${r.satisfaite()} ? '✓' : '✗'">✓</span>
+                            <span class="conditions-elim__nom">
+                                <span th:text="#{${r.condition().code()}}">18 ans ou plus</span>
+                                <span class="visuellement-cache" th:text="' — ' + (${r.satisfaite()} ? #{bo.fiche.satisfaite} : #{bo.fiche.non-satisfaite})">— Satisfaite</span>
+                            </span>
+                            <span class="conditions-elim__raison" dir="auto" th:text="${r.raison()}">36 ans</span>
+                        </li>
+                    </ul>
+
+                    <h3 class="panneau__sous-titre" th:text="#{bo.fiche.criteres}">Note critère par critère</h3>
+                    <ul class="criteres">
+                        <li th:each="r : ${s.criteres()}" class="critere"
+                            th:with="pct=${r.critere().pointsMax() == 0 ? 0 : r.points() * 100 / r.critere().pointsMax()},
+                                     ton=${r.points() == r.critere().pointsMax()} ? 'succes' : (${r.points() == 0} ? 'danger' : 'attention')">
+                            <div class="critere__entete">
+                                <span class="critere__nom" th:text="#{${r.critere().code()}}">Type de contrat</span>
+                                <span class="critere__points" dir="ltr" th:text="#{bo.fiche.points.valeur(${r.points()}, ${r.critere().pointsMax()})}">25 / 25</span>
+                            </div>
+                            <svg class="jauge" th:classappend="'jauge--' + ${ton}" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                                <rect class="jauge__fond" width="100" height="10"/>
+                                <rect class="jauge__valeur" th:attr="width=${pct}" width="100" height="10"/>
+                            </svg>
+                            <p class="critere__raison" dir="auto" th:text="${r.raison()}">CDI</p>
+                        </li>
+                        <li class="critere critere--total">
+                            <div class="critere__entete">
+                                <span class="critere__nom" th:text="#{bo.fiche.total}">Total</span>
+                                <span class="critere__points">
+                                    <span dir="ltr" th:text="#{bo.dossiers.note.valeur(${s.note()})}">85 / 100</span>
+                                    <span th:replace="~{fragments/badge :: recommandation(${s.recommandationNote()})}">Favorable</span>
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="panneau decision" id="decision" aria-labelledby="titre-decision">
+                    <h2 id="titre-decision" class="panneau__titre" th:text="#{bo.decision.titre}">Décision</h2>
+                    <div th:if="${fiche.decision().isPresent()}" th:with="dec=${fiche.decision().get()}">
+                        <p>
+                            <span th:replace="~{fragments/badge :: statut-dossier(${fiche.statut().name()})}">Acceptée</span>
+                            <span th:text="#{bo.decision.prise(${dec.analyste()}, ${dec.le()})}">Décision prise par analyste le 12/11/2026 10:00.</span>
+                        </p>
+                        <p th:if="${dec.motif().isPresent()}">
+                            <strong th:text="#{bo.decision.motif}">Motif du refus</strong> :
+                            <span dir="auto" th:text="${dec.motif().get()}">Revenus insuffisants</span>
+                        </p>
                     </div>
-                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.decision.justificatif.demander}">Demander ce justificatif</button>
-                    <p class="champ__aide texte-doux" th:text="#{bo.decision.justificatif.aide}">Le dossier reste en analyse.</p>
-                </form>
+                    <p th:if="${fiche.decision().isEmpty() and !fiche.decisionPossible()}" class="texte-doux"
+                       th:text="#{bo.decision.aucune}">Aucune décision à prendre à ce stade du dossier.</p>
+
+                    <th:block th:if="${fiche.decisionPossible()}">
+                        <p class="texte-doux" th:text="#{bo.decision.rappel(#{'score.recommandation.' + ${s.recommandation()}})}">Le score recommande « Favorable » ; la décision vous appartient.</p>
+                        <div class="decision__choix">
+                            <form method="post" class="decision__option decision__option--accepter" th:action="@{/bo/dossiers/{id}/acceptation(id=${fiche.id()})}">
+                                <h3 th:text="#{bo.decision.accepter}">Accepter le dossier</h3>
+                                <p class="champ__aide texte-doux" th:text="#{bo.decision.accepter.aide}">Le client aura 7 jours pour payer l’apport et signer l’autorisation.</p>
+                                <button type="submit" class="bouton bouton--valider" th:text="#{bo.decision.accepter}">Accepter le dossier</button>
+                            </form>
+
+                            <form method="post" class="decision__option decision__option--refuser formulaire" th:action="@{/bo/dossiers/{id}/refus(id=${fiche.id()})}">
+                                <h3 th:text="#{bo.decision.refuser}">Refuser le dossier</h3>
+                                <div class="champ">
+                                    <label for="motif" th:text="#{bo.decision.motif}">Motif du refus</label>
+                                    <textarea id="motif" name="motif" rows="3" required th:maxlength="${longueurMotifMax}"
+                                              aria-describedby="motif-aide"></textarea>
+                                    <p id="motif-aide" class="champ__aide texte-doux" th:text="#{bo.decision.motif.aide(${longueurMotifMax})}">Obligatoire, 500 caractères au plus.</p>
+                                </div>
+                                <button type="submit" class="bouton bouton--danger" th:text="#{bo.decision.refuser}">Refuser le dossier</button>
+                            </form>
+                        </div>
+
+                        <details class="decision__autre" th:open="${!#lists.isEmpty(fiche.typesManquants())}">
+                            <summary th:text="#{bo.decision.justificatif.titre}">Demander un justificatif au client</summary>
+                            <form method="post" class="formulaire" th:action="@{/bo/dossiers/{id}/justificatif(id=${fiche.id()})}">
+                                <div class="champ">
+                                    <label for="type-justificatif" th:text="#{bo.decision.justificatif.type}">Justificatif à demander</label>
+                                    <select id="type-justificatif" name="type" required>
+                                        <option th:each="t : ${typesJustificatif}" th:value="${t.name()}"
+                                                th:selected="${#lists.contains(fiche.typesManquants(), t)}"
+                                                th:text="#{'client.justificatifs.type.' + ${t.name()}}">RIB</option>
+                                    </select>
+                                </div>
+                                <div class="champ">
+                                    <label for="precision" th:text="#{bo.decision.justificatif.precision}">Précision pour le client (facultatif)</label>
+                                    <textarea id="precision" name="precision" rows="2" th:maxlength="${longueurPrecisionMax}"></textarea>
+                                </div>
+                                <div class="actions-formulaire">
+                                    <button type="submit" class="bouton bouton--contour" th:text="#{bo.decision.justificatif.demander}">Demander ce justificatif</button>
+                                </div>
+                                <p class="champ__aide texte-doux" th:text="#{bo.decision.justificatif.aide}">Le dossier reste en analyse.</p>
+                            </form>
+                        </details>
+                    </th:block>
+                </section>
+
+                <section th:if="${fiche.autorisation().isPresent()}" th:with="aut=${fiche.autorisation().get()}"
+                         class="panneau" aria-labelledby="titre-autorisation-dossier">
+                    <h2 id="titre-autorisation-dossier" class="panneau__titre" th:text="#{bo.autorisation.titre-court}">Autorisation de prélèvement</h2>
+                    <p class="actions-ligne">
+                        <span th:text="#{'bo.autorisation.type.' + ${aut.type().name()}}">Virement permanent</span>
+                        <span th:replace="~{fragments/badge :: statut-autorisation(${aut.statut().name()})}">À signer</span>
+                        <a th:href="@{/bo/autorisations/{id}(id=${aut.id()})}" th:text="#{bo.autorisation.suivre}">Suivre l’autorisation</a>
+                    </p>
+                </section>
             </div>
-        </section>
 
-        <!-- Autorisation de prélèvement -->
-        <section th:if="${fiche.autorisation().isPresent()}" th:with="aut=${fiche.autorisation().get()}"
-                 class="fiche-bloc" aria-labelledby="titre-autorisation-dossier">
-            <h2 id="titre-autorisation-dossier" th:text="#{bo.autorisation.titre-court}">Autorisation de prélèvement</h2>
-            <p>
-                <span th:text="#{'bo.autorisation.type.' + ${aut.type().name()}}">Virement permanent</span>
-                <span class="etiquette" th:text="#{'bo.autorisation.statut.' + ${aut.statut().name()}}">À signer</span>
-                <a th:href="@{/bo/autorisations/{id}(id=${aut.id()})}" th:text="#{bo.autorisation.suivre}">Suivre l’autorisation</a>
-            </p>
-        </section>
-
-        <!-- Conditions de la demande -->
-        <section class="fiche-bloc" aria-labelledby="titre-conditions">
-            <h2 id="titre-conditions" th:text="#{bo.fiche.conditions}">Conditions demandées</h2>
-            <dl class="conditions">
-                <div>
-                    <dt th:text="#{bo.fiche.prix-public}">Prix public</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixPublic().valeur(), 1, 'WHITESPACE')})}">20 000 MRU</dd>
+            <!-- Journal d'audit, pleine largeur -->
+            <section class="panneau fiche-dossier__large" aria-labelledby="titre-journal">
+                <h2 id="titre-journal" class="panneau__titre" th:text="#{bo.journal.titre}">Journal du dossier</h2>
+                <th:block th:if="${#lists.isEmpty(fiche.journal())}"><div th:replace="~{fragments/etat-vide :: compact('vide-journal', #{bo.journal.aucun})}"></div></th:block>
+                <div th:unless="${#lists.isEmpty(fiche.journal())}" class="tableau-defilant">
+                    <table class="tableau tableau--dense">
+                        <thead>
+                        <tr>
+                            <th scope="col" th:text="#{bo.journal.le}">Date</th>
+                            <th scope="col" th:text="#{bo.journal.action}">Action</th>
+                            <th scope="col" th:text="#{bo.journal.statut}">Statut</th>
+                            <th scope="col" th:text="#{bo.journal.acteur}">Par</th>
+                            <th scope="col" th:text="#{bo.journal.detail}">Détail</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="e : ${fiche.journal()}">
+                            <td dir="ltr" th:text="${e.le()}">12/11/2026 10:00</td>
+                            <td th:text="#{'bo.journal.action.' + ${e.action()}}">Acceptation</td>
+                            <td>
+                                <th:block th:if="${e.avant().isPresent()}"><span th:replace="~{fragments/badge :: statut-dossier(${e.avant().get()})}">En cours d’étude</span> →</th:block>
+                                <th:block th:if="${e.apres().isPresent()}"><span th:replace="~{fragments/badge :: statut-dossier(${e.apres().get()})}">Acceptée</span></th:block>
+                            </td>
+                            <td>
+                                <span th:text="#{'bo.journal.acteur.' + ${e.typeActeur().name()}}">Back-office</span>
+                                <span th:if="${e.acteur().isPresent()}" dir="ltr" th:text="${e.acteur().get()}">analyste</span>
+                            </td>
+                            <td dir="auto" th:text="${e.detail().orElse('')}">Revenus insuffisants</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <dt th:text="#{bo.fiche.prix-achat}">Prix d’achat fournisseur</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixAchat().valeur(), 1, 'WHITESPACE')})}">18 400 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.simulation.apport}">Apport</dt>
-                    <dd>
-                        <span th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</span>
-                        <span class="texte-doux" th:text="#{bo.fiche.apport-minimum(${#numbers.formatInteger(c.apportMinimum().valeur(), 1, 'WHITESPACE')})}">(minimum 8 320 MRU)</span>
-                    </dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.reste}">Reste à financer</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.dossiers.mensualites}">Mensualités</dt>
-                    <dd th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#numbers.formatInteger(c.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</dd>
-                </div>
-                <div th:if="${c.derniereDiffere()}">
-                    <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
-                </div>
-            </dl>
-        </section>
-
-        <!-- Client -->
-        <section class="fiche-bloc" aria-labelledby="titre-client">
-            <h2 id="titre-client" th:text="#{bo.fiche.client}">Client</h2>
-            <p th:if="${fiche.client().isEmpty()}" class="alerte alerte--erreur" th:text="#{bo.fiche.client.introuvable}">Client introuvable.</p>
-            <dl th:if="${fiche.client().isPresent()}" th:with="cl=${fiche.client().get()}" class="conditions">
-                <div>
-                    <dt th:text="#{bo.fiche.client.nom}">Nom</dt>
-                    <dd th:text="${cl.nomComplet()}">Mohamed Ould Ahmed</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.client.nni}">NNI</dt>
-                    <dd>
-                        <span dir="ltr" th:text="${cl.nni()}">1000000001</span>
-                        <span class="etiquette" th:text="${cl.nniVerifie()} ? #{bo.fiche.verifie} : #{bo.fiche.non-verifie}">vérifié</span>
-                    </dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.client.piece}">Pièce d’identité</dt>
-                    <dd><span class="etiquette etiquette--sans-marge" th:text="${cl.pieceIdentiteVerifiee()} ? #{bo.fiche.verifiee} : #{bo.fiche.non-verifiee}">vérifiée</span></dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.client.naissance}">Date de naissance</dt>
-                    <dd th:text="#{bo.fiche.client.naissance.valeur(${cl.dateNaissance()}, ${cl.age()})}">01/05/1990 (36 ans)</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.client.telephone}">Téléphone</dt>
-                    <dd dir="ltr" th:text="${cl.telephone()}">22120001</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.client.consentement}">Consentement aux données</dt>
-                    <dd dir="ltr" th:text="${cl.consentementLe()}">12/11/2026 10:00</dd>
-                </div>
-            </dl>
-        </section>
-
-        <!-- Emploi -->
-        <section class="fiche-bloc" aria-labelledby="titre-emploi">
-            <h2 id="titre-emploi" th:text="#{bo.fiche.emploi}">Emploi</h2>
-            <p class="texte-doux" th:text="#{bo.fiche.emploi.aide}">Emploi actuellement déclaré par le client.</p>
-            <p th:if="${fiche.emploi().isEmpty()}" class="alerte alerte--erreur" th:text="#{bo.fiche.emploi.aucun}">Aucun emploi déclaré.</p>
-            <dl th:if="${fiche.emploi().isPresent()}" th:with="e=${fiche.emploi().get()}" class="conditions">
-                <div>
-                    <dt th:text="#{client.emploi.employeur}">Employeur</dt>
-                    <dd th:text="${e.employeur()}">SOMELEC</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.emploi.type-contrat}">Type de contrat</dt>
-                    <dd th:text="#{'client.emploi.type-contrat.' + ${e.typeContrat()}}">CDI</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.emploi.debut}">Embauche</dt>
-                    <dd th:text="#{bo.fiche.emploi.anciennete(${e.dateDebut()}, ${e.ancienneteAnnees()}, ${e.ancienneteMois()})}">01/01/2020 (6 ans 10 mois)</dd>
-                </div>
-                <div th:if="${e.dateFin().isPresent()}">
-                    <dt th:text="#{client.emploi.date-fin}">Fin du contrat</dt>
-                    <dd dir="ltr" th:text="${e.dateFin().get()}">31/12/2027</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.emploi.salaire}">Salaire net mensuel</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.salaireNet().valeur(), 1, 'WHITESPACE')})}">30 000 MRU</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.emploi.part}">Part du salaire (ce dossier)</dt>
-                    <dd th:text="#{bo.fiche.emploi.part.valeur(${e.partSalairePourcent()})}">7 %</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.emploi.jour-paie}">Jour de paie</dt>
-                    <dd th:text="${e.jourPaie()}">25</dd>
-                </div>
-                <div>
-                    <dt th:text="#{bo.fiche.emploi.versement}">Versement du salaire</dt>
-                    <dd th:text="${e.salaireDomicilieBmci()} ? #{bo.fiche.emploi.versement.bmci} : (${e.salaireVerseSurCompte()} ? #{bo.fiche.emploi.versement.compte} : #{bo.fiche.emploi.versement.aucun})">Compte BMCI</dd>
-                </div>
-                <div>
-                    <dt th:text="#{client.emploi.mode}">Mode de remboursement</dt>
-                    <dd th:text="#{'client.emploi.mode.' + ${e.modeRemboursement()}}">Retenue sur salaire</dd>
-                </div>
-            </dl>
-        </section>
-
-        <!-- Justificatifs -->
-        <section class="fiche-bloc" aria-labelledby="titre-justificatifs">
-            <h2 id="titre-justificatifs" th:text="#{bo.fiche.justificatifs}">Justificatifs</h2>
-            <p th:unless="${#lists.isEmpty(fiche.typesManquants())}" class="alerte alerte--info">
-                <span th:text="#{bo.fiche.justificatifs.manquants}">Pièces manquantes :</span>
-                <span th:each="t, it : ${fiche.typesManquants()}"
-                      th:text="#{'client.justificatifs.type.' + ${t.name()}} + (${it.last} ? '' : ' · ')">RIB</span>
-            </p>
-            <th:block th:if="${#lists.isEmpty(fiche.justificatifs())}"><div th:replace="~{fragments/etat-vide :: compact('vide-document', #{client.justificatifs.aucun})}"></div></th:block>
-            <div th:unless="${#lists.isEmpty(fiche.justificatifs())}" class="tableau-defilant">
-                <table class="tableau">
-                    <thead>
-                    <tr>
-                        <th scope="col" th:text="#{client.justificatifs.type}">Type</th>
-                        <th scope="col" th:text="#{bo.justificatifs.date}">Reçu le</th>
-                        <th scope="col" th:text="#{client.justificatifs.format}">Format</th>
-                        <th scope="col" class="nombre" th:text="#{client.justificatifs.taille}">Taille</th>
-                        <th scope="col"><span class="visuellement-cache" th:text="#{client.justificatifs.actions}">Actions</span></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="j : ${fiche.justificatifs()}">
-                        <td th:text="#{'client.justificatifs.type.' + ${j.type().name()}}">Pièce d’identité</td>
-                        <td dir="ltr" th:text="${j.recuLe()}">11/11/2026 10:00</td>
-                        <td th:text="${j.format()}">PDF</td>
-                        <td class="nombre" th:text="#{client.justificatifs.taille.ko(${j.tailleKo()})}">120 Ko</td>
-                        <td><a th:href="@{/bo/justificatifs/{id}(id=${j.id()})}" target="_blank" rel="noopener"
-                               th:text="#{client.justificatifs.voir}">Voir</a></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Journal d'audit -->
-        <section class="fiche-bloc" aria-labelledby="titre-journal">
-            <h2 id="titre-journal" th:text="#{bo.journal.titre}">Journal du dossier</h2>
-            <th:block th:if="${#lists.isEmpty(fiche.journal())}"><div th:replace="~{fragments/etat-vide :: compact('vide-journal', #{bo.journal.aucun})}"></div></th:block>
-            <div th:unless="${#lists.isEmpty(fiche.journal())}" class="tableau-defilant">
-                <table class="tableau">
-                    <thead>
-                    <tr>
-                        <th scope="col" th:text="#{bo.journal.le}">Date</th>
-                        <th scope="col" th:text="#{bo.journal.action}">Action</th>
-                        <th scope="col" th:text="#{bo.journal.statut}">Statut</th>
-                        <th scope="col" th:text="#{bo.journal.acteur}">Par</th>
-                        <th scope="col" th:text="#{bo.journal.detail}">Détail</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="e : ${fiche.journal()}">
-                        <td dir="ltr" th:text="${e.le()}">12/11/2026 10:00</td>
-                        <td th:text="#{'bo.journal.action.' + ${e.action()}}">Acceptation</td>
-                        <td>
-                            <span th:if="${e.avant().isPresent()}" th:text="#{'client.demande.statut.' + ${e.avant().get()}} + ' → '">En cours d’étude →</span>
-                            <span th:if="${e.apres().isPresent()}" th:text="#{'client.demande.statut.' + ${e.apres().get()}}">Acceptée</span>
-                        </td>
-                        <td>
-                            <span th:text="#{'bo.journal.acteur.' + ${e.typeActeur().name()}}">Back-office</span>
-                            <span th:if="${e.acteur().isPresent()}" dir="ltr" th:text="${e.acteur().get()}">analyste</span>
-                        </td>
-                        <td dir="auto" th:text="${e.detail().orElse('')}">Revenus insuffisants</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            </section>
+        </div>
     </section>
 </main>
 </body>

@@ -7,36 +7,29 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-bo">
-        <h1 id="titre-bo" th:text="#{bo.accueil.titre}">Back-office</h1>
-        <p>
-            <span th:text="#{bo.accueil.connecte(${identifiant})}">Connecté en tant que admin</span>
-            <span th:if="${!#strings.isEmpty(role)}" class="etiquette"
-                  th:text="#{'bo.role.' + ${role}}">Administrateur</span>
-        </p>
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Démonstration réinitialisée.</p>
+        <header class="bo-entete">
+            <div class="bo-entete__titres">
+                <h1 id="titre-bo" th:text="#{bo.accueil.titre}">Back-office</h1>
+                <p class="bo-entete__sous-titre">
+                    <span th:text="#{bo.accueil.connecte(${identifiant})}">Connecté en tant que admin</span>
+                    <span th:if="${!#strings.isEmpty(role)}" class="badge badge--neutre"
+                          th:text="#{'bo.role.' + ${role}}">Administrateur</span>
+                </p>
+            </div>
+        </header>
+        <p th:if="${succes != null}" class="alerte alerte--succes" role="status" data-toast th:text="#{${succes}}">Démonstration réinitialisée.</p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
-        <nav th:if="${role == 'ADMIN' or role == 'ANALYSTE' or role == 'RECOUVREMENT' or role == 'ASSOCIE'}" aria-labelledby="titre-menu-bo">
-            <h2 id="titre-menu-bo" th:text="#{bo.menu.titre}">Gestion</h2>
-            <ul class="liens-bo">
-                <li th:if="${role == 'ASSOCIE' or role == 'ADMIN'}"><a class="bouton" th:classappend="${role == 'ASSOCIE'} ? 'bouton--principal' : 'bouton--contour'" th:href="@{/bo/pilotage}" th:text="#{bo.pilotage.titre}">Tableau de bord des associés</a></li>
-                <li th:if="${role == 'ASSOCIE' or role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/capital}" th:text="#{bo.capital.titre}">Apports en capital</a></li>
-                <li th:if="${role == 'ASSOCIE' or role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/inscriptions}" th:text="#{bo.inscriptions.titre}">Pré-inscriptions</a></li>
-                <li th:if="${role == 'ANALYSTE'}"><a class="bouton bouton--principal" th:href="@{/bo/dossiers}" th:text="#{bo.dossiers.titre}">Dossiers à analyser</a></li>
-                <li th:if="${role == 'ANALYSTE'}"><a class="bouton bouton--contour" th:href="@{/bo/autorisations}" th:text="#{bo.autorisations.titre}">Autorisations de prélèvement</a></li>
-                <li th:if="${role == 'ADMIN' or role == 'ANALYSTE'}"><a class="bouton bouton--contour" th:href="@{/bo/commandes}" th:text="#{bo.commandes.titre}">Commandes fournisseur</a></li>
-                <li th:if="${role == 'ADMIN' or role == 'RECOUVREMENT'}"><a class="bouton bouton--principal" th:href="@{/bo/recouvrement}" th:text="#{bo.recouvrement.titre}">Recouvrement</a></li>
-                <li th:if="${role == 'ADMIN' or role == 'RECOUVREMENT'}"><a class="bouton bouton--contour" th:href="@{/bo/paiements}" th:text="#{bo.paiements.titre}">Paiements reçus</a></li>
-                <li th:if="${role == 'ADMIN' or role == 'ANALYSTE'}"><a class="bouton bouton--contour" th:href="@{/bo/justificatifs}" th:text="#{bo.justificatifs.titre}">Justificatifs reçus</a></li>
-                <li th:if="${role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/fournisseurs}" th:text="#{bo.fournisseurs.titre}">Fournisseurs</a></li>
-                <li th:if="${role == 'ADMIN'}"><a class="bouton bouton--contour" th:href="@{/bo/produits}" th:text="#{bo.produits.titre}">Produits</a></li>
+        <nav th:if="${menuBo != null}" aria-labelledby="titre-menu-bo">
+            <h2 id="titre-menu-bo" class="panneau__sous-titre" th:text="#{bo.menu.titre}">Gestion</h2>
+            <ul class="raccourcis-bo">
+                <li th:each="l : ${menuBo.raccourcis()}">
+                    <a class="raccourci-bo" th:href="@{${l.chemin()}}">
+                        <svg th:replace="~{fragments/menu-bo :: icone(${l.code()})}"></svg>
+                        <span th:text="#{'bo.menu.' + ${l.code()}}">Dossiers à analyser</span>
+                    </a>
+                </li>
             </ul>
         </nav>
-        <p th:if="${demonstration and role == 'ADMIN'}">
-            <a class="bouton bouton--contour" th:href="@{/bo/demonstration/reinitialisation}" th:text="#{bo.demonstration.titre}">Réinitialiser la démo</a>
-        </p>
-        <form method="post" th:action="@{/bo/logout}">
-            <button type="submit" class="bouton bouton--contour" th:text="#{bo.accueil.deconnexion}">Se déconnecter</button>
-        </form>
     </section>
 </main>
 </body>

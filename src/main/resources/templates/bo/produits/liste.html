@@ -7,7 +7,6 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-produits">
-        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
         <div class="barre-titre">
             <h1 id="titre-produits" th:text="#{bo.produits.titre}">Produits</h1>
             <a class="bouton bouton--principal" th:href="@{/bo/produits/nouveau}"
@@ -19,7 +18,7 @@
         <th:block th:if="${#lists.isEmpty(produits)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-liste', #{bo.produits.aucun})}"></div></th:block>
 
         <div th:unless="${#lists.isEmpty(produits)}" class="tableau-defilant">
-            <table class="tableau">
+            <table class="tableau tableau--dense" data-tableau>
                 <thead>
                 <tr>
                     <th scope="col" th:text="#{bo.produit.reference}">Référence</th>
@@ -41,7 +40,7 @@
                     <td th:text="${nomsFournisseurs.get(p.fournisseurId())}">Mauritel Distribution</td>
                     <td class="nombre" th:text="${#numbers.formatInteger(p.prixPublic().valeur(), 1, 'WHITESPACE')}">20 000</td>
                     <td>
-                        <span class="etiquette etiquette--sans-marge"
+                        <span class="badge" th:classappend="${p.estDisponible()} ? 'badge--succes' : 'badge--neutre'"
                               th:text="${p.estDisponible()} ? #{bo.produit.disponible} : #{bo.produit.indisponible}">Disponible</span>
                     </td>
                     <td class="actions-ligne">

@@ -10,7 +10,7 @@
         <p><a th:href="@{/bo/recouvrement}" th:text="#{bo.recouvrement.retour}">Retour au recouvrement</a></p>
         <h1 id="titre-fiche" th:text="#{bo.recouvrement.fiche.titre(${f.numeroContrat()})}">Contrat SEH-2026-000001</h1>
         <p>
-            <span class="etiquette etiquette--sans-marge" th:text="#{'client.demande.statut.' + ${f.statut().name()}}">Échéance en retard</span>
+            <span th:replace="~{fragments/badge :: statut-dossier(${f.statut().name()})}">Échéance en retard</span>
             <span dir="auto" th:text="${f.designation()}">Galaxy A35</span>
         </p>
 

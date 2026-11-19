@@ -14,7 +14,7 @@
         </p>
         <h1 id="titre-autorisation" th:text="#{bo.autorisation.titre(${a.numeroContrat()})}">Autorisation de prélèvement — SEH-2026-000001</h1>
         <p>
-            <span class="etiquette etiquette--sans-marge" th:text="#{'bo.autorisation.statut.' + ${a.statut().name()}}">À signer</span>
+            <span th:replace="~{fragments/badge :: statut-autorisation(${a.statut().name()})}">À signer</span>
             <span class="texte-doux" dir="auto" th:text="#{bo.autorisation.emise(${a.emiseLe()}, ${a.statutChangeLe()})}">Émise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
         </p>
 

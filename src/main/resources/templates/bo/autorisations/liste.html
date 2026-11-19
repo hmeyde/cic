@@ -7,7 +7,6 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-autorisations">
-        <p><a th:href="@{/bo/}" th:text="#{bo.retour.accueil}">Retour au back-office</a></p>
         <h1 id="titre-autorisations" th:text="#{bo.autorisations.titre}">Autorisations de prélèvement</h1>
         <p class="texte-doux" th:text="#{bo.autorisations.texte(${limite})}">Les 100 dernières autorisations émises, de la plus récente à la plus ancienne.</p>
 
@@ -27,14 +26,14 @@
         <div id="liste-autorisations" class="zone-chargeable">
         <th:block th:if="${#lists.isEmpty(autorisations)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-document', #{bo.autorisations.aucune})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(autorisations)}" class="tableau-defilant">
-            <table class="tableau">
+            <table class="tableau tableau--dense" data-tableau>
                 <thead>
                 <tr>
                     <th scope="col" th:text="#{bo.autorisation.contrat}">Contrat</th>
                     <th scope="col" th:text="#{bo.dossiers.client}">Client</th>
                     <th scope="col" th:text="#{bo.dossiers.produit}">Produit</th>
-                    <th scope="col" th:text="#{bo.autorisation.type}">Type</th>
-                    <th scope="col" th:text="#{bo.autorisation.statut}">Statut</th>
+                    <th scope="col" data-filtre th:text="#{bo.autorisation.type}">Type</th>
+                    <th scope="col" data-filtre th:text="#{bo.autorisation.statut}">Statut</th>
                     <th scope="col" th:text="#{bo.autorisation.statut-change-le}">Depuis le</th>
                 </tr>
                 </thead>
@@ -44,7 +43,7 @@
                     <td dir="auto" th:text="${a.client().orElse('—')}">Mohamed Ould Ahmed</td>
                     <td dir="auto" th:text="${a.designation()}">Galaxy A35</td>
                     <td th:text="#{'bo.autorisation.type.' + ${a.type().name()}}">Virement permanent</td>
-                    <td><span class="etiquette etiquette--sans-marge" th:text="#{'bo.autorisation.statut.' + ${a.statut().name()}}">À signer</span></td>
+                    <td><span th:replace="~{fragments/badge :: statut-autorisation(${a.statut().name()})}">À signer</span></td>
                     <td dir="ltr" th:text="${a.statutChangeLe()}">12/11/2026 10:00</td>
                 </tr>
                 </tbody>

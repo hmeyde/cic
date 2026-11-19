@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  Badges de statut du back-office : couleur selon le ton (succes, attention, danger, info, neutre),
+  pastille décorative ; le libellé porte toujours le sens (jamais la couleur seule).
+  - statut-dossier(code)    : StatutDossier (libellés client.demande.statut.*)
+  - recommandation(code)    : Recommandation du score (score.recommandation.*)
+  - statut-autorisation(code) : StatutAutorisation (bo.autorisation.statut.*)
+  - badge(texte, ton)       : libellé déjà résolu et ton libre
+*/-->
+<span th:fragment="badge(texte, ton)" class="badge" th:classappend="'badge--' + ${ton}" th:text="${texte}">Libellé</span>
+
+<span th:fragment="statut-dossier(code)" class="badge"
+      th:classappend="'badge--' + (${ {'SOLDEE','EN_REMBOURSEMENT','LIVREE'}.contains(code)} ? 'succes'
+          : (${ {'EN_RETARD','REFUSEE','RECOUVREMENT'}.contains(code)} ? 'danger'
+          : (${ {'ANNULEE'}.contains(code)} ? 'neutre'
+          : (${ {'ACCEPTEE','APPORT_ET_AUTORISATION','COMMANDEE'}.contains(code)} ? 'info' : 'attention'))))"
+      th:attr="data-valeur=${code}"
+      th:text="#{'client.demande.statut.' + ${code}}">En cours d’étude</span>
+
+<span th:fragment="recommandation(code)" class="badge"
+      th:classappend="'badge--' + (${code == 'FAVORABLE'} ? 'succes' : (${code == 'A_EXAMINER'} ? 'attention' : 'danger'))"
+      th:attr="data-valeur=${code}"
+      th:text="#{'score.recommandation.' + ${code}}">Favorable</span>
+
+<span th:fragment="statut-autorisation(code)" class="badge"
+      th:classappend="'badge--' + (${ {'ACCEPTEE','ACTIVE'}.contains(code)} ? 'succes'
+          : (${code == 'REVOQUEE'} ? 'danger' : (${code == 'TRANSMISE'} ? 'info' : 'attention')))"
+      th:attr="data-valeur=${code}"
+      th:text="#{'bo.autorisation.statut.' + ${code}}">À signer</span>
+</body>
+</html>
