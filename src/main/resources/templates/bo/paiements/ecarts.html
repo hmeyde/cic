@@ -7,7 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-ecarts">
-        <p><a th:href="@{/bo/paiements}" th:text="#{bo.import.retour}">Retour aux paiements reçus</a></p>
+        <p><a class="lien-retour" th:href="@{/bo/paiements}" th:text="#{bo.import.retour}">Retour aux paiements reçus</a></p>
         <h1 id="titre-ecarts" th:text="#{bo.ecarts.titre}">Écarts de paiement</h1>
         <p class="texte-doux" th:text="#{bo.ecarts.texte(${limite})}">Paiements reçus dont la référence ne désigne aucun dossier, ou dont le montant diffère de l’apport attendu.</p>
         <th:block th:if="${#lists.isEmpty(ecarts)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-ok', #{bo.ecarts.aucun})}"></div></th:block>
@@ -30,9 +30,9 @@
                     <td dir="ltr" th:text="${p.recuLe()}">12/11/2026</td>
                     <td dir="ltr" th:text="${p.reference()}">AP20260000011</td>
                     <td><span class="badge badge--danger" th:text="#{'bo.ecarts.type.' + ${p.ecart().get().name()}}">Montant différent</span></td>
-                    <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 000 MRU</td>
-                    <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
-                    <td th:text="${p.difference().isPresent()} ? (${p.tropPercu()} ? #{bo.ecarts.trop-percu(${#numbers.formatInteger(p.difference().get().valeur(), 1, 'WHITESPACE')})} : #{bo.ecarts.manque(${#numbers.formatInteger(p.difference().get().valeur(), 1, 'WHITESPACE')})}) : '—'">Manque 320 MRU</td>
+                    <td th:text="#{client.catalogue.montant(${#nombres.entier(p.montant().valeur())})}">8 000 MRU</td>
+                    <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#nombres.entier(p.montantAttendu().get().valeur())})} : '—'">8 320 MRU</td>
+                    <td th:text="${p.difference().isPresent()} ? (${p.tropPercu()} ? #{bo.ecarts.trop-percu(${#nombres.entier(p.difference().get().valeur())})} : #{bo.ecarts.manque(${#nombres.entier(p.difference().get().valeur())})}) : '—'">Manque 320 MRU</td>
                     <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">SEH-2026-000001</td>
                     <td dir="auto" th:text="#{bo.paiement.saisi.valeur(${p.saisiLe()}, ${p.saisiPar()})}">12/11/2026 10:00, admin</td>
                 </tr>

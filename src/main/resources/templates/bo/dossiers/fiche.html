@@ -15,7 +15,7 @@
     <section class="section conteneur" aria-labelledby="titre-fiche" th:with="c=${fiche.conditions()}, s=${fiche.score()}">
         <header class="bo-entete">
             <div class="bo-entete__titres">
-                <p class="fil-ariane"><a th:href="@{/bo/dossiers}" th:text="#{bo.fiche.retour}">Retour à la file des dossiers</a></p>
+                <p class="fil-ariane"><a class="lien-retour" th:href="@{/bo/dossiers}" th:text="#{bo.fiche.retour}">Retour à la file des dossiers</a></p>
                 <h1 id="titre-fiche" th:text="#{bo.fiche.titre(${c.designation()})}">Dossier — Galaxy A35</h1>
                 <p class="bo-entete__sous-titre">
                     <span th:replace="~{fragments/badge :: statut-dossier(${fiche.statut().name()})}">En cours d’étude</span>
@@ -29,13 +29,13 @@
 
         <ul class="resume-dossier" th:attr="aria-label=#{bo.fiche.conditions}">
             <li><span th:text="#{client.simulation.prix-total}">Prix total</span>
-                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</strong></li>
+                <strong th:text="#{client.catalogue.montant(${#nombres.entier(c.prixVente().valeur())})}">20 800 MRU</strong></li>
             <li><span th:text="#{client.simulation.apport}">Apport</span>
-                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</strong></li>
+                <strong th:text="#{client.catalogue.montant(${#nombres.entier(c.apport().valeur())})}">8 320 MRU</strong></li>
             <li><span th:text="#{bo.fiche.reste}">Reste à financer</span>
-                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</strong></li>
+                <strong th:text="#{client.catalogue.montant(${#nombres.entier(c.resteAFinancer().valeur())})}">12 480 MRU</strong></li>
             <li><span th:text="#{bo.dossiers.mensualites}">Mensualités</span>
-                <strong th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#numbers.formatInteger(c.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</strong></li>
+                <strong th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#nombres.entier(c.mensualite().valeur())})}">6 × 2 080 MRU</strong></li>
             <li th:if="${fiche.emploi().isPresent()}"><span th:text="#{bo.fiche.emploi.part}">Part du salaire</span>
                 <strong th:text="#{bo.fiche.emploi.part.valeur(${fiche.emploi().get().partSalairePourcent()})}">7 %</strong></li>
             <li><span th:text="#{bo.dossiers.note}">Note</span>
@@ -82,7 +82,7 @@
                             <dd dir="ltr" th:text="${e.dateFin().get()}">31/12/2027</dd>
                         </th:block>
                         <dt th:text="#{bo.fiche.emploi.salaire}">Salaire net mensuel</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.salaireNet().valeur(), 1, 'WHITESPACE')})}">30 000 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(e.salaireNet().valeur())})}">30 000 MRU</dd>
                         <dt th:text="#{bo.fiche.emploi.part}">Part du salaire (ce dossier)</dt>
                         <dd th:text="#{bo.fiche.emploi.part.valeur(${e.partSalairePourcent()})}">7 %</dd>
                         <dt th:text="#{client.emploi.jour-paie}">Jour de paie</dt>
@@ -132,23 +132,23 @@
                     <h2 id="titre-conditions" class="panneau__titre" th:text="#{bo.fiche.conditions}">Conditions demandées</h2>
                     <dl class="donnees">
                         <dt th:text="#{bo.fiche.prix-public}">Prix public</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixPublic().valeur(), 1, 'WHITESPACE')})}">20 000 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(c.prixPublic().valeur())})}">20 000 MRU</dd>
                         <dt th:text="#{bo.fiche.prix-achat}">Prix d’achat fournisseur</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixAchat().valeur(), 1, 'WHITESPACE')})}">18 400 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(c.prixAchat().valeur())})}">18 400 MRU</dd>
                         <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(c.prixVente().valeur())})}">20 800 MRU</dd>
                         <dt th:text="#{client.simulation.apport}">Apport</dt>
                         <dd>
-                            <span th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</span>
-                            <span class="texte-doux" th:text="#{bo.fiche.apport-minimum(${#numbers.formatInteger(c.apportMinimum().valeur(), 1, 'WHITESPACE')})}">(minimum 8 320 MRU)</span>
+                            <span th:text="#{client.catalogue.montant(${#nombres.entier(c.apport().valeur())})}">8 320 MRU</span>
+                            <span class="texte-doux" th:text="#{bo.fiche.apport-minimum(${#nombres.entier(c.apportMinimum().valeur())})}">(minimum 8 320 MRU)</span>
                         </dd>
                         <dt th:text="#{bo.fiche.reste}">Reste à financer</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(c.resteAFinancer().valeur())})}">12 480 MRU</dd>
                         <dt th:text="#{bo.dossiers.mensualites}">Mensualités</dt>
-                        <dd th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#numbers.formatInteger(c.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</dd>
+                        <dd th:text="#{bo.dossiers.mensualites.valeur(${c.nombreMois()}, ${#nombres.entier(c.mensualite().valeur())})}">6 × 2 080 MRU</dd>
                         <th:block th:if="${c.derniereDiffere()}">
                             <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-                            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(c.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                            <dd th:text="#{client.catalogue.montant(${#nombres.entier(c.derniereMensualite().valeur())})}">2 080 MRU</dd>
                         </th:block>
                     </dl>
                 </section>

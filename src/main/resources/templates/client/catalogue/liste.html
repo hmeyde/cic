@@ -93,13 +93,13 @@
                         </h2>
                         <p class="vignette__mensualite">
                             <span class="vignette__a-partir" th:text="#{client.catalogue.a-partir}">À partir de</span>
-                            <strong th:text="#{client.catalogue.par-mois(${#numbers.formatInteger(p.mensualiteIndicative().valeur(), 1, 'WHITESPACE')})}">2 080 MRU / mois</strong>
+                            <strong th:text="#{client.catalogue.par-mois(${#nombres.entier(p.mensualiteIndicative().valeur())})}">2 080 MRU / mois</strong>
                         </p>
                         <p class="vignette__detail texte-doux"
-                           th:text="#{client.catalogue.detail(${p.dureeMaxMois()}, ${#numbers.formatInteger(p.apportMinimum().valeur(), 1, 'WHITESPACE')})}">sur 6 mois, après un apport de 8 320 MRU</p>
+                           th:text="#{client.catalogue.detail(${p.dureeMaxMois()}, ${#nombres.entier(p.apportMinimum().valeur())})}">sur 6 mois, après un apport de 8 320 MRU</p>
                         <p class="vignette__prix">
                             <span th:text="#{client.catalogue.prix}">Prix comptant</span>
-                            <span class="vignette__montant" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</span>
+                            <span class="vignette__montant" th:text="#{client.catalogue.montant(${#nombres.entier(p.prixVente().valeur())})}">20 800 MRU</span>
                         </p>
                     </div>
                 </li>

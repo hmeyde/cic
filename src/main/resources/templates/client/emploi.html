@@ -105,7 +105,7 @@
                 <div class="actions-formulaire" data-sous-etapes-fin>
                     <button type="submit" class="bouton bouton--principal"
                             th:text="${parcours != null} ? #{client.emploi.continuer-parcours} : (${existant} ? #{client.emploi.modifier} : #{client.emploi.enregistrer})">Enregistrer</button>
-                    <a th:if="${parcours == null}" class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a>
+                    <a th:if="${parcours == null}" class="bouton bouton--contour lien-retour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a>
                 </div>
             </fieldset>
         </form>

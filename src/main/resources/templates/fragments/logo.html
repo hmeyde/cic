@@ -4,13 +4,16 @@
 <!--/*
   Logo Seheli (docs/MARQUE.md) : version latine en français, version arabe en arabe.
   « decoratif » : true quand le nom est déjà porté par le lien ou le titre voisin (alt vide).
+  Le alt="" est écrit en dur : Thymeleaf supprime l'attribut quand th:alt vaut une chaîne vide,
+  et une image sans alt est lue par son nom de fichier.
   Les dimensions intrinsèques évitent le décalage de mise en page ; la taille affichée vient du CSS.
 */-->
-<th:block th:fragment="logo(classe, decoratif)">
-    <img th:if="${#locale.language == 'ar'}" th:class="${classe}" th:src="@{/img/logo/seheli-logo-arabe.svg}"
-         width="176" height="76" th:alt="${decoratif} ? '' : #{logo.alt}">
-    <img th:unless="${#locale.language == 'ar'}" th:class="${classe}" th:src="@{/img/logo/seheli-logo.svg}"
-         width="208" height="64" th:alt="${decoratif} ? '' : #{logo.alt}">
+<th:block th:fragment="logo(classe, decoratif)"
+          th:with="src=${#locale.language == 'ar'} ? @{/img/logo/seheli-logo-arabe.svg} : @{/img/logo/seheli-logo.svg},
+                   largeur=${#locale.language == 'ar'} ? 176 : 208,
+                   hauteur=${#locale.language == 'ar'} ? 76 : 64">
+    <img th:if="${decoratif}" th:class="${classe}" th:src="${src}" th:width="${largeur}" th:height="${hauteur}" alt="">
+    <img th:unless="${decoratif}" th:class="${classe}" th:src="${src}" th:width="${largeur}" th:height="${hauteur}" th:alt="#{logo.alt}">
 </th:block>
 </body>
 </html>

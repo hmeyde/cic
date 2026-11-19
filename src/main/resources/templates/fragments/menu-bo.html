@@ -42,10 +42,10 @@
         <div class="choix-langue" role="group" th:attr="aria-label=#{nav-client.langue}">
             <a class="choix-langue__option" th:href="@{''(lang='fr')}" lang="fr" hreflang="fr"
                th:classappend="${#locale.language != 'ar'} ? 'choix-langue__option--actif'"
-               th:attr="aria-current=${#locale.language != 'ar'} ? 'true'" aria-label="Français">FR</a>
+               th:attr="aria-current=${#locale.language != 'ar'} ? 'true'" aria-label="FR, Français">FR</a>
             <a class="choix-langue__option" th:href="@{''(lang='ar')}" lang="ar" hreflang="ar"
                th:classappend="${#locale.language == 'ar'} ? 'choix-langue__option--actif'"
-               th:attr="aria-current=${#locale.language == 'ar'} ? 'true'" aria-label="العربية">ع</a>
+               th:attr="aria-current=${#locale.language == 'ar'} ? 'true'" aria-label="ع، العربية">ع</a>
         </div>
         <form method="post" th:action="@{/bo/logout}">
             <button type="submit" class="bouton-lien bo-menu__deconnexion" th:text="#{bo.accueil.deconnexion}">Se déconnecter</button>

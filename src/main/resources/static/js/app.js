@@ -306,7 +306,8 @@ if ("serviceWorker" in navigator) {
         var formats = ["application/pdf", "image/jpeg", "image/png"];
 
         function tailleLisible(octets) {
-            var nf = new Intl.NumberFormat(langue, { maximumFractionDigits: 1 });
+            // Chiffres latins en arabe aussi, comme les montants rendus par le serveur.
+            var nf = new Intl.NumberFormat(langue === "ar" ? "ar-u-nu-latn" : langue, { maximumFractionDigits: 1 });
             return octets >= 1024 * 1024 ? nf.format(octets / (1024 * 1024)) + " Mo"
                 : nf.format(Math.max(1, Math.round(octets / 1024))) + " Ko";
         }
@@ -388,7 +389,7 @@ if ("serviceWorker" in navigator) {
         retirer.addEventListener("click", function () {
             vider();
             afficherErreur("");
-            zone.focus();
+            fichier.focus();
         });
 
         ["dragenter", "dragover"].forEach(function (type) {
@@ -419,28 +420,22 @@ if ("serviceWorker" in navigator) {
         window.addEventListener("dragover", function (event) { event.preventDefault(); });
         window.addEventListener("drop", function (event) { event.preventDefault(); });
 
-        // La zone (un label) s'active aussi au clavier.
-        zone.setAttribute("tabindex", "0");
-        zone.setAttribute("role", "button");
-        zone.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                fichier.click();
-            }
-        });
+        // Clavier : le champ fichier natif (visuellement caché) reçoit le focus et la zone en dessine l'anneau
+        // (CSS :has). Pas de tabindex ni de role sur la zone : ce serait un second arrêt de tabulation
+        // pour la même action, et role="button" est interdit sur un label.
 
         form.addEventListener("submit", function (event) {
             var f = choisi();
             if (!f) {
                 event.preventDefault();
                 afficherErreur(depot.getAttribute("data-texte-requis"));
-                zone.focus();
+                fichier.focus();
                 return;
             }
             if (!formatAccepte(f) || f.size > tailleMax) {
                 event.preventDefault();
                 examiner(f === (fichier.files && fichier.files[0]) ? fichier : photo);
-                zone.focus();
+                fichier.focus();
             }
         });
         depot.classList.add("depot--actif");

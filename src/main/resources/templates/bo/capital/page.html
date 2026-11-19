@@ -7,13 +7,13 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-capital">
-        <p><a th:href="@{/bo/pilotage}" th:text="#{bo.capital.retour}">Retour au tableau de bord</a></p>
+        <p><a class="lien-retour" th:href="@{/bo/pilotage}" th:text="#{bo.capital.retour}">Retour au tableau de bord</a></p>
         <h1 id="titre-capital" th:text="#{bo.capital.titre}">Apports en capital</h1>
         <p class="texte-doux" th:text="#{bo.capital.texte}">Argent versé par les associés pour financer les achats aux fournisseurs. Chaque apport est comptabilisé et ne peut plus être modifié.</p>
 
         <div th:if="${enregistre != null}" role="status">
             <p class="alerte alerte--info"
-               th:text="#{bo.capital.enregistre(${#numbers.formatInteger(enregistre.montant().valeur(), 1, 'WHITESPACE')}, ${enregistre.associe()}, ${enregistre.verseLe()})}">Apport de 100 000 MRU de Sidi enregistré, versé le 12/11/2026.</p>
+               th:text="#{bo.capital.enregistre(${#nombres.entier(enregistre.montant().valeur())}, ${enregistre.associe()}, ${enregistre.verseLe()})}">Apport de 100 000 MRU de Sidi enregistré, versé le 12/11/2026.</p>
         </div>
         <div th:if="${erreur != null}" role="alert">
             <p class="alerte alerte--erreur" th:text="#{${erreur}(${longueurAssocieMax})}">Indiquez le montant versé.</p>
@@ -58,7 +58,7 @@
                 <tr th:each="a : ${apports}">
                     <td dir="ltr" th:text="${a.verseLe()}">12/11/2026</td>
                     <td dir="auto" th:text="${a.associe()}">Sidi</td>
-                    <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(a.montant().valeur(), 1, 'WHITESPACE')})}">100 000 MRU</td>
+                    <td class="nombre" th:text="#{client.catalogue.montant(${#nombres.entier(a.montant().valeur())})}">100 000 MRU</td>
                     <td dir="auto" th:text="#{bo.paiement.saisi.valeur(${a.saisiLe()}, ${a.saisiPar()})}">12/11/2026 10:00, admin</td>
                 </tr>
                 </tbody>

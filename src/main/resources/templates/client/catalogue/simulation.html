@@ -16,22 +16,22 @@
 <output th:fragment="valeur-apport(oob)" id="apport-valeur" for="apport" class="curseur-apport__valeur"
         th:attr="hx-swap-oob=${oob ? 'true' : null}"
         th:with="d=${simulation.detail()}"
-        th:text="#{client.simulation.apport.valeur(${simulation.apportPct()}, ${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">40 % · 8 320 MRU</output>
+        th:text="#{client.simulation.apport.valeur(${simulation.apportPct()}, ${#nombres.entier(d.apport().valeur())})}">40 % · 8 320 MRU</output>
 
 <div th:fragment="resultat" id="simulation" th:with="d=${simulation.detail()}">
     <p th:if="${d.endettementDepasse()}" class="alerte alerte--attention" role="alert"
-       th:text="#{client.simulation.endettement(${#numbers.formatInteger(d.mensualiteMaximale().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(d.plafondMensualite().valeur(), 1, 'WHITESPACE')})}">Attention : votre mensualité dépasse le tiers de votre salaire net.</p>
+       th:text="#{client.simulation.endettement(${#nombres.entier(d.mensualiteMaximale().valeur())}, ${#nombres.entier(d.plafondMensualite().valeur())})}">Attention : votre mensualité dépasse le tiers de votre salaire net.</p>
     <p th:if="${d.finContratDepassee()}" class="alerte alerte--attention" role="alert"
        th:text="#{client.simulation.fin-contrat}">Attention : votre dernière mensualité tomberait après la fin de votre CDD.</p>
 
     <dl class="conditions">
         <div class="conditions__principale">
             <dt th:text="#{client.simulation.mensualite(${d.nombreMois()})}">Mensualité sur 6 mois</dt>
-            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+            <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.mensualite().valeur())})}">2 080 MRU</dd>
         </div>
         <div>
             <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+            <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.apport().valeur())})}">8 320 MRU</dd>
         </div>
     </dl>
 
@@ -45,7 +45,7 @@
             <p class="frise__date" th:text="#{client.simulation.aujourdhui}">Aujourd’hui</p>
             <p class="frise__ligne">
                 <span th:text="#{client.simulation.aujourdhui.texte}">Apport à payer par Masrvi</span>
-                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</strong>
+                <strong th:text="#{client.catalogue.montant(${#nombres.entier(d.apport().valeur())})}">8 320 MRU</strong>
             </p>
         </li>
         <li th:each="e : ${d.echeances()}" class="frise__etape"
@@ -58,7 +58,7 @@
             <p class="frise__ligne">
                 <span th:if="${e.date() != null}" th:text="#{client.simulation.echeance.rang(${e.rang()}, ${d.nombreMois()})}">Mensualité 1 sur 6</span>
                 <span th:unless="${e.date() != null}" th:text="#{client.simulation.echeance.jour-paie}">Prélevée le jour de votre paie</span>
-                <strong th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</strong>
+                <strong th:text="#{client.catalogue.montant(${#nombres.entier(e.montant().valeur())})}">2 080 MRU</strong>
             </p>
             <p th:if="${e.rang() == d.nombreMois()}" class="frise__note texte-doux"
                th:text="#{client.simulation.echeance.derniere}">Dernière mensualité : votre achat est soldé</p>
@@ -69,23 +69,23 @@
     <dl class="conditions decomposition">
         <div>
             <dt th:text="#{client.simulation.prix-produit}">Prix du produit</dt>
-            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixPublic().valeur(), 1, 'WHITESPACE')})}">20 000 MRU</dd>
+            <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.prixPublic().valeur())})}">20 000 MRU</dd>
         </div>
         <div>
             <dt th:text="#{client.simulation.marge}">Marge Seheli, fixée à la signature</dt>
-            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.margeSeheli().valeur(), 1, 'WHITESPACE')})}">800 MRU</dd>
+            <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.margeSeheli().valeur())})}">800 MRU</dd>
         </div>
         <div>
             <dt th:text="#{client.simulation.frais}">Frais de dossier, intérêts, pénalités</dt>
-            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.frais().valeur(), 1, 'WHITESPACE')})}">0 MRU</dd>
+            <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.frais().valeur())})}">0 MRU</dd>
         </div>
         <div class="decomposition__total">
             <dt th:text="#{client.simulation.total}">Total payé</dt>
-            <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+            <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.prixTotal().valeur())})}">20 800 MRU</dd>
         </div>
     </dl>
     <p class="texte-doux"
-       th:text="#{client.simulation.total.repartition(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(d.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">dont 8 320 MRU d’apport et 12 480 MRU en mensualités</p>
+       th:text="#{client.simulation.total.repartition(${#nombres.entier(d.apport().valeur())}, ${#nombres.entier(d.resteAFinancer().valeur())})}">dont 8 320 MRU d’apport et 12 480 MRU en mensualités</p>
 
     <!--/* Étape suivante du parcours : l'écran de confirmation, avec la durée et l'apport simulés. */-->
     <p class="formulaire-demande">

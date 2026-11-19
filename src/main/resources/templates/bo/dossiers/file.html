@@ -39,9 +39,9 @@
                         <span class="texte-doux" th:text="#{bo.dossiers.attente.depuis(${d.attenteJours()})}">(attente 0 j)</span></td>
                     <td class="cellule-libre" th:text="${d.client()}">Mohamed Ould Ahmed</td>
                     <td class="cellule-libre"><a th:href="@{/bo/dossiers/{id}(id=${d.id()})}" th:text="${d.designation()}" th:attr="aria-label=#{bo.dossiers.ouvrir} + ' — ' + ${d.designation()}">Galaxy A35</a></td>
-                    <td class="nombre" th:attr="data-valeur=${d.prixVente().valeur()}" th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</td>
-                    <td class="nombre" th:attr="data-valeur=${d.apport().valeur()}" th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</td>
-                    <td class="nombre" th:attr="data-valeur=${d.mensualite().valeur()}" th:text="#{bo.dossiers.mensualites.valeur(${d.nombreMois()}, ${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">6 × 2 080 MRU</td>
+                    <td class="nombre" th:attr="data-valeur=${d.prixVente().valeur()}" th:text="#{client.catalogue.montant(${#nombres.entier(d.prixVente().valeur())})}">20 800 MRU</td>
+                    <td class="nombre" th:attr="data-valeur=${d.apport().valeur()}" th:text="#{client.catalogue.montant(${#nombres.entier(d.apport().valeur())})}">8 320 MRU</td>
+                    <td class="nombre" th:attr="data-valeur=${d.mensualite().valeur()}" th:text="#{bo.dossiers.mensualites.valeur(${d.nombreMois()}, ${#nombres.entier(d.mensualite().valeur())})}">6 × 2 080 MRU</td>
                     <td class="nombre" th:attr="data-valeur=${d.note()}"><strong dir="ltr" th:text="#{bo.dossiers.note.valeur(${d.note()})}">85 / 100</strong></td>
                     <td><span th:replace="~{fragments/badge :: recommandation(${d.recommandation().name()})}">Favorable</span></td>
                     <td th:attr="data-valeur=${d.eligible()}">

@@ -46,11 +46,11 @@
                 <dl class="conditions remboursement__montants">
                     <div class="conditions__principale">
                         <dt th:text="#{client.remboursement.restant}">Reste à payer</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(r.montantRestant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(r.montantRestant().valeur())})}">8 320 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.remboursement.paye}">Déjà payé</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(r.montantPaye().valeur(), 1, 'WHITESPACE')})}">4 160 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(r.montantPaye().valeur())})}">4 160 MRU</dd>
                     </div>
                 </dl>
             </div>
@@ -63,7 +63,7 @@
                 <dl class="conditions action__paiement">
                     <div class="conditions__principale">
                         <dt th:text="#{client.action.echeance(${r.prochaine().rang()}, ${#temporals.format(r.prochaine().date(), 'dd/MM/yyyy')})}">Mensualité n° 3 du 25/12/2026</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(r.prochaine().montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(r.prochaine().montant().valeur())})}">2 080 MRU</dd>
                     </div>
                 </dl>
                 <p class="prochaine-echeance__delai" th:if="${r.joursAvantProchaine() != null}"
@@ -91,7 +91,7 @@
                         </div>
                         <div th:if="${r.totalEnRetard().compareTo(r.prochaine().montant()) > 0}">
                             <dt th:text="#{client.action.total-retard}">Total en retard</dt>
-                            <dd th:text="#{${montant}(${#numbers.formatInteger(r.totalEnRetard().valeur(), 1, 'WHITESPACE')})}">6 240 MRU</dd>
+                            <dd th:text="#{${montant}(${#nombres.entier(r.totalEnRetard().valeur())})}">6 240 MRU</dd>
                         </div>
                     </dl>
                     <p class="texte-doux" th:text="#{client.action.regularisation.aide}">Payez par Masrvi avec la référence de l’échéance. Le prix ne change pas, sans pénalité.</p>
@@ -108,7 +108,7 @@
                     <span class="liste-echeances__rang" th:text="#{client.remboursement.rang(${e.rang()})}">N° 1</span>
                     <span class="liste-echeances__date" th:text="${#temporals.format(e.date(), 'dd/MM/yyyy')}">25/10/2026</span>
                     <span class="liste-echeances__montant nombre"
-                          th:text="#{${montant}(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</span>
+                          th:text="#{${montant}(${#nombres.entier(e.montant().valeur())})}">2 080 MRU</span>
                     <span class="etiquette etiquette--sans-marge"
                           th:classappend="${s == 'PAYEE'} ? 'etiquette--favorable' : (${s == 'EN_RETARD'} ? 'etiquette--danger' : 'etiquette--neutre')"
                           th:text="#{'client.offre.echeance.statut.' + ${s}}">Payée</span>
@@ -123,7 +123,7 @@
 
         <ul class="liens-bo">
             <li><a class="bouton bouton--contour" th:href="@{/client/dossier}" th:text="#{client.accueil.dossier}">Suivi de mon dossier</a></li>
-            <li><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
+            <li><a class="bouton bouton--contour lien-retour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
         </ul>
     </section>
 </main>

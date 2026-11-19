@@ -15,11 +15,11 @@
             <a class="choix-langue__option" th:href="@{''(lang='fr')}" lang="fr" hreflang="fr"
                th:classappend="${#locale.language != 'ar'} ? 'choix-langue__option--actif'"
                th:attr="aria-current=${#locale.language != 'ar'} ? 'true'"
-               aria-label="Français">FR</a>
+               aria-label="FR, Français">FR</a>
             <a class="choix-langue__option" th:href="@{''(lang='ar')}" lang="ar" hreflang="ar"
                th:classappend="${#locale.language == 'ar'} ? 'choix-langue__option--actif'"
                th:attr="aria-current=${#locale.language == 'ar'} ? 'true'"
-               aria-label="العربية">ع</a>
+               aria-label="ع، العربية">ع</a>
         </div>
         <nav th:if="${ongletClient == null}" class="entete__nav" th:attr="aria-label=#{layout.navigation}">
             <a th:if="${#locale.language == 'ar'}" class="langue" th:href="@{''(lang='fr')}"

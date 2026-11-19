@@ -18,14 +18,14 @@
             <p th:if="${r.numeroContrat().isPresent()}" class="alerte alerte--info"
                th:text="#{bo.paiement.rapproche(${r.reference()}, ${r.numeroContrat().get()})}">Paiement AP20260000011 enregistré et rattaché au dossier du contrat SEH-2026-000001.</p>
             <p th:if="${r.ecartDeMontant()}" class="alerte alerte--erreur"
-               th:text="#{bo.paiement.ecart.alerte(${#numbers.formatInteger(r.montant().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(r.montantAttendu().get().valeur(), 1, 'WHITESPACE')})}">Montant reçu 8 000 MRU, apport attendu 8 320 MRU : écart à régulariser avec le client.</p>
+               th:text="#{bo.paiement.ecart.alerte(${#nombres.entier(r.montant().valeur())}, ${#nombres.entier(r.montantAttendu().get().valeur())})}">Montant reçu 8 000 MRU, apport attendu 8 320 MRU : écart à régulariser avec le client.</p>
             <p th:if="${r.numeroContrat().isEmpty()}" class="alerte alerte--erreur"
                th:text="#{bo.paiement.non-rapproche(${r.reference()})}">Paiement enregistré, mais sa référence ne correspond à aucun dossier : il reste à rattacher.</p>
         </div>
         <div th:if="${erreur != null}" role="alert">
             <p class="alerte alerte--erreur" th:text="#{${erreur}(${longueurReferenceMax})}">Un paiement porte déjà cette référence : rien n’a été enregistré.</p>
             <p th:if="${existant != null}" class="texte-doux" th:with="e=${existant}"
-               th:text="#{bo.paiement.doublon.existant(${e.reference()}, ${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')}, ${e.saisiLe()}, ${e.saisiPar()})}">Paiement AP20260000011 de 8 320 MRU, saisi le 12/11/2026 10:00 par admin.</p>
+               th:text="#{bo.paiement.doublon.existant(${e.reference()}, ${#nombres.entier(e.montant().valeur())}, ${e.saisiLe()}, ${e.saisiPar()})}">Paiement AP20260000011 de 8 320 MRU, saisi le 12/11/2026 10:00 par admin.</p>
         </div>
 
         <form class="formulaire carte" method="post" novalidate th:action="@{/bo/paiements}" aria-labelledby="titre-saisie">
@@ -71,14 +71,14 @@
                 <tbody>
                 <tr th:each="p : ${paiements}">
                     <td dir="ltr" th:text="${p.reference()}">AP20260000011</td>
-                    <td th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</td>
+                    <td th:text="#{client.catalogue.montant(${#nombres.entier(p.montant().valeur())})}">8 320 MRU</td>
                     <td dir="ltr" th:text="${p.recuLe()}">12/11/2026</td>
                     <td>
                         <span class="badge" th:classappend="${p.statut().name() == 'RAPPROCHE'} ? 'badge--succes' : 'badge--attention'" th:attr="data-valeur=${p.statut().name()}" th:text="#{'bo.paiement.statut.' + ${p.statut().name()}}">Rapproché</span>
                         <span th:if="${p.ecartDeMontant()}" class="badge badge--danger" th:text="#{bo.paiement.ecart}">Écart de montant</span>
                     </td>
                     <td dir="ltr" th:text="${p.numeroContrat().orElse('—')}">SEH-2026-000001</td>
-                    <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#numbers.formatInteger(p.montantAttendu().get().valeur(), 1, 'WHITESPACE')})} : '—'">8 320 MRU</td>
+                    <td th:text="${p.montantAttendu().isPresent()} ? #{client.catalogue.montant(${#nombres.entier(p.montantAttendu().get().valeur())})} : '—'">8 320 MRU</td>
                     <td dir="auto" th:text="#{bo.paiement.saisi.valeur(${p.saisiLe()}, ${p.saisiPar()})}">12/11/2026 10:00, admin</td>
                 </tr>
                 </tbody>

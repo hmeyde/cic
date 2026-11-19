@@ -20,19 +20,19 @@
                 <dl class="conditions">
                     <div>
                         <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.prixVente().valeur())})}">20 800 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.apport().valeur())})}">8 320 MRU</dd>
                     </div>
                     <div class="conditions__principale">
                         <dt th:text="#{client.simulation.mensualite(${d.nombreMois()})}">Mensualité sur 6 mois</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.mensualite().valeur())})}">2 080 MRU</dd>
                     </div>
                     <div th:if="${d.derniereDiffere()}">
                         <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.derniereMensualite().valeur())})}">2 082 MRU</dd>
                     </div>
                 </dl>
                 <p class="texte-doux" th:text="#{'client.demande.statut.' + ${d.statut().name()} + '.aide'}">L’équipe Seheli étudie votre demande.</p>
@@ -42,7 +42,7 @@
         <ul class="liens-bo">
             <li th:unless="${#lists.isEmpty(demandes)}"><a class="bouton bouton--principal" th:href="@{/client/dossier}" th:text="#{client.accueil.dossier}">Suivi de mon dossier</a></li>
             <li><a class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a></li>
-            <li><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
+            <li><a class="bouton bouton--contour lien-retour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
         </ul>
     </section>
 </main>

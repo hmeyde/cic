@@ -34,7 +34,7 @@
                         <td dir="ltr" th:text="${d.numeroContrat()}">SEH-2026-000001</td>
                         <td dir="auto" th:text="${d.designation()}">Galaxy A35</td>
                         <td dir="auto" th:text="${d.fournisseur()}">Mauritel Store</td>
-                        <td dir="ltr" th:text="${#numbers.formatInteger(d.montant(), 1, 'WHITESPACE')}">18 400</td>
+                        <td dir="ltr" th:text="${#nombres.entier(d.montant())}">18 400</td>
                         <td dir="ltr" th:text="${d.depuis()}">12/11/2026 10:00</td>
                         <td>
                             <span class="badge" th:classappend="${d.apportEncaisse()} ? 'badge--succes' : 'badge--attention'"
@@ -79,7 +79,7 @@
                         <td dir="ltr" th:text="${c.numeroContrat()}">SEH-2026-000001</td>
                         <td dir="auto" th:text="${c.designation()}">Galaxy A35</td>
                         <td dir="auto" th:text="${c.fournisseur()}">Mauritel Store</td>
-                        <td dir="ltr" th:text="${#numbers.formatInteger(c.montant(), 1, 'WHITESPACE')}">18 400</td>
+                        <td dir="ltr" th:text="${#nombres.entier(c.montant())}">18 400</td>
                         <td dir="ltr" th:text="${c.validePar() + ' — ' + c.valideLe()}">admin — 12/11/2026 10:00</td>
                     </tr>
                     </tbody>

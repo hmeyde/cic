@@ -13,7 +13,7 @@
 <main id="contenu" class="contenu">
     <section class="section conteneur fiche-produit" aria-labelledby="titre-produit">
         <nav th:replace="~{fragments/parcours :: progression}"></nav>
-        <p class="fiche-produit__retour"><a th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
+        <p class="fiche-produit__retour"><a class="lien-retour" th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Vous avez déjà un dossier en cours.</p>
 
         <div class="fiche-produit__entete">
@@ -30,18 +30,18 @@
 
                 <p class="fiche-produit__mensualite">
                     <span class="vignette__a-partir" th:text="#{client.catalogue.a-partir}">À partir de</span>
-                    <strong th:text="#{client.catalogue.par-mois(${#numbers.formatInteger(produit.mensualiteIndicative().valeur(), 1, 'WHITESPACE')})}">2 080 MRU / mois</strong>
+                    <strong th:text="#{client.catalogue.par-mois(${#nombres.entier(produit.mensualiteIndicative().valeur())})}">2 080 MRU / mois</strong>
                 </p>
-                <p class="texte-doux" th:text="#{client.catalogue.detail(${produit.dureeMaxMois()}, ${#numbers.formatInteger(produit.apportMinimum().valeur(), 1, 'WHITESPACE')})}">sur 6 mois, après un apport de 8 320 MRU</p>
+                <p class="texte-doux" th:text="#{client.catalogue.detail(${produit.dureeMaxMois()}, ${#nombres.entier(produit.apportMinimum().valeur())})}">sur 6 mois, après un apport de 8 320 MRU</p>
 
                 <dl class="conditions fiche-produit__conditions">
                     <div>
                         <dt th:text="#{client.catalogue.prix}">Prix comptant</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(produit.prixVente().valeur())})}">20 800 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.produit.apport-minimum}">Apport minimum</dt>
-                        <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(produit.apportMinimum().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{client.catalogue.montant(${#nombres.entier(produit.apportMinimum().valeur())})}">8 320 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.produit.disponibilite}">Disponibilité</dt>
@@ -96,7 +96,7 @@
 
         <p class="texte-doux" th:text="#{client.produit.mentions}">Prix fixé à la signature : sans intérêt ni pénalité de retard. Les mensualités sont prélevées le jour de votre paie.</p>
 
-        <p><a class="bouton bouton--contour" th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
+        <p><a class="bouton bouton--contour lien-retour" th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
     </section>
 </main>
 </body>

@@ -8,7 +8,7 @@
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-autorisation" th:with="a=${autorisation}">
         <p>
-            <a th:href="@{/bo/autorisations}" th:text="#{bo.autorisation.retour}">Retour aux autorisations</a>
+            <a class="lien-retour" th:href="@{/bo/autorisations}" th:text="#{bo.autorisation.retour}">Retour aux autorisations</a>
             ·
             <a th:href="@{/bo/dossiers/{id}(id=${a.demandeId()})}" th:text="#{bo.autorisation.voir-dossier}">Voir le dossier</a>
         </p>

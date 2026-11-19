@@ -60,7 +60,7 @@
                                 <dl class="conditions action__paiement">
                                     <div class="conditions__principale">
                                         <dt th:text="#{client.apport.montant}">Montant à payer</dt>
-                                        <dd th:text="#{${montant}(${#numbers.formatInteger(action.apport().montant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                                        <dd th:text="#{${montant}(${#nombres.entier(action.apport().montant().valeur())})}">8 320 MRU</dd>
                                     </div>
                                     <div>
                                         <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
@@ -133,7 +133,7 @@
                 <dl th:if="${action.prochaineEcheance() != null}" class="conditions action__paiement">
                     <div class="conditions__principale">
                         <dt th:text="#{client.action.echeance(${action.prochaineEcheance().rang()}, ${#temporals.format(action.prochaineEcheance().date(), 'dd/MM/yyyy')})}">Mensualité n° 2 du 25/12/2026</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(action.prochaineEcheance().montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(action.prochaineEcheance().montant().valeur())})}">2 080 MRU</dd>
                     </div>
                 </dl>
 
@@ -142,7 +142,7 @@
                     <dl class="conditions action__paiement">
                         <div class="conditions__principale">
                             <dt th:text="#{client.action.echeance(${action.aRegulariser().rang()}, ${#temporals.format(action.aRegulariser().date(), 'dd/MM/yyyy')})}">Mensualité n° 3 du 25/11/2026</dt>
-                            <dd th:text="#{${montant}(${#numbers.formatInteger(action.aRegulariser().montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                            <dd th:text="#{${montant}(${#nombres.entier(action.aRegulariser().montant().valeur())})}">2 080 MRU</dd>
                         </div>
                         <div>
                             <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
@@ -164,7 +164,7 @@
                         </div>
                         <div th:if="${action.totalEnRetard().compareTo(action.aRegulariser().montant()) > 0}">
                             <dt th:text="#{client.action.total-retard}">Total en retard</dt>
-                            <dd th:text="#{${montant}(${#numbers.formatInteger(action.totalEnRetard().valeur(), 1, 'WHITESPACE')})}">6 240 MRU</dd>
+                            <dd th:text="#{${montant}(${#nombres.entier(action.totalEnRetard().valeur())})}">6 240 MRU</dd>
                         </div>
                     </dl>
                     <p class="texte-doux" th:text="#{client.action.regularisation.aide}">Payez par Masrvi avec la référence de l’échéance. Le prix ne change pas, sans pénalité.</p>
@@ -201,19 +201,19 @@
                 <dl class="conditions">
                     <div>
                         <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(demande.prixVente().valeur())})}">20 800 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(demande.apport().valeur())})}">8 320 MRU</dd>
                     </div>
                     <div class="conditions__principale">
                         <dt th:text="#{client.simulation.mensualite(${demande.nombreMois()})}">Mensualité sur 6 mois</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(demande.mensualite().valeur())})}">2 080 MRU</dd>
                     </div>
                     <div th:if="${demande.derniereDiffere()}">
                         <dt th:text="#{client.simulation.derniere}">Dernière mensualité</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(demande.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">2 082 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(demande.derniereMensualite().valeur())})}">2 082 MRU</dd>
                     </div>
                 </dl>
             </th:block>
@@ -229,15 +229,15 @@
                     </div>
                     <div class="conditions__principale">
                         <dt th:text="#{client.simulation.prix-total}">Prix total</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(offre.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(offre.prixTotal().valeur())})}">20 800 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(offre.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(offre.apport().valeur())})}">8 320 MRU</dd>
                     </div>
                     <div>
                         <dt th:text="#{client.offre.reste(${offre.nombreMois()})}">Reste à rembourser en 6 mensualités</dt>
-                        <dd th:text="#{${montant}(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                        <dd th:text="#{${montant}(${#nombres.entier(offre.resteAFinancer().valeur())})}">12 480 MRU</dd>
                     </div>
                 </dl>
 
@@ -257,14 +257,14 @@
                         <tr th:each="e : ${offre.echeances()}" th:classappend="${e.statut().name() == 'EN_RETARD'} ? 'ligne--echec'">
                             <td th:text="${e.rang()}">1</td>
                             <td th:text="${#temporals.format(e.date(), 'dd/MM/yyyy')}">25/12/2026</td>
-                            <td class="nombre" th:text="#{${montant}(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                            <td class="nombre" th:text="#{${montant}(${#nombres.entier(e.montant().valeur())})}">2 080 MRU</td>
                             <td th:text="#{'client.offre.echeance.statut.' + ${e.statut().name()}}">À venir</td>
                         </tr>
                         </tbody>
                         <tfoot>
                         <tr>
                             <th scope="row" colspan="2" th:text="#{client.offre.echeance.total}">Total</th>
-                            <td class="nombre" th:text="#{${montant}(${#numbers.formatInteger(offre.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</td>
+                            <td class="nombre" th:text="#{${montant}(${#nombres.entier(offre.resteAFinancer().valeur())})}">12 480 MRU</td>
                             <td></td>
                         </tr>
                         </tfoot>
@@ -287,7 +287,7 @@
         <ul class="liens-bo">
             <li th:if="${suivi == null}"><a class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a></li>
             <li><a class="bouton bouton--contour" th:href="@{/client/demandes}" th:text="#{client.accueil.demandes}">Mes demandes</a></li>
-            <li><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
+            <li><a class="bouton bouton--contour lien-retour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
         </ul>
     </section>
 </main>

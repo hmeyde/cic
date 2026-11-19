@@ -7,7 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-produit">
-        <p><a th:href="@{/bo/produits}" th:text="#{bo.produits.retour}">Retour aux produits</a></p>
+        <p><a class="lien-retour" th:href="@{/bo/produits}" th:text="#{bo.produits.retour}">Retour aux produits</a></p>
         <h1 id="titre-produit"
             th:text="${produitId == null} ? #{bo.produit.creation.titre} : #{bo.produit.modification.titre}">Nouveau produit</h1>
 

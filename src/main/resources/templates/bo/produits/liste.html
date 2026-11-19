@@ -38,7 +38,7 @@
                     <td th:text="${p.marque()}">Samsung</td>
                     <td th:text="#{'bo.produit.categorie.' + ${p.categorie().name()}}">Téléphone</td>
                     <td th:text="${nomsFournisseurs.get(p.fournisseurId())}">Mauritel Distribution</td>
-                    <td class="nombre" th:text="${#numbers.formatInteger(p.prixPublic().valeur(), 1, 'WHITESPACE')}">20 000</td>
+                    <td class="nombre" th:text="${#nombres.entier(p.prixPublic().valeur())}">20 000</td>
                     <td>
                         <span class="badge" th:classappend="${p.estDisponible()} ? 'badge--succes' : 'badge--neutre'"
                               th:text="${p.estDisponible()} ? #{bo.produit.disponible} : #{bo.produit.indisponible}">Disponible</span>

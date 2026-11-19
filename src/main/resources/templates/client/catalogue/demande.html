@@ -21,7 +21,7 @@
             <a th:href="@{/client/emploi}" th:text="#{client.simulation.dates-inconnues.lien}">Déclarer mon emploi</a>
         </p>
         <p th:if="${d.endettementDepasse()}" class="alerte alerte--attention" role="alert"
-           th:text="#{client.simulation.endettement(${#numbers.formatInteger(d.mensualiteMaximale().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(d.plafondMensualite().valeur(), 1, 'WHITESPACE')})}">Attention : mensualité trop élevée.</p>
+           th:text="#{client.simulation.endettement(${#nombres.entier(d.mensualiteMaximale().valeur())}, ${#nombres.entier(d.plafondMensualite().valeur())})}">Attention : mensualité trop élevée.</p>
         <p th:if="${d.finContratDepassee()}" class="alerte alerte--attention" role="alert"
            th:text="#{client.simulation.fin-contrat}">Attention : dernière mensualité après la fin de votre CDD.</p>
 
@@ -36,11 +36,11 @@
             <dl class="conditions">
                 <div class="conditions__principale">
                     <dt th:text="#{client.simulation.mensualite(${d.nombreMois()})}">Mensualité sur 6 mois</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                    <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.mensualite().valeur())})}">2 080 MRU</dd>
                 </div>
                 <div>
                     <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.apport().valeur())})}">8 320 MRU</dd>
                 </div>
                 <div th:if="${d.datesConnues() and !#lists.isEmpty(d.echeances())}">
                     <dt th:text="#{client.demande.confirmation.premiere}">Première mensualité</dt>
@@ -49,7 +49,7 @@
                 </div>
                 <div>
                     <dt th:text="#{client.simulation.total}">Total payé</dt>
-                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                    <dd th:text="#{client.catalogue.montant(${#nombres.entier(d.prixTotal().valeur())})}">20 800 MRU</dd>
                 </div>
             </dl>
             <p class="texte-doux" th:text="#{client.produit.mentions}">Prix fixé à la signature : sans intérêt ni pénalité de retard.</p>
@@ -60,7 +60,7 @@
                 <input type="hidden" name="apport" th:value="${d.apport().valeur().toPlainString()}">
                 <div class="actions">
                     <button type="submit" class="bouton bouton--principal" th:text="#{client.demande.confirmation.envoyer}">Envoyer ma demande</button>
-                    <a class="bouton bouton--contour"
+                    <a class="bouton bouton--contour lien-retour"
                        th:href="@{/client/catalogue/{id}(id=${produitId},duree=${d.nombreMois()},apport=${simulation.apportPct()})} + '#simuler'"
                        th:text="#{client.demande.confirmation.modifier}">Retour : modifier la simulation</a>
                 </div>

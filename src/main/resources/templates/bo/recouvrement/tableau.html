@@ -35,7 +35,7 @@
                         <td dir="ltr" th:text="${p.date()}">09/11/2026</td>
                         <td dir="ltr" th:text="${p.numeroContrat()}">SEH-2026-000001</td>
                         <td th:text="#{bo.recouvrement.rang(${p.rang()}, ${p.nombreEcheances()})}">1 / 6</td>
-                        <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(p.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                        <td class="nombre" th:text="#{client.catalogue.montant(${#nombres.entier(p.montant().valeur())})}">2 080 MRU</td>
                         <td><span th:replace="~{fragments/badge :: statut-dossier(${p.statutDossier().name()})}">Échéance en retard</span></td>
                         <td><a th:href="@{/bo/recouvrement/dossiers/{id}(id=${p.demandeId()})}" th:text="#{bo.recouvrement.ouvrir}">Ouvrir</a></td>
                     </tr>

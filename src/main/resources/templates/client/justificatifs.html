@@ -95,7 +95,7 @@
         <div th:if="${parcours != null}" class="actions parcours__suite">
             <a th:if="${complets}" class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.justificatifs.continuer}">Continuer : choisir mon produit</a>
             <a th:unless="${complets}" class="bouton bouton--contour" th:href="@{/client/catalogue}" th:text="#{client.justificatifs.plus-tard}">Envoyer les autres pièces plus tard</a>
-            <a th:href="@{/client/emploi}" th:text="#{client.justificatifs.retour-emploi}">Retour : mon emploi</a>
+            <a class="lien-retour" th:href="@{/client/emploi}" th:text="#{client.justificatifs.retour-emploi}">Retour : mon emploi</a>
         </div>
 
         <h2 th:text="#{client.justificatifs.recus}">Justificatifs envoyés</h2>
@@ -124,7 +124,7 @@
             </table>
         </div>
 
-        <p th:if="${parcours == null}"><a class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a></p>
+        <p th:if="${parcours == null}"><a class="bouton bouton--contour lien-retour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a></p>
     </section>
 </main>
 </body>

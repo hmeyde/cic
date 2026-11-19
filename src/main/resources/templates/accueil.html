@@ -7,9 +7,9 @@
 <body>
 <!--/* Montants et points clés : calculés par le domaine (AccueilController → ExempleAccueil). */-->
 <main id="contenu" class="contenu"
-      th:with="mru=#{accueil.montant(${#numbers.formatInteger(exemple.prixTotal().valeur(), 1, 'WHITESPACE')})},
-               apportMru=#{accueil.montant(${#numbers.formatInteger(exemple.apport().valeur(), 1, 'WHITESPACE')})},
-               mensualiteMru=#{accueil.montant(${#numbers.formatInteger(exemple.mensualite().valeur(), 1, 'WHITESPACE')})}">
+      th:with="mru=#{accueil.montant(${#nombres.entier(exemple.prixTotal().valeur())})},
+               apportMru=#{accueil.montant(${#nombres.entier(exemple.apport().valeur())})},
+               mensualiteMru=#{accueil.montant(${#nombres.entier(exemple.mensualite().valeur())})}">
 
     <section class="accroche" aria-labelledby="titre-accroche">
         <div class="conteneur">
@@ -95,7 +95,7 @@
                     </div>
                 </dl>
                 <p class="exemple__note" th:if="${exemple.derniereDiffere()}"
-                   th:text="#{accueil.exemple.derniere(${#numbers.formatInteger(exemple.derniereMensualite().valeur(), 1, 'WHITESPACE')})}">Dernière mensualité ajustée à l'ouguiya.</p>
+                   th:text="#{accueil.exemple.derniere(${#nombres.entier(exemple.derniereMensualite().valeur())})}">Dernière mensualité ajustée à l'ouguiya.</p>
                 <p class="exemple__note" th:text="#{accueil.exemple.note}">Aucun intérêt ne s'ajoute.</p>
             </div>
         </div>

@@ -7,7 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-fiche" th:with="f=${fiche}">
-        <p><a th:href="@{/bo/recouvrement}" th:text="#{bo.recouvrement.retour}">Retour au recouvrement</a></p>
+        <p><a class="lien-retour" th:href="@{/bo/recouvrement}" th:text="#{bo.recouvrement.retour}">Retour au recouvrement</a></p>
         <h1 id="titre-fiche" th:text="#{bo.recouvrement.fiche.titre(${f.numeroContrat()})}">Contrat SEH-2026-000001</h1>
         <p>
             <span th:replace="~{fragments/badge :: statut-dossier(${f.statut().name()})}">Échéance en retard</span>
@@ -26,9 +26,9 @@
                 <dt th:text="#{bo.recouvrement.telephone}">Téléphone</dt>
                 <dd dir="ltr" th:text="${f.telephone().orElse('—')}">36123456</dd>
                 <dt th:text="#{bo.recouvrement.prix-vente}">Prix de vente</dt>
-                <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(f.prixVente().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                <dd th:text="#{client.catalogue.montant(${#nombres.entier(f.prixVente().valeur())})}">20 800 MRU</dd>
                 <dt th:text="#{bo.recouvrement.restant-du}">Restant dû</dt>
-                <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(f.restantDu().valeur(), 1, 'WHITESPACE')})}">12 480 MRU</dd>
+                <dd th:text="#{client.catalogue.montant(${#nombres.entier(f.restantDu().valeur())})}">12 480 MRU</dd>
                 <dt th:text="#{bo.recouvrement.en-retard}">Échéances en retard</dt>
                 <dd th:text="${f.echeancesEnRetard()}">1</dd>
             </dl>
@@ -78,7 +78,7 @@
                     <tr th:each="e : ${f.echeances()}" th:classappend="${e.statut().name() == 'EN_RETARD'} ? 'ligne--echec'">
                         <th scope="row" th:text="${e.rang()}">1</th>
                         <td dir="ltr" th:text="${e.date()}">09/11/2026</td>
-                        <td class="nombre" th:text="#{client.catalogue.montant(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</td>
+                        <td class="nombre" th:text="#{client.catalogue.montant(${#nombres.entier(e.montant().valeur())})}">2 080 MRU</td>
                         <td th:text="#{'client.offre.echeance.statut.' + ${e.statut().name()}}">En retard</td>
                     </tr>
                     </tbody>
