@@ -80,7 +80,7 @@
             <div class="actions-formulaire">
                 <button type="submit" class="bouton bouton--principal"
                         th:text="${existant} ? #{client.emploi.modifier} : #{client.emploi.enregistrer}">Enregistrer</button>
-                <a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a>
+                <a class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a>
             </div>
         </form>
     </section>

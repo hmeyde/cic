@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<header th:fragment="entete" class="entete">
+<!--/*
+  En-tête commun. Dans l'espace client connecté (ongletClient présent) : en-tête compact,
+  logo vers l'accueil du client, choix de langue FR / ع et barre d'onglets.
+*/-->
+<header th:fragment="entete" class="entete" th:classappend="${ongletClient != null} ? 'entete--client'">
     <div class="entete__barre conteneur">
-        <a class="marque" th:href="@{/}" th:attr="aria-label=#{layout.retour-accueil}">
+        <a class="marque" th:href="${ongletClient != null} ? @{/client} : @{/}" th:attr="aria-label=#{layout.retour-accueil}">
             <th:block th:replace="~{fragments/logo :: logo('marque__logo', true)}"></th:block>
         </a>
-        <nav class="entete__nav" th:attr="aria-label=#{layout.navigation}">
+        <th:block th:if="${ongletClient != null}"><nav th:replace="~{fragments/navigation-client :: onglets}"></nav></th:block>
+        <div th:if="${ongletClient != null}" class="choix-langue" role="group" th:attr="aria-label=#{nav-client.langue}">
+            <a class="choix-langue__option" th:href="@{''(lang='fr')}" lang="fr" hreflang="fr"
+               th:classappend="${#locale.language != 'ar'} ? 'choix-langue__option--actif'"
+               th:attr="aria-current=${#locale.language != 'ar'} ? 'true'"
+               aria-label="Français">FR</a>
+            <a class="choix-langue__option" th:href="@{''(lang='ar')}" lang="ar" hreflang="ar"
+               th:classappend="${#locale.language == 'ar'} ? 'choix-langue__option--actif'"
+               th:attr="aria-current=${#locale.language == 'ar'} ? 'true'"
+               aria-label="العربية">ع</a>
+        </div>
+        <nav th:if="${ongletClient == null}" class="entete__nav" th:attr="aria-label=#{layout.navigation}">
             <a th:if="${#locale.language == 'ar'}" class="langue" th:href="@{''(lang='fr')}"
                lang="fr" hreflang="fr">Français</a>
             <a th:unless="${#locale.language == 'ar'}" class="langue" th:href="@{''(lang='ar')}"

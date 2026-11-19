@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`fe7fdcf`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`ccab505`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -21,7 +21,7 @@ Générée automatiquement depuis le code (`fe7fdcf`). Sert à se repérer vite 
 | `parametrage` (13) | adapter.out adapter.out.persistence application domain | Parametre, ParametreJpaRepository, ParametrePersistenceAdapter, Parametres, ParametreService |
 | `pilotage` (11) | adapter.in adapter.in.web application domain | Concentration, TableauDeBordController, TableauDeBordService |
 | `recouvrement` (29) | adapter.in adapter.in.scheduling adapter.in.web adapter.out adapter.out.persistence application domain | NoteRecouvrementJpaRepository, NoteRecouvrementPersistenceAdapter, NoteRecouvrementRepository, RappelPrelevementJob, RappelPrelevementService, RecouvrementBackOfficeController, Relance, RelanceJpaRepository, RelancePersistenceAdapter, RelanceRepository, RetardEcheanceService, RetardsEtRelancesJob |
-| `web` (4) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
+| `web` (6) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
 
 ## Routes web
 
@@ -40,7 +40,7 @@ Générée automatiquement depuis le code (`fe7fdcf`). Sert à se repérer vite 
 | `DecisionBackOfficeController` (demande) | `POST CHEMIN_ACCEPTATION`, `POST CHEMIN_REFUS`, `POST CHEMIN_JUSTIFICATIF` |
 | `DemandeClientController` (demande) | `GET /client/demandes`, `GET /client/dossier`, `GET /client/dossier/contrat.pdf`, `GET /client/dossier/autorisation-prelevement.pdf`, `POST /client/dossier/remise`, `POST /client/demandes` |
 | `EmploiClientController` (identite) | `GET /client/emploi`, `POST /client/emploi` |
-| `EspaceClientController` (identite) | `GET /client` |
+| `EspaceClientController` (identite) | `GET /client`, `GET /client/profil` |
 | `FicheDossierBackOfficeController` (demande) | `GET CHEMIN` |
 | `FileAnalyseBackOfficeController` (demande) | `GET /bo/dossiers` |
 | `FournisseurBackOfficeController` (catalogue) | `GET /bo/fournisseurs`, `GET /bo/fournisseurs/nouveau`, `POST /bo/fournisseurs`, `GET /bo/fournisseurs/{id}`, `POST /bo/fournisseurs/{id}` |
@@ -106,4 +106,4 @@ Générée automatiquement depuis le code (`fe7fdcf`). Sert à se repérer vite 
 
 ## Tests
 
-- 122 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 123 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

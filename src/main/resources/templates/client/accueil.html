@@ -10,16 +10,20 @@
         <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre compte est créé.</p>
         <h1 id="titre-espace" th:text="#{client.accueil.titre(${prenom})}">Bonjour</h1>
         <p class="texte-doux" th:text="#{client.accueil.texte}">Vous êtes connecté à votre espace client.</p>
-        <ul class="liens-bo">
-            <li><a class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a></li>
-            <li><a class="bouton bouton--principal" th:href="@{/client/dossier}" th:text="#{client.accueil.dossier}">Suivi de mon dossier</a></li>
-            <li><a class="bouton bouton--principal" th:href="@{/client/demandes}" th:text="#{client.accueil.demandes}">Mes demandes</a></li>
-            <li><a class="bouton bouton--principal" th:href="@{/client/emploi}" th:text="#{client.accueil.emploi}">Mon emploi</a></li>
-            <li><a class="bouton bouton--principal" th:href="@{/client/justificatifs}" th:text="#{client.accueil.justificatifs}">Mes justificatifs</a></li>
+        <ul class="raccourcis">
+            <li><a class="carte raccourci" th:href="@{/client/catalogue}">
+                <strong th:text="#{client.accueil.catalogue}">Catalogue</strong>
+                <span class="texte-doux" th:text="#{client.accueil.catalogue.aide}">Choisir un produit et simuler mes mensualités</span>
+            </a></li>
+            <li><a class="carte raccourci" th:href="@{/client/dossier}">
+                <strong th:text="#{client.accueil.dossier}">Suivi de mon dossier</strong>
+                <span class="texte-doux" th:text="#{client.accueil.dossier.aide}">Où en est ma demande, mes documents, mes échéances</span>
+            </a></li>
+            <li><a class="carte raccourci" th:href="@{/client/profil}">
+                <strong th:text="#{client.profil.titre}">Mon profil</strong>
+                <span class="texte-doux" th:text="#{client.accueil.profil.aide}">Mon emploi et mes justificatifs</span>
+            </a></li>
         </ul>
-        <form method="post" th:action="@{/client/logout}">
-            <button type="submit" class="bouton bouton--contour" th:text="#{client.accueil.deconnexion}">Se déconnecter</button>
-        </form>
     </section>
 </main>
 </body>

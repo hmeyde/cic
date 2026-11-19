@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.profil.titre-page}">Mon profil — Seheli</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-profil">
+        <h1 id="titre-profil" th:text="#{client.profil.titre}">Mon profil</h1>
+        <dl class="carte conditions">
+            <div>
+                <dt th:text="#{client.profil.nom}">Nom</dt>
+                <dd th:text="${prenom + ' ' + nom}">Aminetou Mint Ahmed</dd>
+            </div>
+            <div>
+                <dt th:text="#{client.profil.telephone}">Téléphone</dt>
+                <dd dir="ltr" th:text="${telephone}">22 12 34 56</dd>
+            </div>
+        </dl>
+
+        <ul class="raccourcis">
+            <li><a class="carte raccourci" th:href="@{/client/emploi}">
+                <strong th:text="#{client.accueil.emploi}">Mon emploi</strong>
+                <span class="texte-doux" th:text="#{client.profil.emploi.aide}">Employeur, contrat, salaire et jour de paie</span>
+            </a></li>
+            <li><a class="carte raccourci" th:href="@{/client/justificatifs}">
+                <strong th:text="#{client.accueil.justificatifs}">Mes justificatifs</strong>
+                <span class="texte-doux" th:text="#{client.profil.justificatifs.aide}">Pièce d’identité, bulletin de salaire, contrat de travail</span>
+            </a></li>
+            <li><a class="carte raccourci" th:href="@{/client/demandes}">
+                <strong th:text="#{client.accueil.demandes}">Mes demandes</strong>
+                <span class="texte-doux" th:text="#{client.profil.demandes.aide}">Historique de mes demandes</span>
+            </a></li>
+        </ul>
+
+        <form method="post" th:action="@{/client/logout}">
+            <button type="submit" class="bouton bouton--contour" th:text="#{client.accueil.deconnexion}">Se déconnecter</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

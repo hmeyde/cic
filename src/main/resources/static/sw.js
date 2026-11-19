@@ -1,6 +1,6 @@
 // Service worker minimal : rend l'application installable et affiche une page hors ligne.
 // Volontairement, aucune page HTML n'est mise en cache : elles contiennent des données personnelles.
-var CACHE = "seheli-statique-v4";
+var CACHE = "seheli-statique-v5";
 var HORS_LIGNE = "/hors-ligne.html";
 var STATIQUES = [HORS_LIGNE, "/css/app.css", "/img/icone.svg", "/img/icone-192.png",
     "/img/logo/seheli-logo.svg", "/img/logo/seheli-logo-arabe.svg", "/img/logo/seheli-symbole.svg"];
