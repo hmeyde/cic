@@ -73,10 +73,7 @@ public class ConnexionClientService {
     public String demanderCode(String telephoneSaisi, Locale langue) {
         String telephone = normaliser(telephoneSaisi);
         Instant maintenant = clock.instant();
-        Duration renvoi = Duration.ofSeconds(parametres.entier(CleParametre.CONNEXION_CODE_RENVOI_SECONDES));
-        Optional<CodeConnexion> precedent = codes.parTelephone(telephone);
-        if (precedent.isPresent() && !precedent.get().estInutilisableA(maintenant)
-                && maintenant.isBefore(precedent.get().emisLe().plus(renvoi))) {
+        if (attenteAvantRenvoi(telephone, maintenant).isPositive()) {
             LOG.info("Code de connexion redemandé trop tôt : le code en cours reste valable");
             return telephone;
         }
@@ -88,6 +85,26 @@ public class ConnexionClientService {
         String texte = messages.getMessage("client.connexion.code.sms", new Object[] {code, validiteMinutes}, langue);
         notification.envoyer(Message.sms(telephone, texte));
         return telephone;
+    }
+
+    /**
+     * Nombre de secondes (arrondi au-dessus) avant qu'un nouveau code puisse être envoyé à ce téléphone :
+     * 0 s'il n'y a aucun code en cours, si le code en cours ne peut plus servir ou si le délai
+     * {@code connexion.code.renvoi.secondes} est écoulé.
+     */
+    @Transactional(readOnly = true)
+    public long secondesAvantRenvoi(String telephoneSaisi) {
+        Duration attente = attenteAvantRenvoi(normaliser(telephoneSaisi), clock.instant());
+        return attente.isPositive() ? (attente.toMillis() + 999) / 1000 : 0;
+    }
+
+    private Duration attenteAvantRenvoi(String telephone, Instant maintenant) {
+        Optional<CodeConnexion> enCours = codes.parTelephone(telephone);
+        if (enCours.isEmpty() || enCours.get().estInutilisableA(maintenant)) {
+            return Duration.ZERO;
+        }
+        Duration renvoi = Duration.ofSeconds(parametres.entier(CleParametre.CONNEXION_CODE_RENVOI_SECONDES));
+        return Duration.between(maintenant, enCours.get().emisLe().plus(renvoi));
     }
 
     /**
@@ -104,7 +121,7 @@ public class ConnexionClientService {
             return ResultatConnexion.echec(Verification.EXPIRE, 0);
         }
         CodeConnexion c = code.get();
-        Verification verification = c.verifier(codeSaisi.replace(" ", ""), clock.instant(), encodeur::matches);
+        Verification verification = c.verifier(nettoyerCode(codeSaisi), clock.instant(), encodeur::matches);
         codes.enregistrer(c);
         if (verification != Verification.VALIDE) {
             LOG.info("Code de connexion refusé ({})", verification);
@@ -117,6 +134,24 @@ public class ConnexionClientService {
         }
         LOG.info("Connexion réussie de {}", client.get());
         return ResultatConnexion.valide(client.get().id());
+    }
+
+    /**
+     * Code tel que saisi ou collé : espaces, tirets et points retirés ; chiffres arabes orientaux
+     * (٠-٩ et ۰-۹, claviers arabes des téléphones) ramenés aux chiffres 0-9.
+     */
+    public static String nettoyerCode(String codeSaisi) {
+        StringBuilder code = new StringBuilder(codeSaisi.length());
+        codeSaisi.codePoints().forEach(c -> {
+            if (c >= '٠' && c <= '٩') {
+                code.append((char) ('0' + c - '٠'));
+            } else if (c >= '۰' && c <= '۹') {
+                code.append((char) ('0' + c - '۰'));
+            } else if (!Character.isWhitespace(c) && !Character.isSpaceChar(c) && c != '-' && c != '.') {
+                code.appendCodePoint(c);
+            }
+        });
+        return code.toString();
     }
 
     private static String normaliser(String telephone) {

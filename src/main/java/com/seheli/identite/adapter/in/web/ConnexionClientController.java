@@ -65,8 +65,29 @@ class ConnexionClientController {
         if (telephone == null) {
             return "redirect:/client/connexion";
         }
-        model.addAttribute("telephoneMasque", masquer(telephone));
+        preparerPageCode(telephone, model);
         return "client/code";
+    }
+
+    /**
+     * Renvoi d'un code au téléphone gardé en session. Trop tôt (bouton actif sans JavaScript), rien
+     * n'est envoyé et la page indique le temps restant.
+     */
+    @PostMapping("/client/connexion/code/renvoi")
+    String renvoyerCode(Locale langue, HttpSession session, RedirectAttributes redirection) {
+        String telephone = (String) session.getAttribute(SESSION_TELEPHONE);
+        if (telephone == null) {
+            return "redirect:/client/connexion";
+        }
+        long attente = connexion.secondesAvantRenvoi(telephone);
+        if (attente > 0) {
+            redirection.addFlashAttribute("erreur", "client.code.renvoi.trop-tot");
+            redirection.addFlashAttribute("secondesErreur", attente);
+        } else {
+            connexion.demanderCode(telephone, langue);
+            redirection.addFlashAttribute("info", "client.code.renvoye");
+        }
+        return "redirect:/client/connexion/code";
     }
 
     @PostMapping("/client/connexion/code")
@@ -75,6 +96,12 @@ class ConnexionClientController {
         String telephone = (String) session.getAttribute(SESSION_TELEPHONE);
         if (telephone == null) {
             return "redirect:/client/connexion";
+        }
+        if (!ConnexionClientService.nettoyerCode(code).matches("[0-9]{6}")) {
+            // Saisie incomplète : refusée sans décompter d'essai.
+            model.addAttribute("erreur", "client.code.format");
+            preparerPageCode(telephone, model);
+            return "client/code";
         }
         ResultatConnexion resultat = connexion.verifierCode(telephone, code);
         if (resultat.estNouveauClient()) {
@@ -93,16 +120,21 @@ class ConnexionClientController {
             case INCORRECT -> {
                 model.addAttribute("erreur", "client.connexion.code.incorrect");
                 model.addAttribute("essaisRestants", resultat.essaisRestants());
-                model.addAttribute("telephoneMasque", masquer(telephone));
+                preparerPageCode(telephone, model);
                 return "client/code";
             }
             default -> {
-                // Expiré, essais épuisés ou déjà utilisé : il faut demander un nouveau code.
-                session.removeAttribute(SESSION_TELEPHONE);
+                // Expiré, essais épuisés ou déjà utilisé : le code en cours ne sert plus, un nouveau peut
+                // être demandé tout de suite depuis la même page, sans ressaisir le numéro.
                 redirection.addFlashAttribute("erreur", "client.connexion.code." + resultat.verification());
-                return "redirect:/client/connexion";
+                return "redirect:/client/connexion/code";
             }
         }
+    }
+
+    private void preparerPageCode(String telephone, Model model) {
+        model.addAttribute("telephoneMasque", masquer(telephone));
+        model.addAttribute("secondesAvantRenvoi", connexion.secondesAvantRenvoi(telephone));
     }
 
     /** Seule forme du téléphone affichée : {@code ****3456}. */

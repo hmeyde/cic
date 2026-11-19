@@ -184,4 +184,34 @@ class ConnexionClientServiceTest {
         assertThat(envoyes).hasSize(2);
         assertThat(service.verifierCode("22123456", "123457").estValide()).isTrue();
     }
+
+    @Test
+    void le_delai_avant_renvoi_decompte_les_60_secondes_puis_tombe_a_zero() {
+        assertThat(service.secondesAvantRenvoi("22123456")).isZero();
+        service.demanderCode("22123456", FR);
+        assertThat(service.secondesAvantRenvoi("22123456")).isEqualTo(60);
+        avancer(Duration.ofMillis(20_500));
+        assertThat(service.secondesAvantRenvoi("22123456")).isEqualTo(40);
+        avancer(Duration.ofSeconds(40));
+        assertThat(service.secondesAvantRenvoi("22123456")).isZero();
+    }
+
+    @Test
+    void un_code_bloque_peut_etre_redemande_tout_de_suite() {
+        service.demanderCode("22123456", FR);
+        for (int i = 0; i < 5; i++) {
+            service.verifierCode("22123456", "000000");
+        }
+
+        assertThat(service.secondesAvantRenvoi("22123456")).isZero();
+    }
+
+    @Test
+    void le_code_colle_avec_espaces_ou_saisi_en_chiffres_arabes_est_accepte() {
+        service.demanderCode("22123456", FR);
+
+        assertThat(ConnexionClientService.nettoyerCode(" 123-456 ")).isEqualTo("123456");
+        assertThat(ConnexionClientService.nettoyerCode("۱۲۳۴۵۶")).isEqualTo("123456");
+        assertThat(service.verifierCode("22123456", "١٢٣ ٤٥٦").estValide()).isTrue();
+    }
 }

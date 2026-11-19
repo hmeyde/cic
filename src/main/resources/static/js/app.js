@@ -446,7 +446,233 @@ if ("serviceWorker" in navigator) {
         depot.classList.add("depot--actif");
     }
 
+    // Code à usage unique : le champ unique (envoyé sous le nom « code ») devient 6 cases. Une case
+    // accepte un chiffre puis passe à la suivante ; un collage ou le remplissage automatique du SMS
+    // (autocomplete="one-time-code", qui peut verser les 6 chiffres dans une seule case) est réparti
+    // sur les cases. Les chiffres arabes (٠-٩, ۰-۹) sont convertis. Le code complet est envoyé seul.
+    var CHIFFRES_ORIENTAUX = /[٠-٩۰-۹]/g;
+
+    function chiffres(texte) {
+        return (texte || "").replace(CHIFFRES_ORIENTAUX, function (c) {
+            var n = c.charCodeAt(0);
+            return String(n >= 0x06F0 ? n - 0x06F0 : n - 0x0660);
+        }).replace(/[^0-9]/g, "");
+    }
+
+    function initialiserCodeOtp(form) {
+        var source = form.querySelector('input[name="code"]');
+        if (!source) {
+            return;
+        }
+        var longueur = parseInt(source.getAttribute("maxlength"), 10) || 6;
+        var champ = source.closest(".champ");
+        var invalide = source.getAttribute("aria-invalid") === "true";
+        var decrit = source.getAttribute("aria-describedby") || "";
+        var groupe = document.createElement("div");
+        groupe.className = "code-otp";
+        groupe.setAttribute("role", "group");
+        groupe.setAttribute("aria-labelledby", "code-libelle");
+        groupe.setAttribute("dir", "ltr");
+        if (decrit) {
+            groupe.setAttribute("aria-describedby", decrit);
+        }
+        var cases = [];
+        for (var i = 0; i < longueur; i++) {
+            var c = document.createElement("input");
+            c.type = "text";
+            c.className = "code-otp__case";
+            c.setAttribute("inputmode", "numeric");
+            c.setAttribute("pattern", "[0-9]*");
+            c.setAttribute("autocomplete", i === 0 ? "one-time-code" : "off");
+            c.setAttribute("spellcheck", "false");
+            c.setAttribute("aria-label", format(form.getAttribute("data-texte-case"), i + 1));
+            if (invalide) {
+                c.setAttribute("aria-invalid", "true");
+            }
+            cases.push(c);
+            groupe.appendChild(c);
+        }
+        // Le libellé « Code reçu par SMS » désigne la première case ; le champ d'origine devient caché.
+        cases[0].id = source.id;
+        source.removeAttribute("id");
+        source.type = "hidden";
+        source.required = false;
+        source.removeAttribute("autofocus");
+        source.value = "";
+        champ.appendChild(groupe);
+
+        var erreur = null;
+        var envoye = false;
+
+        function code() {
+            return cases.map(function (c) { return c.value; }).join("");
+        }
+
+        function afficherErreur(message) {
+            if (!erreur) {
+                erreur = document.createElement("p");
+                erreur.id = "code-erreur-saisie";
+                erreur.className = "champ__erreur";
+                erreur.setAttribute("role", "alert");
+                champ.appendChild(erreur);
+            }
+            erreur.hidden = !message;
+            erreur.textContent = message || "";
+            cases.forEach(function (c) {
+                if (message) {
+                    c.setAttribute("aria-invalid", "true");
+                } else {
+                    c.removeAttribute("aria-invalid");
+                }
+            });
+            groupe.setAttribute("aria-describedby", message ? decrit + " code-erreur-saisie" : decrit);
+        }
+
+        // Écrit les chiffres à partir de la case « depart » ; renvoie l'index de la case suivante.
+        function repartir(texte, depart) {
+            var n = chiffres(texte).split("");
+            var i = depart;
+            for (var k = 0; k < n.length && i < longueur; k++, i++) {
+                cases[i].value = n[k];
+            }
+            return i;
+        }
+
+        function apresSaisie(suivante) {
+            source.value = code();
+            if (erreur && !erreur.hidden) {
+                afficherErreur("");
+            }
+            if (source.value.length === longueur) {
+                cases[longueur - 1].focus();
+                envoyer();
+            } else {
+                cases[Math.min(suivante, longueur - 1)].focus();
+            }
+        }
+
+        // Code complet : envoi automatique, une seule fois (chaque envoi compte comme un essai).
+        function envoyer() {
+            if (envoye) {
+                return;
+            }
+            envoye = true;
+            var bouton = form.querySelector('button[type="submit"]');
+            if (bouton) {
+                bouton.classList.add("bouton--chargement");
+            }
+            form.submit();
+        }
+
+        cases.forEach(function (c, i) {
+            c.addEventListener("input", function (event) {
+                var saisi = chiffres(c.value);
+                // Frappe d'un chiffre dans une case déjà remplie : le nouveau chiffre remplace l'ancien.
+                if (event.inputType === "insertText" && chiffres(event.data).length === 1) {
+                    saisi = chiffres(event.data);
+                }
+                if (!saisi) {
+                    c.value = "";
+                    source.value = code();
+                    return;
+                }
+                c.value = "";
+                // Plusieurs chiffres d'un coup (remplissage automatique, saisie rapide) : depuis cette
+                // case, ou depuis la première si le code entier arrive.
+                apresSaisie(repartir(saisi, saisi.length >= longueur ? 0 : i));
+            });
+            c.addEventListener("paste", function (event) {
+                var presse = event.clipboardData || window.clipboardData;
+                if (!presse) {
+                    return; // collage géré par l'événement « input »
+                }
+                event.preventDefault();
+                var n = chiffres(presse.getData("text"));
+                if (!n) {
+                    return;
+                }
+                apresSaisie(repartir(n, n.length >= longueur ? 0 : i));
+            });
+            c.addEventListener("keydown", function (event) {
+                if (event.key === "Backspace" && !c.value && i > 0) {
+                    event.preventDefault();
+                    cases[i - 1].value = "";
+                    cases[i - 1].focus();
+                    source.value = code();
+                } else if (event.key === "ArrowLeft" && i > 0) {
+                    event.preventDefault();
+                    cases[i - 1].focus();
+                } else if (event.key === "ArrowRight" && i < longueur - 1) {
+                    event.preventDefault();
+                    cases[i + 1].focus();
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    cases[0].focus();
+                } else if (event.key === "End") {
+                    event.preventDefault();
+                    cases[longueur - 1].focus();
+                }
+            });
+            c.addEventListener("focus", function () { c.select(); });
+        });
+
+        form.addEventListener("submit", function (event) {
+            source.value = code();
+            if (source.value.length !== longueur) {
+                event.preventDefault();
+                afficherErreur(form.getAttribute("data-texte-incomplet"));
+                var vide = cases.findIndex(function (c) { return !c.value; });
+                cases[vide < 0 ? 0 : vide].focus();
+                return;
+            }
+            if (envoye) {
+                event.preventDefault();
+                return;
+            }
+            envoye = true;
+        });
+        // Retour arrière du navigateur vers une page restaurée depuis le cache : on peut renvoyer.
+        window.addEventListener("pageshow", function () {
+            envoye = false;
+            var bouton = form.querySelector('button[type="submit"]');
+            if (bouton) {
+                bouton.classList.remove("bouton--chargement");
+            }
+        });
+        cases[0].focus();
+    }
+
+    // Compte à rebours avant de pouvoir redemander un code : bouton désactivé, temps restant affiché.
+    // Calculé sur l'heure de fin pour rester juste si l'onglet passe en arrière-plan.
+    function initialiserCompteARebours(form) {
+        var restant = parseInt(form.getAttribute("data-compte-a-rebours"), 10) || 0;
+        var bouton = form.querySelector('button[type="submit"]');
+        var texte = form.querySelector("[data-compte-a-rebours-texte]");
+        if (restant <= 0 || !bouton) {
+            return;
+        }
+        var fin = Date.now() + restant * 1000;
+        bouton.disabled = true;
+        function maj() {
+            var s = Math.max(0, Math.ceil((fin - Date.now()) / 1000));
+            if (s <= 0) {
+                bouton.disabled = false;
+                if (texte) {
+                    texte.hidden = true;
+                }
+                return;
+            }
+            if (texte) {
+                texte.textContent = format(form.getAttribute("data-texte-attente"), s);
+            }
+            setTimeout(maj, 250);
+        }
+        maj();
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("form[data-code-otp]").forEach(initialiserCodeOtp);
+        document.querySelectorAll("form[data-compte-a-rebours]").forEach(initialiserCompteARebours);
         document.querySelectorAll("form[data-sous-etapes]").forEach(initialiserSousEtapes);
         document.querySelectorAll("form[data-brouillon]").forEach(initialiserBrouillon);
         document.querySelectorAll("[data-depot]").forEach(initialiserDepot);

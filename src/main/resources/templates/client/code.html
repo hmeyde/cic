@@ -13,19 +13,34 @@
             <bdi dir="ltr" th:text="${telephoneMasque}">****3456</bdi>.
         </p>
 
-        <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert"
-           th:text="#{${erreur}(${essaisRestants})}">Code incorrect.</p>
+        <p th:if="${erreur != null}" id="code-erreur" class="alerte alerte--erreur" role="alert"
+           th:text="#{${erreur}(${essaisRestants ?: secondesErreur})}">Code incorrect.</p>
+        <p th:if="${info != null}" class="alerte alerte--succes" role="status" th:text="#{${info}}">Nouveau code envoyé.</p>
 
-        <form class="formulaire carte" method="post" th:action="@{/client/connexion/code}">
+        <!--/* Sans JavaScript : un seul champ de 6 chiffres. Avec JavaScript ([data-code-otp]) : 6 cases,
+               passage automatique à la suivante, collage du code entier, remplissage par le SMS reçu. */-->
+        <form class="formulaire carte" method="post" th:action="@{/client/connexion/code}" data-code-otp
+              th:attr="data-texte-case=#{client.code.case},data-texte-incomplet=#{client.code.format}">
             <div class="champ">
-                <label for="code" th:text="#{client.code.libelle}">Code reçu par SMS</label>
+                <label for="code" id="code-libelle" th:text="#{client.code.libelle}">Code reçu par SMS</label>
+                <p id="code-aide" class="champ__aide texte-doux" th:text="#{client.code.aide}">6 chiffres. Vous pouvez coller le code reçu.</p>
                 <input id="code" name="code" type="text" required minlength="6" maxlength="6" pattern="[0-9]{6}"
-                       inputmode="numeric" autocomplete="one-time-code" dir="ltr"
-                       th:attr="aria-invalid=${erreur != null} ? 'true' : 'false'" autofocus>
+                       inputmode="numeric" autocomplete="one-time-code" dir="ltr" spellcheck="false"
+                       th:attr="aria-invalid=${erreur != null} ? 'true' : 'false',
+                                aria-describedby=${erreur != null} ? 'code-aide code-erreur' : 'code-aide'"
+                       autofocus>
             </div>
             <button type="submit" class="bouton bouton--principal" th:text="#{client.code.valider}">Se connecter</button>
         </form>
-        <p><a th:href="@{/client/connexion}" th:text="#{client.code.autre-numero}">Changer de numéro ou recevoir un nouveau code</a></p>
+
+        <form class="renvoi-code" method="post" th:action="@{/client/connexion/code/renvoi}"
+              th:attr="data-compte-a-rebours=${secondesAvantRenvoi},data-texte-attente=#{client.code.renvoi.attente}">
+            <p class="texte-doux renvoi-code__attente" data-compte-a-rebours-texte
+               th:if="${secondesAvantRenvoi > 0}"
+               th:text="#{client.code.renvoi.attente(${secondesAvantRenvoi})}">Vous pourrez demander un nouveau code dans 60 s.</p>
+            <button type="submit" class="bouton-lien" th:text="#{client.code.renvoi}">Recevoir un nouveau code</button>
+        </form>
+        <p><a th:href="@{/client/connexion}" th:text="#{client.code.autre-numero}">Changer de numéro</a></p>
     </section>
 </main>
 </body>

@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`35a4257`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`9a01111`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -35,7 +35,7 @@ Générée automatiquement depuis le code (`35a4257`). Sert à se repérer vite 
 | `CommandesFournisseurBackOfficeController` (demande) | `GET /bo/commandes`, `POST /bo/commandes/{id}/validation`, `GET /bo/commandes/{id}/bon-de-commande.pdf` |
 | `ComposantsDevController` (web) | `GET /dev/composants` |
 | `ConnexionBackOfficeController` (identite) | `GET /bo/login` |
-| `ConnexionClientController` (identite) | `GET /client/connexion`, `POST /client/connexion`, `GET /client/connexion/code`, `POST /client/connexion/code` |
+| `ConnexionClientController` (identite) | `GET /client/connexion`, `POST /client/connexion`, `GET /client/connexion/code`, `POST /client/connexion/code/renvoi`, `POST /client/connexion/code` |
 | `CreationCompteClientController` (identite) | `GET /client/connexion/compte`, `POST /client/connexion/compte` |
 | `DecisionBackOfficeController` (demande) | `POST CHEMIN_ACCEPTATION`, `POST CHEMIN_REFUS`, `POST CHEMIN_JUSTIFICATIF` |
 | `DemandeClientController` (demande) | `GET /client/demandes`, `GET /client/dossier`, `GET /client/dossier/contrat.pdf`, `GET /client/dossier/autorisation-prelevement.pdf`, `POST /client/dossier/remise`, `POST /client/demandes` |
