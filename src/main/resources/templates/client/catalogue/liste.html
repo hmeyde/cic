@@ -13,6 +13,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur catalogue" aria-labelledby="titre-catalogue">
+        <nav th:replace="~{fragments/parcours :: progression}"></nav>
         <h1 id="titre-catalogue" th:text="#{client.catalogue.titre}">Catalogue</h1>
         <p class="texte-doux" th:text="#{client.catalogue.texte}">Choisissez un produit : vous payez un apport, nous vous le remettons, puis vous remboursez le reste par mensualités, sans intérêt ni pénalité.</p>
 

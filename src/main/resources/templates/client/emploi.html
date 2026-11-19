@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--/*
+  Étape 2 du parcours (Emploi), aussi ouverte depuis le profil. Même découpage en questions que la
+  création du compte (voir creation-compte.html). Dans le parcours (« parcours » présent), le champ
+  caché « parcours » fait suivre l'enregistrement par l'étape Justificatifs.
+*/-->
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
@@ -7,81 +12,102 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-emploi">
+        <nav th:replace="~{fragments/parcours :: progression}"></nav>
         <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre emploi est enregistré.</p>
         <h1 id="titre-emploi" th:text="#{client.emploi.titre}">Mon emploi</h1>
         <p class="texte-doux" th:text="#{client.emploi.texte}">Ces informations servent à étudier vos demandes et à fixer la date de vos échéances.</p>
 
-        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}" th:action="@{/client/emploi}">
-            <div class="champ">
-                <label for="employeur" th:text="#{client.emploi.employeur}">Employeur</label>
-                <input id="employeur" type="text" th:field="*{employeur}" required maxlength="150" autocomplete="organization"
-                       th:attr="aria-invalid=${#fields.hasErrors('employeur')} ? 'true' : null,aria-describedby=${#fields.hasErrors('employeur')} ? 'employeur-erreur' : null">
-                <p th:if="${#fields.hasErrors('employeur')}" id="employeur-erreur" class="champ__erreur" th:errors="*{employeur}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="typeContrat" th:text="#{client.emploi.type-contrat}">Type de contrat</label>
-                <select id="typeContrat" th:field="*{typeContrat}" required
-                        th:attr="aria-invalid=${#fields.hasErrors('typeContrat')} ? 'true' : null,aria-describedby=${#fields.hasErrors('typeContrat')} ? 'typeContrat-erreur' : null">
-                    <option value="" th:text="#{client.emploi.choisir}">Choisir…</option>
-                    <option th:each="t : ${typesContrat}" th:value="${t.name()}"
-                            th:text="#{'client.emploi.type-contrat.' + ${t.name()}}">CDI</option>
-                </select>
-                <p th:if="${#fields.hasErrors('typeContrat')}" id="typeContrat-erreur" class="champ__erreur" th:errors="*{typeContrat}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="dateDebut" th:text="#{client.emploi.date-debut}">Date d’embauche</label>
-                <input id="dateDebut" type="date" th:field="*{dateDebut}" required th:max="${aujourdhui}" dir="ltr"
-                       th:attr="aria-invalid=${#fields.hasErrors('dateDebut')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateDebut')} ? 'dateDebut-erreur' : null">
-                <p th:if="${#fields.hasErrors('dateDebut')}" id="dateDebut-erreur" class="champ__erreur" th:errors="*{dateDebut}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="dateFin" th:text="#{client.emploi.date-fin}">Fin du contrat</label>
-                <p id="dateFin-aide" class="champ__aide texte-doux" th:text="#{client.emploi.date-fin.aide}">Seulement pour un CDD.</p>
-                <input id="dateFin" type="date" th:field="*{dateFin}" th:min="${aujourdhui}" dir="ltr"
-                       th:attr="aria-invalid=${#fields.hasErrors('dateFin')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateFin')} ? 'dateFin-aide dateFin-erreur' : 'dateFin-aide'">
-                <p th:if="${#fields.hasErrors('dateFin')}" id="dateFin-erreur" class="champ__erreur" th:errors="*{dateFin}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="salaireNet" th:text="#{client.emploi.salaire-net}">Salaire net mensuel (MRU)</label>
-                <p id="salaireNet-aide" class="champ__aide texte-doux" th:text="#{client.emploi.salaire-net.aide}">Le montant versé chaque mois, en ouguiyas entières.</p>
-                <input id="salaireNet" type="text" th:field="*{salaireNet}" required inputmode="numeric" maxlength="20"
-                       autocomplete="off" dir="ltr"
-                       th:attr="aria-invalid=${#fields.hasErrors('salaireNet')} ? 'true' : null,aria-describedby=${#fields.hasErrors('salaireNet')} ? 'salaireNet-aide salaireNet-erreur' : 'salaireNet-aide'">
-                <p th:if="${#fields.hasErrors('salaireNet')}" id="salaireNet-erreur" class="champ__erreur" th:errors="*{salaireNet}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="jourPaie" th:text="#{client.emploi.jour-paie}">Jour de paie</label>
-                <p id="jourPaie-aide" class="champ__aide texte-doux" th:text="#{client.emploi.jour-paie.aide}">Jour du mois où le salaire est versé (1 à 31). Vos échéances tomberont ce jour-là.</p>
-                <input id="jourPaie" type="number" th:field="*{jourPaie}" required min="1" max="31" inputmode="numeric" dir="ltr"
-                       th:attr="aria-invalid=${#fields.hasErrors('jourPaie')} ? 'true' : null,aria-describedby=${#fields.hasErrors('jourPaie')} ? 'jourPaie-aide jourPaie-erreur' : 'jourPaie-aide'">
-                <p th:if="${#fields.hasErrors('jourPaie')}" id="jourPaie-erreur" class="champ__erreur" th:errors="*{jourPaie}">Erreur</p>
-            </div>
-            <div class="champ champ--case">
-                <input id="salaireVerseSurCompte" type="checkbox" th:field="*{salaireVerseSurCompte}">
-                <label for="salaireVerseSurCompte" th:text="#{client.emploi.salaire-verse-sur-compte}">Mon salaire est versé sur un compte bancaire</label>
-            </div>
-            <div class="champ champ--case">
-                <input id="salaireDomicilieBmci" type="checkbox" th:field="*{salaireDomicilieBmci}"
-                       th:attr="aria-invalid=${#fields.hasErrors('salaireDomicilieBmci')} ? 'true' : null,aria-describedby=${#fields.hasErrors('salaireDomicilieBmci')} ? 'salaireDomicilieBmci-erreur' : null">
-                <label for="salaireDomicilieBmci" th:text="#{client.emploi.salaire-domicilie-bmci}">Ce compte est à la BMCI</label>
-            </div>
-            <p th:if="${#fields.hasErrors('salaireDomicilieBmci')}" id="salaireDomicilieBmci-erreur" class="champ__erreur" th:errors="*{salaireDomicilieBmci}">Erreur</p>
-            <div class="champ">
-                <label for="modeRemboursement" th:text="#{client.emploi.mode}">Mode de remboursement</label>
-                <p id="modeRemboursement-aide" class="champ__aide texte-doux" th:text="#{client.emploi.mode.aide}">Comment vos mensualités seront prélevées.</p>
-                <select id="modeRemboursement" th:field="*{modeRemboursement}" required
-                        th:attr="aria-invalid=${#fields.hasErrors('modeRemboursement')} ? 'true' : null,aria-describedby=${#fields.hasErrors('modeRemboursement')} ? 'modeRemboursement-aide modeRemboursement-erreur' : 'modeRemboursement-aide'">
-                    <option value="" th:text="#{client.emploi.choisir}">Choisir…</option>
-                    <option th:each="m : ${modesRemboursement}" th:value="${m.name()}"
-                            th:text="#{'client.emploi.mode.' + ${m.name()}}">Retenue par l’employeur</option>
-                </select>
-                <p th:if="${#fields.hasErrors('modeRemboursement')}" id="modeRemboursement-erreur" class="champ__erreur" th:errors="*{modeRemboursement}">Erreur</p>
-            </div>
-            <div class="actions-formulaire">
-                <button type="submit" class="bouton bouton--principal"
-                        th:text="${existant} ? #{client.emploi.modifier} : #{client.emploi.enregistrer}">Enregistrer</button>
-                <a class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a>
-            </div>
+        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}" th:action="@{/client/emploi}"
+              data-sous-etapes data-brouillon="emploi"
+              th:attr="data-texte-continuer=#{sous-etapes.continuer},data-texte-retour=#{sous-etapes.retour},data-texte-compteur=#{sous-etapes.compteur('{0}', '{1}')},data-texte-requis=#{client.compte.obligatoire}">
+            <input th:if="${parcours != null}" type="hidden" name="parcours" value="1">
+            <p class="sous-etapes__compteur texte-doux" data-sous-etapes-compteur hidden></p>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.emploi.question.employeur}">Qui est votre employeur ?</legend>
+                <div class="champ">
+                    <label for="employeur" th:text="#{client.emploi.employeur}">Employeur</label>
+                    <input id="employeur" type="text" th:field="*{employeur}" required maxlength="150" autocomplete="organization"
+                           th:attr="aria-invalid=${#fields.hasErrors('employeur')} ? 'true' : null,aria-describedby=${#fields.hasErrors('employeur')} ? 'employeur-erreur' : null">
+                    <p th:if="${#fields.hasErrors('employeur')}" id="employeur-erreur" class="champ__erreur" th:errors="*{employeur}">Erreur</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.emploi.question.contrat}">Quel est votre contrat de travail ?</legend>
+                <div class="champ">
+                    <label for="typeContrat" th:text="#{client.emploi.type-contrat}">Type de contrat</label>
+                    <select id="typeContrat" th:field="*{typeContrat}" required
+                            th:attr="aria-invalid=${#fields.hasErrors('typeContrat')} ? 'true' : null,aria-describedby=${#fields.hasErrors('typeContrat')} ? 'typeContrat-erreur' : null,data-texte-requis=#{client.emploi.choix.obligatoire}">
+                        <option value="" th:text="#{client.emploi.choisir}">Choisir…</option>
+                        <option th:each="t : ${typesContrat}" th:value="${t.name()}"
+                                th:text="#{'client.emploi.type-contrat.' + ${t.name()}}">CDI</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('typeContrat')}" id="typeContrat-erreur" class="champ__erreur" th:errors="*{typeContrat}">Erreur</p>
+                </div>
+                <div class="champ">
+                    <label for="dateDebut" th:text="#{client.emploi.date-debut}">Date d’embauche</label>
+                    <input id="dateDebut" type="date" th:field="*{dateDebut}" required th:max="${aujourdhui}" dir="ltr"
+                           th:attr="aria-invalid=${#fields.hasErrors('dateDebut')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateDebut')} ? 'dateDebut-erreur' : null,data-texte-format=#{client.emploi.date.invalide}">
+                    <p th:if="${#fields.hasErrors('dateDebut')}" id="dateDebut-erreur" class="champ__erreur" th:errors="*{dateDebut}">Erreur</p>
+                </div>
+                <div class="champ">
+                    <label for="dateFin" th:text="#{client.emploi.date-fin}">Fin du contrat</label>
+                    <p id="dateFin-aide" class="champ__aide texte-doux" th:text="#{client.emploi.date-fin.aide}">Seulement pour un CDD.</p>
+                    <input id="dateFin" type="date" th:field="*{dateFin}" th:min="${aujourdhui}" dir="ltr"
+                           th:attr="aria-invalid=${#fields.hasErrors('dateFin')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateFin')} ? 'dateFin-aide dateFin-erreur' : 'dateFin-aide',data-texte-format=#{client.emploi.date.invalide}">
+                    <p th:if="${#fields.hasErrors('dateFin')}" id="dateFin-erreur" class="champ__erreur" th:errors="*{dateFin}">Erreur</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.emploi.question.salaire}">Quel est votre salaire, et quand est-il versé ?</legend>
+                <div class="champ">
+                    <label for="salaireNet" th:text="#{client.emploi.salaire-net}">Salaire net mensuel (MRU)</label>
+                    <p id="salaireNet-aide" class="champ__aide texte-doux" th:text="#{client.emploi.salaire-net.aide}">Le montant versé chaque mois, en ouguiyas entières.</p>
+                    <input id="salaireNet" type="text" th:field="*{salaireNet}" required inputmode="numeric" maxlength="20"
+                           autocomplete="off" dir="ltr"
+                           th:attr="aria-invalid=${#fields.hasErrors('salaireNet')} ? 'true' : null,aria-describedby=${#fields.hasErrors('salaireNet')} ? 'salaireNet-aide salaireNet-erreur' : 'salaireNet-aide',data-texte-format=#{client.emploi.salaire.invalide}">
+                    <p th:if="${#fields.hasErrors('salaireNet')}" id="salaireNet-erreur" class="champ__erreur" th:errors="*{salaireNet}">Erreur</p>
+                </div>
+                <div class="champ">
+                    <label for="jourPaie" th:text="#{client.emploi.jour-paie}">Jour de paie</label>
+                    <p id="jourPaie-aide" class="champ__aide texte-doux" th:text="#{client.emploi.jour-paie.aide}">Jour du mois où le salaire est versé (1 à 31). Vos échéances tomberont ce jour-là.</p>
+                    <input id="jourPaie" type="number" th:field="*{jourPaie}" required min="1" max="31" inputmode="numeric" dir="ltr"
+                           th:attr="aria-invalid=${#fields.hasErrors('jourPaie')} ? 'true' : null,aria-describedby=${#fields.hasErrors('jourPaie')} ? 'jourPaie-aide jourPaie-erreur' : 'jourPaie-aide',data-texte-format=#{client.emploi.jour-paie.invalide}">
+                    <p th:if="${#fields.hasErrors('jourPaie')}" id="jourPaie-erreur" class="champ__erreur" th:errors="*{jourPaie}">Erreur</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.emploi.question.versement}">Comment vos mensualités seront-elles prélevées ?</legend>
+                <div class="champ champ--case">
+                    <input id="salaireVerseSurCompte" type="checkbox" th:field="*{salaireVerseSurCompte}">
+                    <label for="salaireVerseSurCompte" th:text="#{client.emploi.salaire-verse-sur-compte}">Mon salaire est versé sur un compte bancaire</label>
+                </div>
+                <div class="champ champ--case">
+                    <input id="salaireDomicilieBmci" type="checkbox" th:field="*{salaireDomicilieBmci}"
+                           th:attr="aria-invalid=${#fields.hasErrors('salaireDomicilieBmci')} ? 'true' : null,aria-describedby=${#fields.hasErrors('salaireDomicilieBmci')} ? 'salaireDomicilieBmci-erreur' : null">
+                    <label for="salaireDomicilieBmci" th:text="#{client.emploi.salaire-domicilie-bmci}">Ce compte est à la BMCI</label>
+                    <p th:if="${#fields.hasErrors('salaireDomicilieBmci')}" id="salaireDomicilieBmci-erreur" class="champ__erreur champ__erreur--case" th:errors="*{salaireDomicilieBmci}">Erreur</p>
+                </div>
+                <div class="champ">
+                    <label for="modeRemboursement" th:text="#{client.emploi.mode}">Mode de remboursement</label>
+                    <p id="modeRemboursement-aide" class="champ__aide texte-doux" th:text="#{client.emploi.mode.aide}">Comment vos mensualités seront prélevées.</p>
+                    <select id="modeRemboursement" th:field="*{modeRemboursement}" required
+                            th:attr="aria-invalid=${#fields.hasErrors('modeRemboursement')} ? 'true' : null,aria-describedby=${#fields.hasErrors('modeRemboursement')} ? 'modeRemboursement-aide modeRemboursement-erreur' : 'modeRemboursement-aide',data-texte-requis=#{client.emploi.choix.obligatoire}">
+                        <option value="" th:text="#{client.emploi.choisir}">Choisir…</option>
+                        <option th:each="m : ${modesRemboursement}" th:value="${m.name()}"
+                                th:text="#{'client.emploi.mode.' + ${m.name()}}">Retenue par l’employeur</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('modeRemboursement')}" id="modeRemboursement-erreur" class="champ__erreur" th:errors="*{modeRemboursement}">Erreur</p>
+                </div>
+                <div class="actions-formulaire" data-sous-etapes-fin>
+                    <button type="submit" class="bouton bouton--principal"
+                            th:text="${parcours != null} ? #{client.emploi.continuer-parcours} : (${existant} ? #{client.emploi.modifier} : #{client.emploi.enregistrer})">Enregistrer</button>
+                    <a th:if="${parcours == null}" class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a>
+                </div>
+            </fieldset>
         </form>
     </section>
 </main>

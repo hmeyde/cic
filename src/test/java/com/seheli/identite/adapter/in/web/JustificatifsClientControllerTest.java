@@ -59,7 +59,7 @@ class JustificatifsClientControllerTest {
     void le_client_envoie_puis_revoit_son_justificatif() throws IOException {
         RedirectAttributesModelMap redirection = new RedirectAttributesModelMap();
 
-        String vue = controller.envoyer(principal, "PIECE_IDENTITE", fichier(PDF), new ExtendedModelMap(), redirection);
+        String vue = controller.envoyer(principal, "PIECE_IDENTITE", fichier(PDF), null, new ExtendedModelMap(), redirection);
 
         assertThat(vue).isEqualTo("redirect:/client/justificatifs");
         assertThat(redirection.getFlashAttributes().get("succes")).isEqualTo("client.justificatifs.envoye");
@@ -86,28 +86,63 @@ class JustificatifsClientControllerTest {
     }
 
     @Test
+    void la_photo_prise_avec_le_telephone_est_envoyee_quand_aucun_fichier_n_est_choisi() throws IOException {
+        byte[] jpeg = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 0x10};
+        MockMultipartFile vide = new MockMultipartFile("fichier", "", "application/octet-stream", new byte[0]);
+        MockMultipartFile photo = new MockMultipartFile("photo", "image.jpg", "image/jpeg", jpeg);
+
+        assertThat(controller.envoyer(principal, "PIECE_IDENTITE", vide, photo, new ExtendedModelMap(),
+                new RedirectAttributesModelMap())).isEqualTo("redirect:/client/justificatifs");
+
+        assertThat(documents.parClient(client.id())).singleElement()
+                .satisfies(d -> assertThat(d.type()).isEqualTo(TypeDocument.PIECE_IDENTITE));
+    }
+
+    @Test
+    void propose_la_prochaine_piece_attendue() throws IOException {
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.liste(principal, model);
+        assertThat(model).containsEntry("typeChoisi", "PIECE_IDENTITE").containsEntry("nombreRecus", 0)
+                .containsEntry("complets", false);
+
+        controller.envoyer(principal, "PIECE_IDENTITE", fichier(PDF), null, new ExtendedModelMap(),
+                new RedirectAttributesModelMap());
+        model = new ExtendedModelMap();
+        controller.liste(principal, model);
+        assertThat(model).containsEntry("typeChoisi", "CONTRAT_OU_ATTESTATION").containsEntry("nombreRecus", 1);
+
+        for (String type : new String[] {"CONTRAT_OU_ATTESTATION", "BULLETIN_PAIE", "RIB"}) {
+            controller.envoyer(principal, type, fichier(PDF), null, new ExtendedModelMap(),
+                    new RedirectAttributesModelMap());
+        }
+        model = new ExtendedModelMap();
+        controller.liste(principal, model);
+        assertThat(model).containsEntry("typeChoisi", "").containsEntry("complets", true);
+    }
+
+    @Test
     void reaffiche_la_page_avec_l_erreur() throws IOException {
         ExtendedModelMap model = new ExtendedModelMap();
-        assertThat(controller.envoyer(principal, "", fichier(PDF), model, new RedirectAttributesModelMap()))
+        assertThat(controller.envoyer(principal, "", fichier(PDF), null, model, new RedirectAttributesModelMap()))
                 .isEqualTo("client/justificatifs");
         assertThat(model).containsEntry("erreur", "client.justificatifs.type.obligatoire");
 
         model = new ExtendedModelMap();
-        controller.envoyer(principal, "RIB", fichier(new byte[0]), model, new RedirectAttributesModelMap());
+        controller.envoyer(principal, "RIB", fichier(new byte[0]), null, model, new RedirectAttributesModelMap());
         assertThat(model).containsEntry("erreur", "client.justificatifs.fichier.obligatoire")
                 .containsEntry("typeChoisi", "RIB");
 
         model = new ExtendedModelMap();
-        controller.envoyer(principal, "RIB", null, model, new RedirectAttributesModelMap());
+        controller.envoyer(principal, "RIB", null, null, model, new RedirectAttributesModelMap());
         assertThat(model).containsEntry("erreur", "client.justificatifs.fichier.obligatoire");
 
         model = new ExtendedModelMap();
-        controller.envoyer(principal, "RIB", fichier("GIF89a".getBytes(StandardCharsets.US_ASCII)), model,
+        controller.envoyer(principal, "RIB", fichier("GIF89a".getBytes(StandardCharsets.US_ASCII)), null, model,
                 new RedirectAttributesModelMap());
         assertThat(model).containsEntry("erreur", "client.justificatifs.format.refuse");
 
         model = new ExtendedModelMap();
-        controller.envoyer(principal, "RIB", fichier(new byte[(int) Document.TAILLE_MAX_OCTETS + 1]), model,
+        controller.envoyer(principal, "RIB", fichier(new byte[(int) Document.TAILLE_MAX_OCTETS + 1]), null, model,
                 new RedirectAttributesModelMap());
         assertThat(model).containsEntry("erreur", "client.justificatifs.fichier.trop-volumineux");
 

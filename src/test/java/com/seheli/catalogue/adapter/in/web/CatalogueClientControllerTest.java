@@ -200,6 +200,19 @@ class CatalogueClientControllerTest {
     }
 
     @Test
+    void la_confirmation_de_la_demande_reprend_la_duree_et_l_apport_simules() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        assertThat(controller.confirmation(telephone.id(), 4, 50, principal, model))
+                .isEqualTo("client/catalogue/demande");
+
+        SimulationClient simulation = simulationAffichee(model);
+        assertThat(simulation.detail().nombreMois()).isEqualTo(4);
+        assertThat(simulation.apportPct()).isEqualTo(50);
+        assertThat(model).containsEntry("produitId", telephone.id());
+    }
+
+    @Test
     void le_fragment_htmx_recalcule_la_simulation_pour_la_duree_choisie() {
         ExtendedModelMap model = new ExtendedModelMap();
 

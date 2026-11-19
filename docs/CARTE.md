@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`8d721d4`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`35a4257`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -21,7 +21,7 @@ Générée automatiquement depuis le code (`8d721d4`). Sert à se repérer vite 
 | `parametrage` (13) | adapter.out adapter.out.persistence application domain | Parametre, ParametreJpaRepository, ParametrePersistenceAdapter, Parametres, ParametreService |
 | `pilotage` (11) | adapter.in adapter.in.web application domain | Concentration, TableauDeBordController, TableauDeBordService |
 | `recouvrement` (29) | adapter.in adapter.in.scheduling adapter.in.web adapter.out adapter.out.persistence application domain | NoteRecouvrementJpaRepository, NoteRecouvrementPersistenceAdapter, NoteRecouvrementRepository, RappelPrelevementJob, RappelPrelevementService, RecouvrementBackOfficeController, Relance, RelanceJpaRepository, RelancePersistenceAdapter, RelanceRepository, RetardEcheanceService, RetardsEtRelancesJob |
-| `web` (7) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
+| `web` (10) | - | AccueilController, BackOfficeAccueilController, ComposantsDevController |
 
 ## Routes web
 
@@ -31,7 +31,7 @@ Générée automatiquement depuis le code (`8d721d4`). Sert à se repérer vite 
 | `AutorisationsBackOfficeController` (contrat) | `GET /bo/autorisations`, `GET /bo/autorisations/{id}`, `POST /bo/autorisations/{id}/document-signe`, `GET /bo/autorisations/{id}/document-signe`, `GET /bo/autorisations/{id}/autorisation.pdf`, `POST /bo/autorisations/{id}/transmission`, `POST /bo/autorisations/{id}/acceptation`, `POST /bo/autorisations/{id}/activation`, `POST /bo/autorisations/{id}/revocation` |
 | `BackOfficeAccueilController` (web) | `GET /bo` |
 | `CapitalBackOfficeController` (comptabilite) | `GET /bo/capital`, `POST /bo/capital` |
-| `CatalogueClientController` (catalogue) | `GET /client/catalogue`, `GET /client/catalogue/{id}`, `GET /client/catalogue/{id}/simulation` |
+| `CatalogueClientController` (catalogue) | `GET /client/catalogue`, `GET /client/catalogue/{id}`, `GET /client/catalogue/{id}/demande`, `GET /client/catalogue/{id}/simulation` |
 | `CommandesFournisseurBackOfficeController` (demande) | `GET /bo/commandes`, `POST /bo/commandes/{id}/validation`, `GET /bo/commandes/{id}/bon-de-commande.pdf` |
 | `ComposantsDevController` (web) | `GET /dev/composants` |
 | `ConnexionBackOfficeController` (identite) | `GET /bo/login` |
@@ -107,4 +107,4 @@ Générée automatiquement depuis le code (`8d721d4`). Sert à se repérer vite 
 
 ## Tests
 
-- 125 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.
+- 127 classes de test. Lancer une seule classe : `./mvnw -q test -Dtest=NomDuTest`.

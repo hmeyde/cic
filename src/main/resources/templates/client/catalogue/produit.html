@@ -12,6 +12,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur fiche-produit" aria-labelledby="titre-produit">
+        <nav th:replace="~{fragments/parcours :: progression}"></nav>
         <p class="fiche-produit__retour"><a th:href="@{/client/catalogue}" th:text="#{client.produit.retour}">Retour au catalogue</a></p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Vous avez déjà un dossier en cours.</p>
 

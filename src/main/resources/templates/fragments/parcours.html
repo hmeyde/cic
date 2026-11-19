@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  Barre de progression du parcours de demande (Compte, Emploi, Justificatifs, Demande).
+  « parcours » est fourni par ParcoursDemandeAdvice ; absent hors du parcours, rien n'est affiché.
+  Les étapes autres que la courante sont des liens (retour sans perte : leurs données sont
+  enregistrées), sauf le compte, créé une seule fois.
+*/-->
+<nav th:fragment="progression" th:if="${parcours != null}" class="parcours"
+     th:attr="aria-label=#{parcours.libelle}">
+    <p class="parcours__resume">
+        <span th:text="#{parcours.etape-sur(${parcours.numero()}, ${parcours.total()})}">Étape 2 sur 4</span>
+        <strong th:text="#{'parcours.etape.' + ${parcours.nom()}}">Emploi</strong>
+    </p>
+    <progress class="parcours__barre" th:max="${parcours.total()}" th:value="${parcours.numero()}"
+              aria-hidden="true">2 / 4</progress>
+    <ol class="parcours__etapes">
+        <li th:each="e : ${parcours.etapes()}" class="parcours__etape"
+            th:classappend="${'parcours__etape--' + #strings.replace(#strings.toLowerCase(e.statut().name()), '_', '-')}"
+            th:attr="aria-current=${e.statut().name() == 'COURANTE'} ? 'step'">
+            <th:block th:if="${e.lien() != null}">
+                <a class="parcours__lien" th:href="@{${e.lien()}}">
+                    <span class="parcours__pastille" aria-hidden="true" th:text="${e.numero()}">1</span>
+                    <span class="parcours__nom" th:text="#{'parcours.etape.' + ${e.nom()}}">Compte</span>
+                    <span class="visuellement-cache" th:text="#{'parcours.statut.' + ${e.statut().name()}}">faite</span>
+                </a>
+            </th:block>
+            <th:block th:if="${e.lien() == null}">
+                <span class="parcours__lien">
+                    <span class="parcours__pastille" aria-hidden="true" th:text="${e.numero()}">1</span>
+                    <span class="parcours__nom" th:text="#{'parcours.etape.' + ${e.nom()}}">Compte</span>
+                    <span class="visuellement-cache" th:text="#{'parcours.statut.' + ${e.statut().name()}}">faite</span>
+                </span>
+            </th:block>
+        </li>
+    </ol>
+</nav>
+</body>
+</html>

@@ -267,7 +267,7 @@ class ParcoursDemandeIntegrationTest extends TestIntegration {
                         .param("nni", nni).param("nom", "Test").param("prenom", "Intégration")
                         .param("dateNaissance", LocalDate.now(clock).minusYears(30).toString())
                         .param("consentement", "true"))
-                .andExpect(redirectedUrl("/client/"))
+                .andExpect(redirectedUrl("/client/emploi"))
                 .andExpect(flash().attribute("succes", "client.compte.cree"));
         mvc.perform(get("/client/").session(session)).andExpect(status().isOk());
         return new ClientConnecte(session, clients.parTelephone(telephone).orElseThrow().id());

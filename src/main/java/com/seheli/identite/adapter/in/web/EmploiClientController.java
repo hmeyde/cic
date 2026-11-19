@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.seheli.identite.application.ContratTermineException;
@@ -21,7 +22,8 @@ import com.seheli.identite.domain.ModeRemboursement;
 import com.seheli.identite.domain.TypeContrat;
 
 /**
- * Écran emploi du client connecté : déclaration puis modification de son emploi actuel. Le client est
+ * Écran emploi du client connecté : déclaration puis modification de son emploi actuel. Étape 2 du parcours
+ * de demande : avec le champ {@code parcours}, l'enregistrement mène aux justificatifs. Le client est
  * celui de la session (principal = identifiant du client), jamais un identifiant passé dans l'URL.
  */
 @Controller
@@ -46,7 +48,8 @@ class EmploiClientController {
 
     @PostMapping(CHEMIN)
     String enregistrer(Principal principal, @ModelAttribute("formulaire") EmploiFormulaire formulaire,
-            BindingResult erreurs, Model model, RedirectAttributes redirection) {
+            BindingResult erreurs, @RequestParam(name = "parcours", required = false) String parcours, Model model,
+            RedirectAttributes redirection) {
         UUID clientId = clientId(principal);
         boolean existant = emplois.parClient(clientId).isPresent();
         formulaire.valider(erreurs);
@@ -55,7 +58,8 @@ class EmploiClientController {
                 emplois.enregistrer(clientId, formulaire.versCommande());
                 redirection.addFlashAttribute("succes",
                         existant ? "client.emploi.modifie" : "client.emploi.enregistre");
-                return "redirect:" + CHEMIN;
+                // Dans le parcours de demande, on enchaîne sur les justificatifs.
+                return "redirect:" + (parcours != null ? JustificatifsClientController.CHEMIN : CHEMIN);
             } catch (DateDebutEmploiFutureException e) {
                 erreurs.rejectValue("dateDebut", e.code());
             } catch (ContratTermineException e) {

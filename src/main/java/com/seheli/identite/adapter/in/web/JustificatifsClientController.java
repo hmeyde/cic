@@ -3,6 +3,7 @@ package com.seheli.identite.adapter.in.web;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +30,9 @@ import com.seheli.identite.domain.Document;
 import com.seheli.identite.domain.TypeDocument;
 
 /**
- * Justificatifs du client connecté : envoi, liste et consultation. Le client est celui de la session ;
+ * Justificatifs du client connecté (étape 3 du parcours de demande) : envoi, liste et consultation.
+ * Le type proposé par défaut est la prochaine pièce attendue. Un fichier peut venir du sélecteur
+ * (ou d'un glisser-déposer) ou d'une photo prise directement (champ {@code photo}). Le client est celui de la session ;
  * un document d'un autre client répond 404, comme un document inexistant.
  */
 @Controller
@@ -53,12 +56,16 @@ class JustificatifsClientController {
 
     @PostMapping(CHEMIN)
     String envoyer(Principal principal, @RequestParam(name = "type", required = false) String type,
-            @RequestParam(name = "fichier", required = false) MultipartFile fichier, Model model,
+            @RequestParam(name = "fichier", required = false) MultipartFile fichier,
+            @RequestParam(name = "photo", required = false) MultipartFile photo, Model model,
             RedirectAttributes redirection) throws IOException {
         UUID clientId = clientId(principal);
+        fichier = fichierOuPhoto(fichier, photo);
         TypeDocument typeDocument = typeOuNull(type);
         if (typeDocument == null) {
-            return vue(model, clientId, null, "client.justificatifs.type.obligatoire");
+            String vue = vue(model, clientId, null, "client.justificatifs.type.obligatoire");
+            model.addAttribute("typeChoisi", "");
+            return vue;
         }
         try {
             if (fichier == null || fichier.isEmpty()) {
@@ -89,11 +96,25 @@ class JustificatifsClientController {
         model.addAttribute("documents", recus.stream().map(d -> LigneDocument.depuis(d, clock)).toList());
         model.addAttribute("types", TypeDocument.values());
         model.addAttribute("typesRecus", typesRecus);
-        model.addAttribute("typeChoisi", typeChoisi == null ? "" : typeChoisi.name());
+        // Par défaut, la prochaine pièce attendue : une seule question à la fois.
+        TypeDocument suivant = typeChoisi != null ? typeChoisi
+                : Arrays.stream(TypeDocument.values()).filter(t -> !typesRecus.contains(t)).findFirst().orElse(null);
+        model.addAttribute("typeChoisi", suivant == null ? "" : suivant.name());
+        model.addAttribute("nombreRecus", typesRecus.size());
+        model.addAttribute("complets", typesRecus.size() == TypeDocument.values().length);
+        model.addAttribute("tailleMaxOctets", Document.TAILLE_MAX_OCTETS);
         model.addAttribute("tailleMaxMo", Document.TAILLE_MAX_MO);
         model.addAttribute("maxParType", DocumentService.MAX_PAR_TYPE);
         model.addAttribute("erreur", erreur);
         return VUE;
+    }
+
+    /**
+     * Le fichier choisi, sinon la photo prise avec l'appareil (champ séparé, avec {@code capture}) ;
+     * sans JavaScript les deux champs sont envoyés, l'un vide.
+     */
+    static MultipartFile fichierOuPhoto(MultipartFile fichier, MultipartFile photo) {
+        return fichier != null && !fichier.isEmpty() ? fichier : photo != null && !photo.isEmpty() ? photo : fichier;
     }
 
     private static TypeDocument typeOuNull(String type) {

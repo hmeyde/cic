@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--/*
+  Étape 4 du parcours (Demande) : une seule question, « Envoyer ma demande ? », avec le récapitulatif
+  de la simulation retenue. Le retour rouvre la simulation avec la même durée et le même apport.
+*/-->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.demande.confirmation.titre-page}">Confirmer ma demande — Espace client Seheli</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-confirmation"
+             th:with="d=${simulation.detail()}">
+        <nav th:replace="~{fragments/parcours :: progression}"></nav>
+        <h1 id="titre-confirmation" th:text="#{client.demande.confirmation.titre}">Envoyer ma demande ?</h1>
+        <p class="texte-doux" th:text="#{client.demande.confirmation.texte}">Vérifiez les conditions. L’équipe Seheli étudie votre demande puis vous fait une offre : rien n’est à payer maintenant.</p>
+
+        <p th:if="${parcours != null and !parcours.faite('EMPLOI')}" class="alerte alerte--attention" role="alert">
+            <span th:text="#{client.demande.confirmation.emploi-manquant}">Déclarez d’abord votre emploi : il fixe la date de vos échéances.</span>
+            <a th:href="@{/client/emploi}" th:text="#{client.simulation.dates-inconnues.lien}">Déclarer mon emploi</a>
+        </p>
+        <p th:if="${d.endettementDepasse()}" class="alerte alerte--attention" role="alert"
+           th:text="#{client.simulation.endettement(${#numbers.formatInteger(d.mensualiteMaximale().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(d.plafondMensualite().valeur(), 1, 'WHITESPACE')})}">Attention : mensualité trop élevée.</p>
+        <p th:if="${d.finContratDepassee()}" class="alerte alerte--attention" role="alert"
+           th:text="#{client.simulation.fin-contrat}">Attention : dernière mensualité après la fin de votre CDD.</p>
+
+        <div class="carte confirmation-demande">
+            <div class="confirmation-demande__produit">
+                <img th:src="@{${illustration}}" alt="" width="72" height="72">
+                <div>
+                    <p class="vignette__marque" th:text="${produit.marque()}">Samsung</p>
+                    <p class="confirmation-demande__designation" th:text="${produit.designation()}">Galaxy A35 128 Go</p>
+                </div>
+            </div>
+            <dl class="conditions">
+                <div class="conditions__principale">
+                    <dt th:text="#{client.simulation.mensualite(${d.nombreMois()})}">Mensualité sur 6 mois</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.mensualite().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.simulation.apport}">Apport à la commande</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                </div>
+                <div th:if="${d.datesConnues() and !#lists.isEmpty(d.echeances())}">
+                    <dt th:text="#{client.demande.confirmation.premiere}">Première mensualité</dt>
+                    <dd><time th:datetime="${d.echeances()[0].date()}"
+                              th:text="${#temporals.format(d.echeances()[0].date(), 'd MMMM yyyy')}">25 décembre 2026</time></dd>
+                </div>
+                <div>
+                    <dt th:text="#{client.simulation.total}">Total payé</dt>
+                    <dd th:text="#{client.catalogue.montant(${#numbers.formatInteger(d.prixTotal().valeur(), 1, 'WHITESPACE')})}">20 800 MRU</dd>
+                </div>
+            </dl>
+            <p class="texte-doux" th:text="#{client.produit.mentions}">Prix fixé à la signature : sans intérêt ni pénalité de retard.</p>
+
+            <form class="formulaire" method="post" th:action="@{/client/demandes}">
+                <input type="hidden" name="produit" th:value="${produitId}">
+                <input type="hidden" name="duree" th:value="${d.nombreMois()}">
+                <input type="hidden" name="apport" th:value="${d.apport().valeur().toPlainString()}">
+                <div class="actions">
+                    <button type="submit" class="bouton bouton--principal" th:text="#{client.demande.confirmation.envoyer}">Envoyer ma demande</button>
+                    <a class="bouton bouton--contour"
+                       th:href="@{/client/catalogue/{id}(id=${produitId},duree=${d.nombreMois()},apport=${simulation.apportPct()})} + '#simuler'"
+                       th:text="#{client.demande.confirmation.modifier}">Retour : modifier la simulation</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

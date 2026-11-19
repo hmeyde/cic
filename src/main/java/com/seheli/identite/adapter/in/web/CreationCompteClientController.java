@@ -69,7 +69,8 @@ class CreationCompteClientController {
                 session.removeAttribute(ConnexionClientController.SESSION_TELEPHONE_VERIFIE);
                 sessionClient.ouvrir(client.id(), request, response);
                 redirection.addFlashAttribute("succes", "client.compte.cree");
-                return "redirect:/client/";
+                // Étape suivante du parcours de demande : l'emploi.
+                return "redirect:" + EmploiClientController.CHEMIN;
             } catch (ConsentementManquantException e) {
                 erreurs.rejectValue("consentement", e.code());
             } catch (DateNaissanceInvalideException e) {

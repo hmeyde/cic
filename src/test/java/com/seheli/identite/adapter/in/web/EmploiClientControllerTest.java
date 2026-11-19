@@ -41,7 +41,7 @@ class EmploiClientControllerTest {
     }
 
     private String enregistrer(EmploiFormulaire saisie, BindingResult erreurs, RedirectAttributesModelMap redirection) {
-        return controller.enregistrer(principal, saisie, erreurs, new ExtendedModelMap(), redirection);
+        return controller.enregistrer(principal, saisie, erreurs, null, new ExtendedModelMap(), redirection);
     }
 
     @Test
@@ -78,6 +78,15 @@ class EmploiClientControllerTest {
         assertThat(lu.typeContrat()).isEqualTo(TypeContrat.CDD);
         assertThat(lu.salaireNet()).isEqualTo(Montant.de(35_000));
         assertThat(lu.jourPaie()).isEqualTo(28);
+    }
+
+    @Test
+    void dans_le_parcours_l_emploi_enregistre_mene_aux_justificatifs() {
+        EmploiFormulaire saisie = cdiValide();
+
+        assertThat(controller.enregistrer(principal, saisie, new BeanPropertyBindingResult(saisie, "formulaire"), "1",
+                new ExtendedModelMap(), new RedirectAttributesModelMap())).isEqualTo("redirect:/client/justificatifs");
+        assertThat(emplois.parClient(client.id())).isPresent();
     }
 
     @Test

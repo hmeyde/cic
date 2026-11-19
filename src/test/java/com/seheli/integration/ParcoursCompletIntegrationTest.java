@@ -319,7 +319,7 @@ class ParcoursCompletIntegrationTest extends TestIntegration {
                         .param("nni", nniUnique()).param("nom", "Parcours").param("prenom", "Client")
                         .param("dateNaissance", LocalDate.now(clock).minusYears(30).toString())
                         .param("consentement", "true"))
-                .andExpect(redirectedUrl("/client/"))
+                .andExpect(redirectedUrl("/client/emploi"))
                 .andExpect(flash().attribute("succes", "client.compte.cree"));
         return session;
     }

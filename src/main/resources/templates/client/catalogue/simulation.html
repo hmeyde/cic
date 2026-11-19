@@ -87,13 +87,12 @@
     <p class="texte-doux"
        th:text="#{client.simulation.total.repartition(${#numbers.formatInteger(d.apport().valeur(), 1, 'WHITESPACE')}, ${#numbers.formatInteger(d.resteAFinancer().valeur(), 1, 'WHITESPACE')})}">dont 8 320 MRU d’apport et 12 480 MRU en mensualités</p>
 
-    <form class="formulaire formulaire-demande" method="post" th:action="@{/client/demandes}">
-        <input type="hidden" name="produit" th:value="${produitId}">
-        <input type="hidden" name="duree" th:value="${d.nombreMois()}">
-        <input type="hidden" name="apport" th:value="${d.apport().valeur().toPlainString()}">
-        <button type="submit" class="bouton bouton--principal"
-                th:text="#{client.demande.soumettre(${d.nombreMois()})}">Faire ma demande sur 6 mois</button>
-    </form>
+    <!--/* Étape suivante du parcours : l'écran de confirmation, avec la durée et l'apport simulés. */-->
+    <p class="formulaire-demande">
+        <a class="bouton bouton--principal"
+           th:href="@{/client/catalogue/{id}/demande(id=${produitId},duree=${d.nombreMois()},apport=${simulation.apportPct()})}"
+           th:text="#{client.demande.soumettre(${d.nombreMois()})}">Faire ma demande sur 6 mois</a>
+    </p>
 </div>
 </body>
 </html>

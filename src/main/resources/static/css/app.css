@@ -886,3 +886,79 @@ html[lang="ar"] .onglet { font-size: var(--texte-sm); }
     .points-cles { grid-template-columns: repeat(3, 1fr); }
     .exemple__resume { font-size: 1.75rem; }
 }
+
+/* ---- Parcours de demande : barre de progression (Compte, Emploi, Justificatifs, Demande) ---- */
+.parcours { margin-block-end: 1.25rem; }
+.parcours__resume { display: flex; flex-wrap: wrap; gap: .25rem .5rem; align-items: baseline; margin: 0 0 .4rem; font-size: .95rem; color: var(--couleur-texte-doux); }
+.parcours__resume strong { color: var(--couleur-texte); }
+.parcours__barre {
+    display: block; width: 100%; height: .5rem; margin: 0 0 .6rem;
+    border: 0; border-radius: var(--rayon-plein); background: var(--couleur-fond-doux); overflow: hidden;
+    appearance: none; accent-color: var(--couleur-primaire);
+}
+.parcours__barre::-webkit-progress-bar { background: var(--couleur-fond-doux); border-radius: var(--rayon-plein); }
+.parcours__barre::-webkit-progress-value { background: var(--couleur-primaire); border-radius: var(--rayon-plein); }
+.parcours__barre::-moz-progress-bar { background: var(--couleur-primaire); border-radius: var(--rayon-plein); }
+.parcours__etapes { display: grid; grid-template-columns: repeat(4, 1fr); gap: .25rem; margin: 0; padding: 0; list-style: none; }
+.parcours__lien {
+    display: flex; flex-direction: column; align-items: center; gap: .2rem; min-height: 44px;
+    font-size: .8rem; text-align: center; color: var(--couleur-texte-doux); text-decoration: none;
+}
+a.parcours__lien:hover .parcours__nom { text-decoration: underline; }
+.parcours__pastille {
+    display: inline-grid; place-items: center; width: 1.75rem; height: 1.75rem;
+    border: 2px solid var(--couleur-bordure); border-radius: 50%; font-weight: 700; background: var(--couleur-fond);
+}
+.parcours__etape--faite .parcours__pastille { border-color: var(--couleur-primaire); background: var(--couleur-primaire); color: var(--couleur-sur-primaire); font-size: 0; }
+.parcours__etape--faite .parcours__pastille::before { content: "✓"; font-size: .95rem; }
+.parcours__etape--courante .parcours__pastille { border-color: var(--couleur-primaire); color: var(--couleur-primaire); }
+.parcours__etape--courante .parcours__lien { color: var(--couleur-texte); font-weight: 700; }
+.parcours__suite { margin-block: 1.25rem 2rem; }
+
+/* ---- Formulaires découpés en questions (une visible à la fois avec JavaScript) ---- */
+.sous-etape { display: grid; gap: 1rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.sous-etape[hidden] { display: none; }
+.sous-etape__question { padding: 0; margin: 0 0 .25rem; font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
+.sous-etape__question:focus { outline: none; }
+.sous-etapes__compteur { margin: 0; font-size: .9rem; }
+.sous-etape__actions { margin-block-start: .5rem; }
+.sous-etape .actions-formulaire .bouton { flex: 1 1 10rem; }
+.champ__erreur--case { grid-column: 1 / -1; }
+
+/* ---- Zone de dépôt d'un justificatif ---- */
+.depot__libelle { font-weight: 600; }
+.depot__input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.depot__zone {
+    display: grid; justify-items: center; gap: .3rem; padding: 1.5rem 1rem;
+    border: 2px dashed var(--couleur-bordure); border-radius: var(--rayon); background: var(--couleur-fond-doux);
+    text-align: center; cursor: pointer; font-weight: 400;
+}
+.depot__zone:hover, .depot__zone--survol { border-color: var(--couleur-primaire); }
+.depot__zone--survol { background: var(--couleur-succes-fond); }
+.depot__zone:focus-visible, .depot:has(#fichier:focus-visible) .depot__zone { outline: 3px solid var(--couleur-primaire); outline-offset: 2px; }
+.depot:has(#photo:focus-visible) .depot__photo { outline: 3px solid var(--couleur-primaire); outline-offset: 2px; }
+.depot__icone, .depot__pdf { width: 2rem; height: 2rem; fill: none; stroke: var(--couleur-primaire); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.depot__icone-bouton { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.depot__photo { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+.depot__apercu {
+    display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .5rem .75rem;
+    padding: .75rem; border: 1px solid var(--couleur-bordure); border-radius: var(--rayon);
+}
+.depot__apercu[hidden], .depot__image[hidden], .depot__pdf[hidden] { display: none; }
+.depot__image { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: var(--rayon-sm); }
+.depot__nom { margin: 0; display: grid; gap: .1rem; overflow-wrap: anywhere; }
+.depot__apercu .bouton-lien { grid-column: 1 / -1; justify-self: start; }
+/* Glisser-déposer sur ordinateur (pointeur fin) ; photo directe sur mobile (écran tactile). */
+.depot__glisser { display: none; }
+@media (hover: hover) and (pointer: fine) {
+    .depot__glisser { display: block; }
+    .depot--actif .depot__photo { display: none; }
+}
+.liste-pieces__piece--recue span:first-child { color: var(--couleur-texte-doux); }
+
+/* ---- Confirmation de la demande ---- */
+.confirmation-demande { display: grid; gap: 1rem; }
+.confirmation-demande__produit { display: flex; align-items: center; gap: .75rem; }
+.confirmation-demande__produit img { border-radius: var(--rayon-sm); background: var(--couleur-fond-doux); }
+.confirmation-demande__produit p { margin: 0; }
+.confirmation-demande__designation { font-weight: 700; font-size: 1.1rem; }

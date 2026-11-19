@@ -476,7 +476,7 @@ class SecuriteIntegrationTest extends TestIntegration {
                         .param("nni", nniUnique()).param("nom", "Securite").param("prenom", "Client")
                         .param("dateNaissance", LocalDate.now(clock).minusYears(30).toString())
                         .param("consentement", "true"))
-                .andExpect(redirectedUrl("/client/"));
+                .andExpect(redirectedUrl("/client/emploi"));
         return new ClientConnecte(session, clients.parTelephone(telephone).orElseThrow().id());
     }
 

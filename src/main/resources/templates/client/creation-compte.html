@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--/*
+  Étape 1 du parcours (Compte). Le formulaire est découpé en questions (fieldset.sous-etape) :
+  avec JavaScript, une seule est visible à la fois (Continuer / Retour, retour arrière du navigateur),
+  la saisie reste dans le formulaire et un brouillon est gardé dans l'onglet ; sans JavaScript, tout
+  est affiché. Une erreur du serveur rouvre la première question en erreur, message à côté du champ.
+*/-->
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
@@ -7,48 +13,70 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-compte">
+        <nav th:replace="~{fragments/parcours :: progression}"></nav>
         <h1 id="titre-compte" th:text="#{client.compte.titre}">Créer mon compte</h1>
         <p class="texte-doux">
             <span th:text="#{client.compte.texte}">Votre numéro est confirmé. Il sera celui de votre compte :</span>
             <bdi dir="ltr" th:text="${telephoneMasque}">****3456</bdi>.
         </p>
 
-        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}" th:action="@{/client/connexion/compte}">
-            <div class="champ">
-                <label for="nni" th:text="#{client.compte.nni}">NNI (numéro national d’identification)</label>
-                <p id="nni-aide" class="champ__aide texte-doux" th:text="#{client.compte.nni.aide}">10 chiffres, tels qu’ils figurent sur votre carte d’identité.</p>
-                <input id="nni" type="text" th:field="*{nni}" required maxlength="14" inputmode="numeric"
-                       autocomplete="off" dir="ltr"
-                       th:attr="aria-invalid=${#fields.hasErrors('nni')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nni')} ? 'nni-aide nni-erreur' : 'nni-aide'">
-                <p th:if="${#fields.hasErrors('nni')}" id="nni-erreur" class="champ__erreur" th:errors="*{nni}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="nom" th:text="#{client.compte.nom}">Nom</label>
-                <input id="nom" type="text" th:field="*{nom}" required maxlength="100" autocomplete="family-name"
-                       th:attr="aria-invalid=${#fields.hasErrors('nom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nom')} ? 'nom-erreur' : null">
-                <p th:if="${#fields.hasErrors('nom')}" id="nom-erreur" class="champ__erreur" th:errors="*{nom}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="prenom" th:text="#{client.compte.prenom}">Prénom</label>
-                <input id="prenom" type="text" th:field="*{prenom}" required maxlength="100" autocomplete="given-name"
-                       th:attr="aria-invalid=${#fields.hasErrors('prenom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('prenom')} ? 'prenom-erreur' : null">
-                <p th:if="${#fields.hasErrors('prenom')}" id="prenom-erreur" class="champ__erreur" th:errors="*{prenom}">Erreur</p>
-            </div>
-            <div class="champ">
-                <label for="dateNaissance" th:text="#{client.compte.date-naissance}">Date de naissance</label>
-                <input id="dateNaissance" type="date" th:field="*{dateNaissance}" required th:max="${dateMax}"
-                       autocomplete="bday" dir="ltr"
-                       th:attr="aria-invalid=${#fields.hasErrors('dateNaissance')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateNaissance')} ? 'dateNaissance-erreur' : null">
-                <p th:if="${#fields.hasErrors('dateNaissance')}" id="dateNaissance-erreur" class="champ__erreur" th:errors="*{dateNaissance}">Erreur</p>
-            </div>
-            <div class="champ champ--case">
-                <input id="consentement" type="checkbox" th:field="*{consentement}" required
-                       th:attr="aria-invalid=${#fields.hasErrors('consentement')} ? 'true' : null,aria-describedby=${#fields.hasErrors('consentement')} ? 'consentement-erreur' : null">
-                <label for="consentement" th:text="#{client.compte.consentement}">J’accepte que Seheli utilise mes données pour étudier mes demandes de crédit et gérer mes remboursements.</label>
-            </div>
-            <p th:if="${#fields.hasErrors('consentement')}" id="consentement-erreur" class="champ__erreur" th:errors="*{consentement}">Erreur</p>
-            <p class="champ__aide texte-doux" th:text="#{client.compte.consentement.aide}">Sans ce consentement, Seheli ne peut pas étudier votre demande. Vos justificatifs ne sont visibles que par vous et par l’équipe Seheli.</p>
-            <button type="submit" class="bouton bouton--principal" th:text="#{client.compte.creer}">Créer mon compte</button>
+        <form class="formulaire carte" method="post" novalidate th:object="${formulaire}" th:action="@{/client/connexion/compte}"
+              data-sous-etapes data-brouillon="compte"
+              th:attr="data-texte-continuer=#{sous-etapes.continuer},data-texte-retour=#{sous-etapes.retour},data-texte-compteur=#{sous-etapes.compteur('{0}', '{1}')},data-texte-requis=#{client.compte.obligatoire}">
+            <p class="sous-etapes__compteur texte-doux" data-sous-etapes-compteur hidden></p>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.compte.question.nni}">Quel est votre NNI ?</legend>
+                <div class="champ">
+                    <label for="nni" th:text="#{client.compte.nni}">NNI (numéro national d’identification)</label>
+                    <p id="nni-aide" class="champ__aide texte-doux" th:text="#{client.compte.nni.aide}">10 chiffres, tels qu’ils figurent sur votre carte d’identité.</p>
+                    <input id="nni" type="text" th:field="*{nni}" required maxlength="14" inputmode="numeric"
+                           pattern="[0-9 ]{10,14}" autocomplete="off" dir="ltr"
+                           th:attr="aria-invalid=${#fields.hasErrors('nni')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nni')} ? 'nni-aide nni-erreur' : 'nni-aide',data-texte-format=#{client.compte.nni.invalide}">
+                    <p th:if="${#fields.hasErrors('nni')}" id="nni-erreur" class="champ__erreur" th:errors="*{nni}">Erreur</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.compte.question.nom}">Comment vous appelez-vous ?</legend>
+                <div class="champ">
+                    <label for="prenom" th:text="#{client.compte.prenom}">Prénom</label>
+                    <input id="prenom" type="text" th:field="*{prenom}" required maxlength="100" autocomplete="given-name"
+                           th:attr="aria-invalid=${#fields.hasErrors('prenom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('prenom')} ? 'prenom-erreur' : null">
+                    <p th:if="${#fields.hasErrors('prenom')}" id="prenom-erreur" class="champ__erreur" th:errors="*{prenom}">Erreur</p>
+                </div>
+                <div class="champ">
+                    <label for="nom" th:text="#{client.compte.nom}">Nom</label>
+                    <input id="nom" type="text" th:field="*{nom}" required maxlength="100" autocomplete="family-name"
+                           th:attr="aria-invalid=${#fields.hasErrors('nom')} ? 'true' : null,aria-describedby=${#fields.hasErrors('nom')} ? 'nom-erreur' : null">
+                    <p th:if="${#fields.hasErrors('nom')}" id="nom-erreur" class="champ__erreur" th:errors="*{nom}">Erreur</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.compte.question.naissance}">Quelle est votre date de naissance ?</legend>
+                <div class="champ">
+                    <label for="dateNaissance" th:text="#{client.compte.date-naissance}">Date de naissance</label>
+                    <input id="dateNaissance" type="date" th:field="*{dateNaissance}" required th:max="${dateMax}"
+                           autocomplete="bday" dir="ltr"
+                           th:attr="aria-invalid=${#fields.hasErrors('dateNaissance')} ? 'true' : null,aria-describedby=${#fields.hasErrors('dateNaissance')} ? 'dateNaissance-erreur' : null,data-texte-format=#{client.compte.date-naissance.invalide}">
+                    <p th:if="${#fields.hasErrors('dateNaissance')}" id="dateNaissance-erreur" class="champ__erreur" th:errors="*{dateNaissance}">Erreur</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="sous-etape" data-sous-etape>
+                <legend class="sous-etape__question" th:text="#{client.compte.question.consentement}">Acceptez-vous l’usage de vos données ?</legend>
+                <div class="champ champ--case">
+                    <input id="consentement" type="checkbox" th:field="*{consentement}" required
+                           th:attr="aria-invalid=${#fields.hasErrors('consentement')} ? 'true' : null,aria-describedby=${#fields.hasErrors('consentement')} ? 'consentement-aide consentement-erreur' : 'consentement-aide',data-texte-requis=#{client.compte.consentement.manquant}">
+                    <label for="consentement" th:text="#{client.compte.consentement}">J’accepte que Seheli utilise mes données pour étudier mes demandes de crédit et gérer mes remboursements.</label>
+                    <p th:if="${#fields.hasErrors('consentement')}" id="consentement-erreur" class="champ__erreur champ__erreur--case" th:errors="*{consentement}">Erreur</p>
+                </div>
+                <p id="consentement-aide" class="champ__aide texte-doux" th:text="#{client.compte.consentement.aide}">Sans ce consentement, Seheli ne peut pas étudier votre demande. Vos justificatifs ne sont visibles que par vous et par l’équipe Seheli.</p>
+                <div class="actions-formulaire" data-sous-etapes-fin>
+                    <button type="submit" class="bouton bouton--principal" th:text="#{client.compte.creer}">Créer mon compte</button>
+                </div>
+            </fieldset>
         </form>
     </section>
 </main>

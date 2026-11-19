@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!--/*
+  Étape 3 du parcours (Justificatifs), aussi ouverte depuis le profil. Question principale : envoyer
+  la prochaine pièce attendue (type présélectionné). Zone de dépôt [data-depot] : sélecteur de fichier
+  (cliquer ou glisser-déposer sur ordinateur), bouton « Prendre une photo » (champ « photo » avec
+  capture, sur mobile), aperçu (image ou nom du PDF), taille et format vérifiés avant l'envoi.
+  Sans JavaScript, les deux champs restent utilisables ; le serveur refait toutes les vérifications.
+  Les erreurs s'affichent à côté du champ concerné.
+*/-->
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: page(~{::title}, ~{::main})}">
 <head>
@@ -6,44 +14,89 @@
 </head>
 <body>
 <main id="contenu" class="contenu">
-    <section class="section conteneur" aria-labelledby="titre-justificatifs">
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Justificatif reçu.</p>
+    <section class="section conteneur conteneur--etroit" aria-labelledby="titre-justificatifs"
+             th:with="erreurType=${erreur == 'client.justificatifs.type.obligatoire' or erreur == 'client.justificatifs.trop-nombreux'},
+                      erreurFichier=${erreur != null and !erreurType}">
+        <nav th:replace="~{fragments/parcours :: progression}"></nav>
+        <p th:if="${succes != null}" class="alerte alerte--succes" role="status" th:text="#{${succes}}">Justificatif reçu.</p>
         <h1 id="titre-justificatifs" th:text="#{client.justificatifs.titre}">Mes justificatifs</h1>
         <p class="texte-doux" th:text="#{client.justificatifs.texte}">Envoyez les pièces demandées. Elles ne sont visibles que par vous et par l’équipe Seheli.</p>
 
-        <h2 th:text="#{client.justificatifs.attendus}">Pièces attendues</h2>
-        <ul class="liste-pieces">
-            <li th:each="t : ${types}">
+        <h2 id="titre-attendus" class="visuellement-cache" th:text="#{client.justificatifs.attendus}">Pièces attendues</h2>
+        <p class="texte-doux" th:text="#{client.justificatifs.progression(${nombreRecus}, ${types.length})}">1 pièce sur 4 reçue</p>
+        <ul class="liste-pieces" aria-labelledby="titre-attendus">
+            <li th:each="t : ${types}" th:classappend="${typesRecus.contains(t)} ? 'liste-pieces__piece--recue'">
                 <span th:text="#{'client.justificatifs.type.' + ${t.name()}}">Pièce d’identité</span>
-                <span class="etiquette"
+                <span class="etiquette" th:classappend="${typesRecus.contains(t)} ? 'etiquette--favorable'"
                       th:text="${typesRecus.contains(t)} ? #{client.justificatifs.recu} : #{client.justificatifs.a-envoyer}">À envoyer</span>
             </li>
         </ul>
 
-        <h2 id="titre-envoi" th:text="#{client.justificatifs.envoyer-titre}">Envoyer un justificatif</h2>
         <form class="formulaire carte" method="post" enctype="multipart/form-data" novalidate
-              th:action="@{/client/justificatifs}" aria-labelledby="titre-envoi">
-            <p th:if="${erreur != null}" id="envoi-erreur" class="alerte alerte--erreur" role="alert"
-               th:text="#{${erreur}(${tailleMaxMo}, ${maxParType})}">Erreur</p>
+              th:action="@{/client/justificatifs}" aria-labelledby="titre-envoi" data-envoi-justificatif>
+            <h2 id="titre-envoi" class="sous-etape__question"
+                th:text="${complets} ? #{client.justificatifs.envoyer-titre} : #{client.justificatifs.question}">Envoyez la pièce suivante</h2>
             <div class="champ">
                 <label for="type" th:text="#{client.justificatifs.type}">Type de justificatif</label>
-                <select id="type" name="type" required>
+                <select id="type" name="type" required
+                        th:attr="aria-invalid=${erreurType} ? 'true' : null,aria-describedby=${erreurType} ? 'type-erreur' : null">
                     <option value="" th:text="#{client.emploi.choisir}">Choisir…</option>
                     <option th:each="t : ${types}" th:value="${t.name()}" th:selected="${t.name() == typeChoisi}"
                             th:text="#{'client.justificatifs.type.' + ${t.name()}}">Pièce d’identité</option>
                 </select>
+                <p th:if="${erreurType}" id="type-erreur" class="champ__erreur" role="alert"
+                   th:text="#{${erreur}(${tailleMaxMo}, ${maxParType})}">Choisissez le type de justificatif.</p>
             </div>
-            <div class="champ">
-                <label for="fichier" th:text="#{client.justificatifs.fichier}">Fichier</label>
+
+            <div class="champ depot" data-depot
+                 th:attr="data-taille-max=${tailleMaxOctets},data-texte-trop-gros=#{client.justificatifs.depot.trop-gros('{0}', ${tailleMaxMo})},data-texte-format=#{client.justificatifs.format.refuse},data-texte-requis=#{client.justificatifs.fichier.obligatoire}">
+                <span class="depot__libelle" id="fichier-libelle" th:text="#{client.justificatifs.fichier}">Fichier</span>
                 <p id="fichier-aide" class="champ__aide texte-doux"
                    th:text="#{client.justificatifs.fichier.aide(${tailleMaxMo})}">PDF, JPEG ou PNG, 5 Mo au plus. Une photo nette prise avec votre téléphone convient.</p>
-                <input id="fichier" name="fichier" type="file" required aria-describedby="fichier-aide"
-                       accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                <label for="fichier" class="depot__zone" data-depot-zone>
+                    <svg class="depot__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
+                    </svg>
+                    <strong th:text="#{client.justificatifs.depot.choisir}">Choisir un fichier</strong>
+                    <span class="depot__glisser texte-doux" th:text="#{client.justificatifs.depot.glisser}">ou glissez-le ici</span>
+                </label>
+                <input id="fichier" name="fichier" type="file" class="depot__input"
+                       accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                       th:attr="aria-invalid=${erreurFichier} ? 'true' : null,aria-describedby=${erreurFichier} ? 'fichier-aide fichier-erreur' : 'fichier-aide'">
+                <label for="photo" class="bouton bouton--contour depot__photo">
+                    <svg class="depot__icone-bouton" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    <span th:text="#{client.justificatifs.depot.photo}">Prendre une photo</span>
+                </label>
+                <input id="photo" name="photo" type="file" class="depot__input" accept="image/*" capture="environment"
+                       aria-describedby="fichier-aide">
+                <div class="depot__apercu" data-depot-apercu hidden aria-live="polite">
+                    <img class="depot__image" data-depot-image alt="" hidden>
+                    <svg class="depot__pdf" data-depot-pdf viewBox="0 0 24 24" aria-hidden="true" focusable="false" hidden>
+                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>
+                    </svg>
+                    <p class="depot__nom">
+                        <span class="visuellement-cache" th:text="#{client.justificatifs.depot.apercu}">Fichier choisi :</span>
+                        <bdi data-depot-nom>carte.pdf</bdi>
+                        <span class="texte-doux" data-depot-taille dir="ltr">120 Ko</span>
+                    </p>
+                    <button type="button" class="bouton-lien" data-depot-retirer th:text="#{client.justificatifs.depot.retirer}">Retirer</button>
+                </div>
+                <p th:if="${erreurFichier}" id="fichier-erreur" class="champ__erreur" role="alert" data-depot-erreur
+                   th:text="#{${erreur}(${tailleMaxMo}, ${maxParType})}">Fichier trop volumineux.</p>
+                <p th:unless="${erreurFichier}" id="fichier-erreur" class="champ__erreur" role="alert" data-depot-erreur hidden></p>
             </div>
             <div class="actions-formulaire">
                 <button type="submit" class="bouton bouton--principal" th:text="#{client.justificatifs.envoyer}">Envoyer</button>
             </div>
         </form>
+
+        <div th:if="${parcours != null}" class="actions parcours__suite">
+            <a th:if="${complets}" class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.justificatifs.continuer}">Continuer : choisir mon produit</a>
+            <a th:unless="${complets}" class="bouton bouton--contour" th:href="@{/client/catalogue}" th:text="#{client.justificatifs.plus-tard}">Envoyer les autres pièces plus tard</a>
+            <a th:href="@{/client/emploi}" th:text="#{client.justificatifs.retour-emploi}">Retour : mon emploi</a>
+        </div>
 
         <h2 th:text="#{client.justificatifs.recus}">Justificatifs envoyés</h2>
         <p th:if="${#lists.isEmpty(documents)}" class="texte-doux" th:text="#{client.justificatifs.aucun}">Aucun justificatif envoyé pour l’instant.</p>
@@ -71,7 +124,7 @@
             </table>
         </div>
 
-        <p><a class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a></p>
+        <p th:if="${parcours == null}"><a class="bouton bouton--contour" th:href="@{/client/profil}" th:text="#{client.profil.retour}">Retour à mon profil</a></p>
     </section>
 </main>
 </body>

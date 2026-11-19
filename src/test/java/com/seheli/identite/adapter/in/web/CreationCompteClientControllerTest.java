@@ -89,7 +89,7 @@ class CreationCompteClientControllerTest {
 
         String vue = creer(saisie, new BeanPropertyBindingResult(saisie, "formulaire"), new ExtendedModelMap());
 
-        assertThat(vue).isEqualTo("redirect:/client/");
+        assertThat(vue).isEqualTo("redirect:/client/emploi");
         Client client = clients.parTelephone("22123456").orElseThrow();
         assertThat(client.consentementDonneesLe()).isEqualTo(MAINTENANT);
         assertThat(session.getAttribute(ConnexionClientController.SESSION_TELEPHONE_VERIFIE)).isNull();

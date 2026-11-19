@@ -39,6 +39,7 @@ class CatalogueClientController {
     static final String CHEMIN = "/client/catalogue";
     static final String VUE_LISTE = "client/catalogue/liste";
     static final String VUE_PRODUIT = "client/catalogue/produit";
+    static final String VUE_CONFIRMATION = "client/catalogue/demande";
     static final String FRAGMENT_RESULTATS = VUE_LISTE + " :: resultats";
     static final int RECHERCHE_LONGUEUR_MAX = 100;
     static final String FRAGMENT_SIMULATION = "client/catalogue/simulation :: reponse";
@@ -98,6 +99,19 @@ class CatalogueClientController {
         model.addAttribute("simulation", simulations.simuler(id, clientId(principal), retenue, apport)
                 .orElseThrow(CatalogueClientController::introuvable));
         return VUE_PRODUIT;
+    }
+
+    /**
+     * Étape 4 du parcours : confirmation de la demande avec la durée et l'apport (en %) simulés.
+     * Récapitule le produit, la mensualité, l'apport et le total ; le bouton envoie la demande
+     * ({@code POST /client/demandes}) et le retour rouvre la simulation telle quelle, sans perte.
+     * Mêmes règles de bornes que la page du produit.
+     */
+    @GetMapping(CHEMIN + "/{id}/demande")
+    String confirmation(@PathVariable("id") UUID id, @RequestParam(name = "duree", required = false) Integer duree,
+            @RequestParam(name = "apport", required = false) Integer apport, Principal principal, Model model) {
+        produit(id, duree, apport, principal, model);
+        return VUE_CONFIRMATION;
     }
 
     /**
