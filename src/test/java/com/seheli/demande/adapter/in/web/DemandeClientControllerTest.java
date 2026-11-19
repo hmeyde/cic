@@ -478,4 +478,116 @@ class DemandeClientControllerTest {
         assertThat(controller.suivi(principal, model)).isEqualTo("client/dossier/suivi");
         assertThat(model.containsAttribute("suivi")).isFalse();
     }
+
+    private RemboursementClient remboursement() {
+        ExtendedModelMap model = new ExtendedModelMap();
+        assertThat(controller.remboursement(principal, model)).isEqualTo("client/dossier/remboursement");
+        return (RemboursementClient) model.get("remboursement");
+    }
+
+    private void marquer(UUID demandeId, StatutEcheance statut, int... rangs) {
+        Contrat c = decisions.contrats.parDemande(demandeId).orElseThrow();
+        for (int rang : rangs) {
+            Echeance e = c.echeance(rang).orElseThrow();
+            decisions.contrats.enregistrerStatut(c.id(), Echeance.reconstituer(e.id(), e.rang(), e.date(),
+                    e.montant(), statut));
+        }
+    }
+
+    @Test
+    void remboursement_pas_encore_commence_avant_la_remise() {
+        dossierAccepte();
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.remboursement(principal, model);
+
+        assertThat(model.containsAttribute("suivi")).isTrue();
+        assertThat(model.containsAttribute("remboursement")).isFalse();
+    }
+
+    @Test
+    void remboursement_sans_dossier() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        assertThat(controller.remboursement(principal, model)).isEqualTo("client/dossier/remboursement");
+        assertThat(model.containsAttribute("suivi")).isFalse();
+        assertThat(model.containsAttribute("remboursement")).isFalse();
+    }
+
+    @Test
+    void en_remboursement_deux_sur_six_payees_le_restant_et_la_prochaine_echeance() {
+        UUID demandeId = dossierAccepte();
+        passerA(demandeId, StatutDossier.EN_REMBOURSEMENT);
+        marquer(demandeId, StatutEcheance.PAYEE, 1, 2);
+
+        RemboursementClient r = remboursement();
+
+        assertThat(r.payees()).isEqualTo(2);
+        assertThat(r.total()).isEqualTo(6);
+        assertThat(r.montantPaye()).isEqualTo(Montant.de(4_160));
+        assertThat(r.montantRestant()).isEqualTo(Montant.de(8_320));
+        assertThat(r.prochaine().rang()).isEqualTo(3);
+        assertThat(r.joursAvantProchaine())
+                .isEqualTo(java.time.temporal.ChronoUnit.DAYS.between(LocalDate.of(2026, 11, 12), r.prochaine().date()));
+        assertThat(r.enRetard()).isFalse();
+        assertThat(r.referenceRegularisation()).isNull();
+        assertThat(r.solde()).isFalse();
+        assertThat(r.arcs()).extracting(RemboursementClient.Arc::statut).containsExactly(StatutEcheance.PAYEE,
+                StatutEcheance.PAYEE, StatutEcheance.A_VENIR, StatutEcheance.A_VENIR, StatutEcheance.A_VENIR,
+                StatutEcheance.A_VENIR);
+    }
+
+    @Test
+    void en_retard_l_echeance_a_regulariser_sans_penalite() {
+        UUID demandeId = dossierAccepte();
+        passerA(demandeId, StatutDossier.EN_RETARD);
+        marquer(demandeId, StatutEcheance.PAYEE, 1, 2);
+        marquer(demandeId, StatutEcheance.EN_RETARD, 3);
+        Contrat c = decisions.contrats.parDemande(demandeId).orElseThrow();
+
+        RemboursementClient r = remboursement();
+
+        assertThat(r.enRetard()).isTrue();
+        assertThat(r.prochaine().rang()).isEqualTo(3);
+        assertThat(r.prochaine().montant()).isEqualTo(Montant.de(2_080));
+        assertThat(r.totalEnRetard()).isEqualTo(Montant.de(2_080));
+        assertThat(r.montantRestant()).isEqualTo(Montant.de(8_320));
+        assertThat(r.referenceRegularisation()).isEqualTo(ReferenceEcheance.pourEcheance(c.numero(), 3).valeur());
+        assertThat(r.codeMarchand()).isEqualTo("012345");
+    }
+
+    @Test
+    void soldee_six_sur_six_rien_a_payer() {
+        UUID demandeId = dossierAccepte();
+        passerA(demandeId, StatutDossier.SOLDEE);
+        marquer(demandeId, StatutEcheance.PAYEE, 1, 2, 3, 4, 5, 6);
+
+        RemboursementClient r = remboursement();
+
+        assertThat(r.solde()).isTrue();
+        assertThat(r.pourcentage()).isEqualTo(100);
+        assertThat(r.montantRestant()).isEqualTo(Montant.ZERO);
+        assertThat(r.montantPaye()).isEqualTo(Montant.de(12_480));
+        assertThat(r.prochaine()).isNull();
+        assertThat(r.joursAvantProchaine()).isNull();
+        assertThat(r.enRetard()).isFalse();
+    }
+
+    @Test
+    void anneau_un_arc_par_echeance_separes_par_un_ecart() {
+        Contrat c = decisions.contrats.parDemande(dossierAccepte()).orElseThrow();
+
+        List<RemboursementClient.Arc> arcs = RemboursementClient.arcs(c.echeances());
+
+        double pas = 2 * Math.PI * RemboursementClient.RAYON / 6;
+        assertThat(arcs).hasSize(6);
+        assertThat(arcs.getFirst().dashoffset()).isEqualTo("0");
+        String[] dash = arcs.getFirst().dasharray().split(" ");
+        assertThat(Double.parseDouble(dash[0])).isCloseTo(pas - 3, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(Double.parseDouble(dash[0]) + Double.parseDouble(dash[1]))
+                .isCloseTo(6 * pas, org.assertj.core.data.Offset.offset(0.02));
+        assertThat(Double.parseDouble(arcs.get(1).dashoffset())).isCloseTo(-pas, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(RemboursementClient.arcs(c.echeances().subList(0, 1)).getFirst().dasharray())
+                .startsWith("326.73");
+    }
 }

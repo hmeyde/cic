@@ -170,6 +170,10 @@
                     <p class="texte-doux" th:text="#{client.action.regularisation.aide}">Payez par Masrvi avec la référence de l’échéance. Le prix ne change pas, sans pénalité.</p>
                 </th:block>
 
+                <p th:if="${statut == 'LIVREE' or statut == 'EN_REMBOURSEMENT' or statut == 'EN_RETARD' or statut == 'RECOUVREMENT' or statut == 'SOLDEE'}">
+                    <a class="bouton bouton--contour" th:href="@{/client/dossier/remboursement}"
+                       th:text="#{client.remboursement.lien}">Voir mon remboursement</a>
+                </p>
                 <a th:if="${prochaine == 'NOUVELLE_DEMANDE_POSSIBLE'}" class="bouton bouton--principal"
                    th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a>
             </section>

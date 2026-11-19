@@ -1040,3 +1040,32 @@ a.parcours__lien:hover .parcours__nom { text-decoration: underline; }
     .rebours { background: transparent; border: 1px solid var(--couleur-attention); }
     .rebours--urgent { border-color: var(--couleur-danger); color: inherit; }
 }
+
+/* Espace client : remboursement — anneau de progression en SVG calculé côté serveur, un arc par échéance */
+.remboursement { display: grid; gap: 1rem; align-items: center; margin-block: 1rem 1.5rem; }
+@media (min-width: 40rem) { .remboursement { grid-template-columns: auto minmax(0, 1fr); gap: 2rem; } }
+.anneau { margin: 0; display: grid; justify-items: center; gap: .25rem; }
+.anneau__svg { width: 10rem; height: 10rem; }
+.anneau__arc { fill: none; stroke-width: 12; stroke: var(--couleur-bordure); }
+.anneau__arc[data-statut="PAYEE"] { stroke: var(--couleur-succes); }
+.anneau__arc[data-statut="EN_RETARD"] { stroke: var(--couleur-danger); }
+[dir="rtl"] .anneau__arcs { transform: scaleX(-1); transform-origin: 60px 60px; }
+.anneau__nombre { font-size: 30px; font-weight: 700; fill: var(--couleur-texte); }
+.anneau__sur { font-size: 12px; fill: var(--couleur-texte-doux); }
+.anneau__legende { font-weight: 700; }
+.remboursement__montants .conditions__principale dd { font-size: 1.5rem; }
+.rassurance { margin-block: 1rem; }
+.rassurance p { margin-block: .25rem; }
+.rassurance__titre { font-weight: 700; }
+.prochaine-echeance__delai { font-weight: 600; }
+.liste-echeances { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .5rem; }
+.liste-echeances__ligne {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .25rem .75rem; align-items: center;
+    padding: .75rem; border: 1px solid var(--couleur-bordure); border-radius: var(--rayon);
+}
+.liste-echeances__ligne .etiquette { grid-column: 3; justify-self: end; }
+.liste-echeances__rang { font-weight: 700; }
+.liste-echeances__montant { grid-column: 3; grid-row: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.liste-echeances__ligne--prochaine { border-color: var(--couleur-primaire); border-width: 2px; }
+.liste-echeances__ligne[data-statut="EN_RETARD"] { border-color: var(--couleur-danger); background: var(--couleur-danger-fond); }
+@media (prefers-color-scheme: dark) { .liste-echeances__ligne[data-statut="EN_RETARD"] { background: transparent; } }

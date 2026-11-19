@@ -49,6 +49,8 @@ class DemandeClientController {
     static final String VUE_LISTE = "client/demandes/liste";
     static final String CHEMIN_SUIVI = "/client/dossier";
     static final String VUE_SUIVI = "client/dossier/suivi";
+    static final String CHEMIN_REMBOURSEMENT = "/client/dossier/remboursement";
+    static final String VUE_REMBOURSEMENT = "client/dossier/remboursement";
     static final String CHEMIN_CONTRAT_PDF = "/client/dossier/contrat.pdf";
     static final String CHEMIN_AUTORISATION_PDF = "/client/dossier/autorisation-prelevement.pdf";
     static final String CHEMIN_REMISE = "/client/dossier/remise";
@@ -115,6 +117,26 @@ class DemandeClientController {
             model.addAttribute("action", action);
         });
         return VUE_SUIVI;
+    }
+
+    /**
+     * Remboursement du dossier en cours : anneau de progression (échéances payées sur le total), montant
+     * restant, prochaine échéance avec sa date, liste des échéances avec leur statut et, en cas de retard,
+     * la référence Masrvi pour régulariser, sans pénalité. Pas de {@code remboursement} dans le modèle tant
+     * que le produit n'est pas remis. Aucun identifiant dans l'URL : le dossier est celui du client connecté.
+     */
+    @GetMapping(CHEMIN_REMBOURSEMENT)
+    String remboursement(Principal principal, Model model) {
+        demandes.suiviDossierCourant(clientId(principal)).ifPresent(s -> {
+            model.addAttribute("suivi", s);
+            if (RemboursementClient.concerne(s.statut())) {
+                contrats.parDemande(s.demande().id()).ifPresent(c -> model.addAttribute("remboursement",
+                        RemboursementClient.depuis(s.statut(), c,
+                                instructionsApport.pour(c.numero(), c.apport()).codeMarchand(),
+                                LocalDate.now(clock))));
+            }
+        });
+        return VUE_REMBOURSEMENT;
     }
 
     /**

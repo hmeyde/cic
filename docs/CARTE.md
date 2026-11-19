@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`9a01111`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`a18219a`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -12,7 +12,7 @@ Générée automatiquement depuis le code (`9a01111`). Sert à se repérer vite 
 | `comptabilite` (31) | adapter.in adapter.in.evenement adapter.in.web adapter.out adapter.out.persistence application domain | ApportCapitalJpaRepository, ApportCapitalPersistenceAdapter, ApportCapitalRepository, ApportCapitalService, CapitalBackOfficeController, ComptabiliteService, Compte, EcritureComptableJpaRepository, EcritureComptablePersistenceAdapter, EcritureComptableRepository, IndicateursFinanciersService, Sens |
 | `config` (5) | - | - |
 | `contrat` (63) | adapter.in adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence adapter.out.stockage application domain | Acheteur, AutorisationPdfService, AutorisationPrelevementJpaRepository, AutorisationPrelevementPersistenceAdapter, AutorisationPrelevementRepository, AutorisationsBackOfficeController, CalculPrixService, Contrat, ContratJpaRepository, ContratPdfService, ContratPersistenceAdapter, ContratRepository |
-| `demande` (101) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
+| `demande` (103) | adapter.in adapter.in.evenement adapter.in.scheduling adapter.in.web adapter.out adapter.out.pdf adapter.out.persistence application domain | ApportEtAutorisationService, CommandeFournisseurJpaRepository, CommandeFournisseurPersistenceAdapter, CommandeFournisseurRepository, CommandeFournisseurService, CommandesFournisseurBackOfficeController, Decision, DecisionBackOfficeController, DecisionService, Demande, DemandeClientController, DemandeJpaRepository |
 | `demonstration` (21) | adapter.in adapter.in.demarrage adapter.in.web adapter.out adapter.out.base adapter.out.demarrage adapter.out.horloge adapter.out.image application domain | DonneesDemonstrationService, ReinitialisationDemonstrationController, ReinitialisationDemonstrationService, Simulation |
 | `identite` (77) | adapter.in adapter.in.web adapter.out adapter.out.code adapter.out.persistence adapter.out.stockage application domain | Client, ClientJpaRepository, ClientPersistenceAdapter, ClientRepository, ClientService, CodeConnexionJpaRepository, CodeConnexionPersistenceAdapter, CodeConnexionRepository, CompteBackOfficeService, ConnexionBackOfficeController, ConnexionClientController, ConnexionClientService |
 | `inscription` (17) | adapter.in adapter.in.web adapter.out adapter.out.persistence application domain | Inscription, InscriptionController, InscriptionJpaRepository, InscriptionPersistenceAdapter, InscriptionRepository, InscriptionsBackOfficeController, InscriptionService |
@@ -38,7 +38,7 @@ Générée automatiquement depuis le code (`9a01111`). Sert à se repérer vite 
 | `ConnexionClientController` (identite) | `GET /client/connexion`, `POST /client/connexion`, `GET /client/connexion/code`, `POST /client/connexion/code/renvoi`, `POST /client/connexion/code` |
 | `CreationCompteClientController` (identite) | `GET /client/connexion/compte`, `POST /client/connexion/compte` |
 | `DecisionBackOfficeController` (demande) | `POST CHEMIN_ACCEPTATION`, `POST CHEMIN_REFUS`, `POST CHEMIN_JUSTIFICATIF` |
-| `DemandeClientController` (demande) | `GET /client/demandes`, `GET /client/dossier`, `GET /client/dossier/contrat.pdf`, `GET /client/dossier/autorisation-prelevement.pdf`, `POST /client/dossier/remise`, `POST /client/demandes` |
+| `DemandeClientController` (demande) | `GET /client/demandes`, `GET /client/dossier`, `GET /client/dossier/remboursement`, `GET /client/dossier/contrat.pdf`, `GET /client/dossier/autorisation-prelevement.pdf`, `POST /client/dossier/remise`, `POST /client/demandes` |
 | `EmploiClientController` (identite) | `GET /client/emploi`, `POST /client/emploi` |
 | `EspaceClientController` (identite) | `GET /client`, `GET /client/profil` |
 | `FicheDossierBackOfficeController` (demande) | `GET CHEMIN` |

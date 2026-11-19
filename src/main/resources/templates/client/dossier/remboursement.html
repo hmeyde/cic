@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{client.remboursement.titre-page}">Mon remboursement — Espace client Seheli</title>
+</head>
+<body>
+<main id="contenu" class="contenu">
+    <section class="section conteneur" aria-labelledby="titre-remboursement">
+        <h1 id="titre-remboursement" th:text="#{client.remboursement.titre}">Mon remboursement</h1>
+
+        <p th:if="${suivi == null}" class="texte-doux" th:text="#{client.dossier.aucun}">Vous n’avez pas encore de dossier.</p>
+        <p th:if="${suivi != null and remboursement == null}" class="texte-doux"
+           th:text="#{client.remboursement.pas-commence}">Votre remboursement commence une fois votre produit remis.</p>
+
+        <th:block th:if="${remboursement != null}"
+                  th:with="r=${remboursement}, montant=${'client.catalogue.montant'}">
+            <p class="texte-doux" th:text="#{client.remboursement.contrat(${r.designation()}, ${r.numero()})}">Galaxy A35 — contrat SEH-2026-000001</p>
+
+            <!-- Message rassurant en cas de retard : aucune pénalité, le prix ne change pas -->
+            <div th:if="${r.enRetard()}" class="alerte alerte--attention rassurance" role="status">
+                <p class="rassurance__titre" th:text="#{client.remboursement.retard.titre}">Pas d’inquiétude : aucune pénalité.</p>
+                <p th:text="#{client.remboursement.retard.texte}">Un retard peut arriver. Votre prix est fixé depuis la signature : il ne change pas, sans pénalité ni frais. Il suffit de régler l’échéance en retard dès que possible.</p>
+            </div>
+            <p th:if="${r.solde()}" class="alerte alerte--succes" role="status"
+               th:text="#{client.action.clos.SOLDEE}">Bravo, votre crédit est entièrement remboursé !</p>
+
+            <!-- Anneau de progression : un arc par échéance, SVG calculé côté serveur -->
+            <div class="carte remboursement">
+                <figure class="anneau">
+                    <svg class="anneau__svg" viewBox="0 0 120 120" role="img"
+                         th:attr="aria-label=#{client.remboursement.anneau(${r.payees()}, ${r.total()})}">
+                        <g class="anneau__arcs"><g transform="rotate(-90 60 60)">
+                            <circle th:each="a : ${r.arcs()}" class="anneau__arc" cx="60" cy="60"
+                                    th:attr="r=${r.rayon()},
+                                             stroke-dasharray=${a.dasharray()},stroke-dashoffset=${a.dashoffset()},
+                                             data-statut=${a.statut().name()}"/>
+                        </g></g>
+                        <text class="anneau__nombre" x="60" y="58" text-anchor="middle" aria-hidden="true"
+                              th:text="${r.payees()}">2</text>
+                        <text class="anneau__sur" x="60" y="76" text-anchor="middle" aria-hidden="true"
+                              th:text="#{client.remboursement.anneau.sur(${r.total()})}">sur 6</text>
+                    </svg>
+                    <figcaption class="anneau__legende" th:text="#{client.remboursement.anneau(${r.payees()}, ${r.total()})}">2 sur 6 payées</figcaption>
+                </figure>
+                <dl class="conditions remboursement__montants">
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.remboursement.restant}">Reste à payer</dt>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(r.montantRestant().valeur(), 1, 'WHITESPACE')})}">8 320 MRU</dd>
+                    </div>
+                    <div>
+                        <dt th:text="#{client.remboursement.paye}">Déjà payé</dt>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(r.montantPaye().valeur(), 1, 'WHITESPACE')})}">4 160 MRU</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Prochaine échéance (ou échéance en retard à régulariser) -->
+            <section th:if="${r.prochaine() != null}" class="carte action prochaine-echeance"
+                     th:classappend="${r.enRetard()} ? 'action--alerte'" aria-labelledby="titre-prochaine">
+                <h2 id="titre-prochaine"
+                    th:text="${r.enRetard()} ? #{client.remboursement.prochaine.retard} : #{client.remboursement.prochaine}">Prochaine échéance</h2>
+                <dl class="conditions action__paiement">
+                    <div class="conditions__principale">
+                        <dt th:text="#{client.action.echeance(${r.prochaine().rang()}, ${#temporals.format(r.prochaine().date(), 'dd/MM/yyyy')})}">Mensualité n° 3 du 25/12/2026</dt>
+                        <dd th:text="#{${montant}(${#numbers.formatInteger(r.prochaine().montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</dd>
+                    </div>
+                </dl>
+                <p class="prochaine-echeance__delai" th:if="${r.joursAvantProchaine() != null}"
+                   th:text="${r.joursAvantProchaine() >= 0} ? #{client.remboursement.dans(${r.joursAvantProchaine()})} : #{client.remboursement.depuis(${-r.joursAvantProchaine()})}">Dans 6 jours, le jour de votre paie</p>
+
+                <th:block th:if="${r.enRetard()}">
+                    <dl class="conditions action__paiement">
+                        <div>
+                            <dt th:text="#{client.apport.code-marchand}">Code marchand Seheli</dt>
+                            <dd class="copiable">
+                                <span class="code-copiable" dir="ltr" th:text="${r.codeMarchand()}">012345</span>
+                                <button type="button" class="bouton bouton--contour bouton--copier" hidden
+                                        th:attr="data-copier=${r.codeMarchand()},data-texte-copie=#{client.copier.fait},aria-label=#{client.copier.code-marchand}"
+                                        th:text="#{client.copier}">Copier</button>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt th:text="#{client.action.reference-echeance}">Référence de l’échéance</dt>
+                            <dd class="copiable">
+                                <span class="code-copiable" dir="ltr" th:text="${r.referenceRegularisation()}">EC2026000042037</span>
+                                <button type="button" class="bouton bouton--contour bouton--copier" hidden
+                                        th:attr="data-copier=${r.referenceRegularisation()},data-texte-copie=#{client.copier.fait},aria-label=#{client.copier.reference}"
+                                        th:text="#{client.copier}">Copier</button>
+                            </dd>
+                        </div>
+                        <div th:if="${r.totalEnRetard().compareTo(r.prochaine().montant()) > 0}">
+                            <dt th:text="#{client.action.total-retard}">Total en retard</dt>
+                            <dd th:text="#{${montant}(${#numbers.formatInteger(r.totalEnRetard().valeur(), 1, 'WHITESPACE')})}">6 240 MRU</dd>
+                        </div>
+                    </dl>
+                    <p class="texte-doux" th:text="#{client.action.regularisation.aide}">Payez par Masrvi avec la référence de l’échéance. Le prix ne change pas, sans pénalité.</p>
+                </th:block>
+                <p th:unless="${r.enRetard()}" class="texte-doux" th:text="#{client.dossier.prochaine.PROVISIONNER_COMPTE}">Le jour de votre paie, laissez le montant de la mensualité sur votre compte.</p>
+            </section>
+
+            <!-- Liste des échéances avec leur badge -->
+            <h2 th:text="#{client.remboursement.echeances}">Mes échéances</h2>
+            <ol class="liste-echeances">
+                <li th:each="e : ${r.echeances()}" class="liste-echeances__ligne"
+                    th:with="s=${e.statut().name()}" th:attr="data-statut=${s}"
+                    th:classappend="${r.prochaine() != null and e.rang() == r.prochaine().rang()} ? 'liste-echeances__ligne--prochaine'">
+                    <span class="liste-echeances__rang" th:text="#{client.remboursement.rang(${e.rang()})}">N° 1</span>
+                    <span class="liste-echeances__date" th:text="${#temporals.format(e.date(), 'dd/MM/yyyy')}">25/10/2026</span>
+                    <span class="liste-echeances__montant nombre"
+                          th:text="#{${montant}(${#numbers.formatInteger(e.montant().valeur(), 1, 'WHITESPACE')})}">2 080 MRU</span>
+                    <span class="etiquette etiquette--sans-marge"
+                          th:classappend="${s == 'PAYEE'} ? 'etiquette--favorable' : (${s == 'EN_RETARD'} ? 'etiquette--danger' : 'etiquette--neutre')"
+                          th:text="#{'client.offre.echeance.statut.' + ${s}}">Payée</span>
+                </li>
+            </ol>
+            <p class="texte-doux" th:text="#{client.offre.prix-fixe.court}">Prix fixé à la signature : il ne change jamais, sans intérêt ni pénalité.</p>
+
+            <p th:if="${r.solde()}">
+                <a class="bouton bouton--principal" th:href="@{/client/catalogue}" th:text="#{client.accueil.catalogue}">Catalogue</a>
+            </p>
+        </th:block>
+
+        <ul class="liens-bo">
+            <li><a class="bouton bouton--contour" th:href="@{/client/dossier}" th:text="#{client.accueil.dossier}">Suivi de mon dossier</a></li>
+            <li><a class="bouton bouton--contour" th:href="@{/client/}" th:text="#{client.emploi.retour}">Retour à mon espace</a></li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>
