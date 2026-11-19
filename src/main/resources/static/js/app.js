@@ -743,3 +743,204 @@ if ("serviceWorker" in navigator) {
         document.querySelectorAll("button[data-copier]").forEach(initialiserCopier);
     });
 })();
+
+// ---------------------------------------------------------------------------------------------
+// États transverses.
+// - Chargement : tout bouton qui envoie un formulaire ordinaire, et tout lien-bouton vers une autre
+//   page, passe en « chargement » (roue, aria-busy) dès le clic ; un second envoi du même formulaire
+//   est ignoré. Les requêtes HTMX marquent de même leur bouton, et leur zone cible passe en
+//   aria-busy (squelette ou zone atténuée, voir app.css). Un formulaire GET [data-liste="#id"] met
+//   sa liste en aria-busy pendant le rechargement. Tout est relâché au retour arrière (pageshow) et,
+//   par sécurité, après 20 s (téléchargement, réponse sans nouvelle page).
+// - Notifications brèves (toasts) : les messages [data-toast] posés par le serveur (succès d'une
+//   action) sont déplacés dans la région #toasts et disparaissent seuls (pause au survol ou au
+//   focus, bouton « Fermer »). Une réponse HTMX peut en demander une par l'en-tête
+//   HX-Trigger: {"toast": {"message": "…", "type": "succes|erreur"}} ; un échec HTMX (réseau ou
+//   serveur) en affiche une en erreur. Sans JavaScript, les messages restent dans la page.
+// ---------------------------------------------------------------------------------------------
+(function () {
+    "use strict";
+
+    var DUREE_TOAST = 6000;
+    var SECURITE_CHARGEMENT = 20000;
+
+    function texte(nom) {
+        return document.body ? document.body.getAttribute("data-texte-" + nom) || "" : "";
+    }
+
+    // --- Notifications brèves ---------------------------------------------------------------
+
+    function retirerToast(t) {
+        if (t.classList.contains("toast--sortie")) {
+            return;
+        }
+        t.classList.add("toast--sortie");
+        setTimeout(function () { t.remove(); }, 250);
+    }
+
+    function minuterToast(t) {
+        var minuterie;
+        function lancer() {
+            clearTimeout(minuterie);
+            minuterie = setTimeout(function () { retirerToast(t); }, DUREE_TOAST);
+        }
+        function suspendre() {
+            clearTimeout(minuterie);
+        }
+        t.addEventListener("mouseenter", suspendre);
+        t.addEventListener("mouseleave", lancer);
+        t.addEventListener("focusin", suspendre);
+        t.addEventListener("focusout", lancer);
+        lancer();
+    }
+
+    function toast(message, type) {
+        var zone = document.getElementById("toasts");
+        if (!zone || !message) {
+            return;
+        }
+        var t = document.createElement("div");
+        t.className = "toast toast--" + (type === "erreur" ? "erreur" : "succes");
+        var p = document.createElement("p");
+        p.className = "toast__texte";
+        p.textContent = message;
+        var fermer = document.createElement("button");
+        fermer.type = "button";
+        fermer.className = "toast__fermer";
+        fermer.setAttribute("aria-label", texte("fermer"));
+        fermer.textContent = "×";
+        fermer.addEventListener("click", function () { retirerToast(t); });
+        t.appendChild(p);
+        t.appendChild(fermer);
+        zone.appendChild(t);
+        minuterToast(t);
+    }
+
+    // --- Indicateurs de chargement -------------------------------------------------------------
+
+    function occuper(element) {
+        if (!element || element.hasAttribute("data-chargement")) {
+            return;
+        }
+        element.setAttribute("data-chargement", "");
+        element.classList.add("bouton--chargement");
+        element.setAttribute("aria-busy", "true");
+        element.setAttribute("aria-disabled", "true");
+    }
+
+    function liberer(element) {
+        if (!element || !element.hasAttribute("data-chargement")) {
+            return;
+        }
+        element.removeAttribute("data-chargement");
+        element.classList.remove("bouton--chargement");
+        element.removeAttribute("aria-busy");
+        element.removeAttribute("aria-disabled");
+    }
+
+    function toutLiberer() {
+        document.querySelectorAll("[data-chargement]").forEach(liberer);
+        document.querySelectorAll("form[data-envoi-en-cours]").forEach(function (f) {
+            f.removeAttribute("data-envoi-en-cours");
+        });
+        document.querySelectorAll(".zone-chargeable[aria-busy]").forEach(function (z) {
+            z.removeAttribute("aria-busy");
+        });
+    }
+
+    // Formulaires ordinaires (les formulaires HTMX sont annulés par htmx : defaultPrevented).
+    document.addEventListener("submit", function (event) {
+        var form = event.target;
+        if (event.defaultPrevented || !(form instanceof HTMLFormElement)) {
+            return;
+        }
+        if (form.hasAttribute("data-envoi-en-cours")) {
+            event.preventDefault(); // double clic : un seul envoi
+            return;
+        }
+        if (form.target && form.target !== "_self") {
+            return;
+        }
+        form.setAttribute("data-envoi-en-cours", "");
+        occuper(event.submitter || form.querySelector('button[type="submit"], button:not([type])'));
+        var liste = form.getAttribute("data-liste");
+        var zone = liste ? document.querySelector(liste) : null;
+        if (zone) {
+            zone.setAttribute("aria-busy", "true");
+        }
+        setTimeout(toutLiberer, SECURITE_CHARGEMENT);
+    });
+
+    // Liens présentés en bouton qui ouvrent une autre page (pas les téléchargements ni les ancres).
+    document.addEventListener("click", function (event) {
+        if (event.defaultPrevented || event.button !== 0
+                || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+        var lien = event.target.closest ? event.target.closest("a.bouton[href]") : null;
+        if (!lien || lien.hasAttribute("download") || lien.hasAttribute("hx-get")
+                || (lien.target && lien.target !== "_self")) {
+            return;
+        }
+        var url = new URL(lien.href, window.location.href);
+        if (url.origin !== window.location.origin || /\.(pdf|csv)$/i.test(url.pathname)
+                || (url.hash && url.pathname === window.location.pathname && url.search === window.location.search)) {
+            return;
+        }
+        occuper(lien);
+        setTimeout(toutLiberer, SECURITE_CHARGEMENT);
+    });
+
+    // Retour arrière vers une page restaurée depuis le cache : plus rien n'est en cours.
+    window.addEventListener("pageshow", toutLiberer);
+
+    // --- HTMX ------------------------------------------------------------------------------------
+
+    document.addEventListener("htmx:beforeRequest", function (event) {
+        var d = event.detail;
+        var declencheur = d.requestConfig && d.requestConfig.triggeringEvent;
+        var bouton = null;
+        if (declencheur && declencheur.type === "submit") {
+            bouton = declencheur.submitter || d.elt.querySelector('button[type="submit"]');
+        } else if (declencheur && declencheur.type === "click" && d.elt.matches("a, button")) {
+            bouton = d.elt;
+        }
+        if (bouton) {
+            occuper(bouton);
+            d.elt.seheliBouton = bouton;
+        }
+        if (d.target) {
+            d.target.setAttribute("aria-busy", "true");
+        }
+    });
+
+    document.addEventListener("htmx:afterRequest", function (event) {
+        var d = event.detail;
+        if (d.target) {
+            d.target.removeAttribute("aria-busy");
+        }
+        if (d.elt.seheliBouton) {
+            liberer(d.elt.seheliBouton);
+            d.elt.seheliBouton = null;
+        }
+    });
+
+    document.addEventListener("htmx:responseError", function () {
+        toast(texte("erreur-serveur"), "erreur");
+    });
+    document.addEventListener("htmx:sendError", function () {
+        toast(texte("erreur-reseau"), "erreur");
+    });
+    // En-tête HX-Trigger: {"toast": {...}} (htmx déclenche l'événement « toast », qui remonte au document).
+    document.addEventListener("toast", function (event) {
+        var d = event.detail || {};
+        toast(d.message || d.value, d.type);
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("[data-toast]").forEach(function (message) {
+            toast(message.textContent.trim(), message.classList.contains("alerte--erreur") ? "erreur" : "succes");
+            message.remove();
+        });
+    });
+})();

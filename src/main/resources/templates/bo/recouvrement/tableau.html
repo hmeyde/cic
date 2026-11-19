@@ -18,7 +18,7 @@
                   th:with="lignes=${bloc == 'enEchec'} ? ${enEchec} : (${bloc == 'aVenir'} ? ${aVenir} : ${reussis})">
             <h2 th:id="'titre-' + ${bloc}" th:text="#{'bo.recouvrement.' + ${bloc}}">Prélèvements en échec</h2>
             <p class="texte-doux" th:text="#{'bo.recouvrement.' + ${bloc} + '.texte'(${aVenirJusquAu}, ${reussisDepuis})}">Échéances impayées à leur date, de la plus ancienne à la plus récente.</p>
-            <p th:if="${#lists.isEmpty(lignes)}" class="texte-doux" th:text="#{bo.recouvrement.aucun}">Aucun prélèvement.</p>
+            <th:block th:if="${#lists.isEmpty(lignes)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-paiement', #{bo.recouvrement.aucun})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(lignes)}" class="tableau-defilant">
                 <table class="tableau" th:attr="aria-labelledby='titre-' + ${bloc}">
                     <thead>

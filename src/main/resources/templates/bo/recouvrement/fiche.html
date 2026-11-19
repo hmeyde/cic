@@ -14,7 +14,7 @@
             <span dir="auto" th:text="${f.designation()}">Galaxy A35</span>
         </p>
 
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Dossier régularisé.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Dossier régularisé.</p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
 
         <!-- Client et situation -->
@@ -89,7 +89,7 @@
         <!-- Relances -->
         <section class="carte fiche-bloc" aria-labelledby="titre-relances">
             <h2 id="titre-relances" th:text="#{bo.recouvrement.relances}">Messages envoyés au client</h2>
-            <p th:if="${#lists.isEmpty(f.relances())}" class="texte-doux" th:text="#{bo.recouvrement.relances.aucune}">Aucun message envoyé.</p>
+            <th:block th:if="${#lists.isEmpty(f.relances())}"><div th:replace="~{fragments/etat-vide :: compact('vide-journal', #{bo.recouvrement.relances.aucune})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(f.relances())}" class="tableau-defilant">
                 <table class="tableau tableau--retour">
                     <thead>
@@ -124,7 +124,7 @@
                     <button type="submit" class="bouton bouton--contour" th:text="#{bo.recouvrement.note.ajouter}">Ajouter la note</button>
                 </div>
             </form>
-            <p th:if="${#lists.isEmpty(f.notes())}" class="texte-doux" th:text="#{bo.recouvrement.notes.aucune}">Aucune note.</p>
+            <th:block th:if="${#lists.isEmpty(f.notes())}"><div th:replace="~{fragments/etat-vide :: compact('vide-journal', #{bo.recouvrement.notes.aucune})}"></div></th:block>
             <ul th:unless="${#lists.isEmpty(f.notes())}" class="liste-notes">
                 <li th:each="n : ${f.notes()}">
                     <p class="texte-doux" dir="auto" th:text="#{bo.recouvrement.note.par(${n.ecriteLe()}, ${n.auteur()})}">12/11/2026 10:00, recouvrement</p>

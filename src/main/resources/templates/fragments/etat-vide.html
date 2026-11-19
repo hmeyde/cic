@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  État vide illustré d'une liste. illustration : nom d'une image de /img/etats (vide-dossier, vide-liste,
+  vide-paiement, vide-document, vide-journal, vide-ok) ; texte : message déjà résolu (#{...}).
+  Variante compacte (etatVideCompact) pour les sous-listes d'une fiche (journal, notes, relances).
+  À appeler dans un th:block th:if (th:replace passe avant th:if sur un même élément).
+*/-->
+<div th:fragment="etat-vide(illustration, texte)" class="etat-vide" role="status">
+    <img class="etat-vide__visuel" th:src="@{/img/etats/{i}.svg(i=${illustration})}" alt="" width="96" height="96">
+    <p class="etat-vide__texte" th:text="${texte}">Aucun élément pour l’instant.</p>
+</div>
+
+<div th:fragment="compact(illustration, texte)" class="etat-vide etat-vide--compact" role="status">
+    <img class="etat-vide__visuel" th:src="@{/img/etats/{i}.svg(i=${illustration})}" alt="" width="48" height="48">
+    <p class="etat-vide__texte texte-doux" th:text="${texte}">Aucune entrée.</p>
+</div>
+</body>
+</html>

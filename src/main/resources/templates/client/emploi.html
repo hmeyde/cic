@@ -13,7 +13,7 @@
 <main id="contenu" class="contenu">
     <section class="section conteneur conteneur--etroit" aria-labelledby="titre-emploi">
         <nav th:replace="~{fragments/parcours :: progression}"></nav>
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre emploi est enregistré.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Votre emploi est enregistré.</p>
         <h1 id="titre-emploi" th:text="#{client.emploi.titre}">Mon emploi</h1>
         <p class="texte-doux" th:text="#{client.emploi.texte}">Ces informations servent à étudier vos demandes et à fixer la date de vos échéances.</p>
 

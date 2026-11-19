@@ -221,6 +221,22 @@
         </div>
     </section>
 
+    <!-- États transverses -->
+    <section class="demo-section">
+        <h2>États transverses</h2>
+        <p class="alerte alerte--succes" role="status" data-toast>Exemple de notification brève (toast).</p>
+        <div class="demo-ligne">
+            <button class="bouton bouton--chargement" type="button" aria-busy="true">Bouton en chargement</button>
+        </div>
+        <div th:replace="~{fragments/etat-vide :: etat-vide('vide-dossier', 'État vide illustré')}"></div>
+        <div th:replace="~{fragments/etat-vide :: compact('vide-journal', 'État vide compact')}"></div>
+        <ul class="liens-bo">
+            <li><a th:href="@{/bo}">Page 403 (connecté en client ou rôle insuffisant)</a></li>
+            <li><a th:href="@{/page-qui-n-existe-pas}">Page 404</a></li>
+            <li><a th:href="@{/dev/erreur-serveur}">Page 500</a></li>
+        </ul>
+    </section>
+
 </main>
 </body>
 </html>

@@ -14,9 +14,9 @@
                th:text="#{bo.produits.nouveau}">Nouveau produit</a>
         </div>
 
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Produit enregistré.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Produit enregistré.</p>
 
-        <p th:if="${#lists.isEmpty(produits)}" class="texte-doux" th:text="#{bo.produits.aucun}">Aucun produit.</p>
+        <th:block th:if="${#lists.isEmpty(produits)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-liste', #{bo.produits.aucun})}"></div></th:block>
 
         <div th:unless="${#lists.isEmpty(produits)}" class="tableau-defilant">
             <table class="tableau">

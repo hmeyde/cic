@@ -11,12 +11,12 @@
         <h1 id="titre-commandes" th:text="#{bo.commandes.titre}">Commandes fournisseur</h1>
         <p class="texte-doux" th:text="#{bo.commandes.texte}">Le fournisseur n’est payé qu’une fois l’apport encaissé et l’autorisation de prélèvement acceptée. Le paiement est validé par une autre personne que l’analyste qui a décidé du dossier.</p>
 
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}(${numero})}">Paiement fournisseur validé : bon de commande BC-2026-000001 émis.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}(${numero})}">Paiement fournisseur validé : bon de commande BC-2026-000001 émis.</p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
 
         <section class="fiche-bloc" aria-labelledby="titre-a-commander">
             <h2 id="titre-a-commander" th:text="#{bo.commandes.a-commander}">Dossiers à commander</h2>
-            <p th:if="${#lists.isEmpty(aCommander)}" class="texte-doux" th:text="#{bo.commandes.a-commander.aucun}">Aucun dossier en attente de commande.</p>
+            <th:block th:if="${#lists.isEmpty(aCommander)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-dossier', #{bo.commandes.a-commander.aucun})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(aCommander)}" class="tableau-defilant">
                 <table class="tableau">
                     <thead>
@@ -60,7 +60,7 @@
         <section class="fiche-bloc" aria-labelledby="titre-commandes-validees">
             <h2 id="titre-commandes-validees" th:text="#{bo.commandes.validees}">Commandes validées</h2>
             <p class="texte-doux" th:text="#{bo.commandes.validees.texte(${limite})}">Les 50 dernières commandes, de la plus récente à la plus ancienne.</p>
-            <p th:if="${#lists.isEmpty(commandes)}" class="texte-doux" th:text="#{bo.commandes.validees.aucune}">Aucune commande.</p>
+            <th:block th:if="${#lists.isEmpty(commandes)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-liste', #{bo.commandes.validees.aucune})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(commandes)}" class="tableau-defilant">
                 <table class="tableau">
                     <thead>

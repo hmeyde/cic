@@ -7,7 +7,7 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-dossier">
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre demande est enregistrée.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Votre demande est enregistrée.</p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n'est pas possible.</p>
         <h1 id="titre-dossier" th:text="#{client.dossier.titre}">Suivi de mon dossier</h1>
 

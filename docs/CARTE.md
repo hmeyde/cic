@@ -1,6 +1,6 @@
 # Carte du projet Seheli
 
-Générée automatiquement depuis le code (`a18219a`). Sert à se repérer vite ; le code fait foi.
+Générée automatiquement depuis le code (`d33662e`). Sert à se repérer vite ; le code fait foi.
 
 ## Modules (`com.seheli.*`)
 
@@ -33,7 +33,7 @@ Générée automatiquement depuis le code (`a18219a`). Sert à se repérer vite 
 | `CapitalBackOfficeController` (comptabilite) | `GET /bo/capital`, `POST /bo/capital` |
 | `CatalogueClientController` (catalogue) | `GET /client/catalogue`, `GET /client/catalogue/{id}`, `GET /client/catalogue/{id}/demande`, `GET /client/catalogue/{id}/simulation` |
 | `CommandesFournisseurBackOfficeController` (demande) | `GET /bo/commandes`, `POST /bo/commandes/{id}/validation`, `GET /bo/commandes/{id}/bon-de-commande.pdf` |
-| `ComposantsDevController` (web) | `GET /dev/composants` |
+| `ComposantsDevController` (web) | `GET /dev/composants`, `GET /dev/erreur-serveur` |
 | `ConnexionBackOfficeController` (identite) | `GET /bo/login` |
 | `ConnexionClientController` (identite) | `GET /client/connexion`, `POST /client/connexion`, `GET /client/connexion/code`, `POST /client/connexion/code/renvoi`, `POST /client/connexion/code` |
 | `CreationCompteClientController` (identite) | `GET /client/connexion/compte`, `POST /client/connexion/compte` |

@@ -43,7 +43,7 @@
         </form>
 
         <h2 th:text="#{bo.capital.liste}">Apports reçus</h2>
-        <p th:if="${#lists.isEmpty(apports)}" class="texte-doux" th:text="#{bo.capital.aucun}">Aucun apport en capital saisi.</p>
+        <th:block th:if="${#lists.isEmpty(apports)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-paiement', #{bo.capital.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(apports)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>

@@ -11,7 +11,7 @@
         <h1 id="titre-dossiers" th:text="#{bo.dossiers.titre}">Dossiers à analyser</h1>
         <p class="texte-doux" th:text="#{bo.dossiers.texte}">Dossiers en analyse, du plus ancien au plus récent.</p>
 
-        <p th:if="${#lists.isEmpty(dossiers)}" class="texte-doux" th:text="#{bo.dossiers.aucun}">Aucun dossier à analyser.</p>
+        <th:block th:if="${#lists.isEmpty(dossiers)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-dossier', #{bo.dossiers.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(dossiers)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>

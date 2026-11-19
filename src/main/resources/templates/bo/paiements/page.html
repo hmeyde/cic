@@ -55,7 +55,7 @@
 
         <h2 th:text="#{bo.paiements.liste}">Derniers paiements saisis</h2>
         <p class="texte-doux" th:text="#{bo.paiements.liste.texte(${limite})}">Les 100 derniers paiements saisis, du plus récent au plus ancien.</p>
-        <p th:if="${#lists.isEmpty(paiements)}" class="texte-doux" th:text="#{bo.paiements.aucun}">Aucun paiement saisi.</p>
+        <th:block th:if="${#lists.isEmpty(paiements)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-paiement', #{bo.paiements.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(paiements)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>

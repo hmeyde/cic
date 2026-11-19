@@ -42,6 +42,10 @@ management:
 server:
   mime-mappings:
     webmanifest: application/manifest+json
+  servlet:
+    session:
+      # Session par cookie seulement : jamais de « ;jsessionid=… » dans les URL (pages d'erreur comprises).
+      tracking-modes: cookie
 
 seheli:
   documents:

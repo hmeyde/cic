@@ -7,10 +7,10 @@
 <body>
 <main id="contenu" class="contenu">
     <section class="section conteneur" aria-labelledby="titre-demandes">
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Votre demande est enregistrée.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Votre demande est enregistrée.</p>
         <h1 id="titre-demandes" th:text="#{client.demandes.titre}">Mes demandes</h1>
 
-        <p th:if="${#lists.isEmpty(demandes)}" class="texte-doux" th:text="#{client.demandes.aucune}">Vous n’avez encore fait aucune demande.</p>
+        <th:block th:if="${#lists.isEmpty(demandes)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-dossier', #{client.demandes.aucune})}"></div></th:block>
 
         <ul th:unless="${#lists.isEmpty(demandes)}" class="grille-produits">
             <li th:each="d : ${demandes}" class="carte carte-produit">

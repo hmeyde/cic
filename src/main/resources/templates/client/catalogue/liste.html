@@ -29,7 +29,7 @@
             <button type="submit" class="bouton bouton--contour recherche__bouton" th:text="#{client.catalogue.recherche.bouton}">Rechercher</button>
         </form>
 
-        <div th:fragment="resultats" id="resultats-catalogue" class="catalogue__resultats">
+        <div th:fragment="resultats" id="resultats-catalogue" class="catalogue__resultats zone-chargeable">
             <!--/* Catégorie retenue, envoyée avec la recherche (attribut form : le champ suit chaque échange HTMX). */-->
             <input type="hidden" name="categorie" form="recherche-catalogue" th:value="${categorieChoisie}">
 
@@ -67,6 +67,18 @@
                     <p class="texte-doux" th:text="#{client.catalogue.aucun.texte}">Notre catalogue est en cours de mise à jour : revenez bientôt.</p>
                 </th:block>
             </div>
+
+            <!--/* Squelette affiché pendant une recherche ou un filtre HTMX (zone en aria-busy), à la place des résultats. */-->
+            <ul class="grille-catalogue squelette" aria-hidden="true">
+                <li th:each="i : ${#numbers.sequence(1, 4)}" class="vignette squelette__carte">
+                    <div class="vignette__visuel"><span class="squelette__bloc squelette__bloc--image"></span></div>
+                    <div class="vignette__corps">
+                        <span class="squelette__bloc squelette__bloc--court"></span>
+                        <span class="squelette__bloc"></span>
+                        <span class="squelette__bloc squelette__bloc--moyen"></span>
+                    </div>
+                </li>
+            </ul>
 
             <ul th:unless="${#lists.isEmpty(produits)}" class="grille-catalogue">
                 <li th:each="p : ${produits}" class="vignette">

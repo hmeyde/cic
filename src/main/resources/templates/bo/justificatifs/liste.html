@@ -11,7 +11,7 @@
         <h1 id="titre-justificatifs" th:text="#{bo.justificatifs.titre}">Justificatifs reçus</h1>
         <p class="texte-doux" th:text="#{bo.justificatifs.texte(${limite})}">Les 100 derniers justificatifs envoyés par les clients.</p>
 
-        <p th:if="${#lists.isEmpty(documents)}" class="texte-doux" th:text="#{bo.justificatifs.aucun}">Aucun justificatif reçu.</p>
+        <th:block th:if="${#lists.isEmpty(documents)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-document', #{bo.justificatifs.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(documents)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>

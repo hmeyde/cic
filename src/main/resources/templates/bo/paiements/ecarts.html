@@ -10,7 +10,7 @@
         <p><a th:href="@{/bo/paiements}" th:text="#{bo.import.retour}">Retour aux paiements reçus</a></p>
         <h1 id="titre-ecarts" th:text="#{bo.ecarts.titre}">Écarts de paiement</h1>
         <p class="texte-doux" th:text="#{bo.ecarts.texte(${limite})}">Paiements reçus dont la référence ne désigne aucun dossier, ou dont le montant diffère de l’apport attendu.</p>
-        <p th:if="${#lists.isEmpty(ecarts)}" class="texte-doux" th:text="#{bo.ecarts.aucun}">Aucun écart : tous les paiements reçus sont conformes.</p>
+        <th:block th:if="${#lists.isEmpty(ecarts)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-ok', #{bo.ecarts.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(ecarts)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>

@@ -18,7 +18,7 @@
             <span class="texte-doux" dir="auto" th:text="#{bo.autorisation.emise(${a.emiseLe()}, ${a.statutChangeLe()})}">Émise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
         </p>
 
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Autorisation acceptée.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Autorisation acceptée.</p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}(${tailleMaxMo}, ${longueurMotifMax})}">Cette opération n’est pas possible.</p>
 
         <section class="fiche-bloc" aria-labelledby="titre-autorisation-resume">
@@ -92,7 +92,7 @@
         <!-- Journal -->
         <section class="fiche-bloc" aria-labelledby="titre-journal-autorisation">
             <h2 id="titre-journal-autorisation" th:text="#{bo.autorisation.journal}">Journal de l’autorisation</h2>
-            <p th:if="${#lists.isEmpty(a.journal())}" class="texte-doux" th:text="#{bo.journal.aucun}">Aucune entrée.</p>
+            <th:block th:if="${#lists.isEmpty(a.journal())}"><div th:replace="~{fragments/etat-vide :: compact('vide-journal', #{bo.journal.aucun})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(a.journal())}" class="tableau-defilant">
                 <table class="tableau">
                     <thead>

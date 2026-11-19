@@ -14,7 +14,7 @@
             <span class="texte-doux" dir="auto" th:text="#{bo.fiche.soumise(${fiche.soumiseLe()}, ${fiche.statutChangeLe()})}">Soumise le 12/11/2026 10:00 · statut depuis le 12/11/2026 10:00</span>
         </p>
 
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Dossier accepté.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Dossier accepté.</p>
         <p th:if="${erreur != null}" class="alerte alerte--erreur" role="alert" th:text="#{${erreur}}">Cette opération n’est pas possible.</p>
 
         <!-- Score -->
@@ -263,7 +263,7 @@
                 <span th:each="t, it : ${fiche.typesManquants()}"
                       th:text="#{'client.justificatifs.type.' + ${t.name()}} + (${it.last} ? '' : ' · ')">RIB</span>
             </p>
-            <p th:if="${#lists.isEmpty(fiche.justificatifs())}" class="texte-doux" th:text="#{client.justificatifs.aucun}">Aucun justificatif.</p>
+            <th:block th:if="${#lists.isEmpty(fiche.justificatifs())}"><div th:replace="~{fragments/etat-vide :: compact('vide-document', #{client.justificatifs.aucun})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(fiche.justificatifs())}" class="tableau-defilant">
                 <table class="tableau">
                     <thead>
@@ -292,7 +292,7 @@
         <!-- Journal d'audit -->
         <section class="fiche-bloc" aria-labelledby="titre-journal">
             <h2 id="titre-journal" th:text="#{bo.journal.titre}">Journal du dossier</h2>
-            <p th:if="${#lists.isEmpty(fiche.journal())}" class="texte-doux" th:text="#{bo.journal.aucun}">Aucune entrée.</p>
+            <th:block th:if="${#lists.isEmpty(fiche.journal())}"><div th:replace="~{fragments/etat-vide :: compact('vide-journal', #{bo.journal.aucun})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(fiche.journal())}" class="tableau-defilant">
                 <table class="tableau">
                     <thead>

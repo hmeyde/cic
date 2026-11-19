@@ -18,7 +18,7 @@
              th:with="erreurType=${erreur == 'client.justificatifs.type.obligatoire' or erreur == 'client.justificatifs.trop-nombreux'},
                       erreurFichier=${erreur != null and !erreurType}">
         <nav th:replace="~{fragments/parcours :: progression}"></nav>
-        <p th:if="${succes != null}" class="alerte alerte--succes" role="status" th:text="#{${succes}}">Justificatif reçu.</p>
+        <p th:if="${succes != null}" class="alerte alerte--succes" role="status" data-toast th:text="#{${succes}}">Justificatif reçu.</p>
         <h1 id="titre-justificatifs" th:text="#{client.justificatifs.titre}">Mes justificatifs</h1>
         <p class="texte-doux" th:text="#{client.justificatifs.texte}">Envoyez les pièces demandées. Elles ne sont visibles que par vous et par l’équipe Seheli.</p>
 
@@ -99,7 +99,7 @@
         </div>
 
         <h2 th:text="#{client.justificatifs.recus}">Justificatifs envoyés</h2>
-        <p th:if="${#lists.isEmpty(documents)}" class="texte-doux" th:text="#{client.justificatifs.aucun}">Aucun justificatif envoyé pour l’instant.</p>
+        <th:block th:if="${#lists.isEmpty(documents)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-document', #{client.justificatifs.aucun})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(documents)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>

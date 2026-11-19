@@ -14,9 +14,9 @@
                th:text="#{bo.fournisseurs.nouveau}">Nouveau fournisseur</a>
         </div>
 
-        <p th:if="${succes != null}" class="alerte alerte--info" role="status" th:text="#{${succes}}">Fournisseur enregistré.</p>
+        <p th:if="${succes != null}" class="alerte alerte--info" role="status" data-toast th:text="#{${succes}}">Fournisseur enregistré.</p>
 
-        <p th:if="${#lists.isEmpty(fournisseurs)}" class="texte-doux" th:text="#{bo.fournisseurs.aucun}">Aucun fournisseur.</p>
+        <th:block th:if="${#lists.isEmpty(fournisseurs)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-liste', #{bo.fournisseurs.aucun})}"></div></th:block>
 
         <div th:unless="${#lists.isEmpty(fournisseurs)}" class="tableau-defilant">
             <table class="tableau">

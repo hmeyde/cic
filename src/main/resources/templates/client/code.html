@@ -15,7 +15,7 @@
 
         <p th:if="${erreur != null}" id="code-erreur" class="alerte alerte--erreur" role="alert"
            th:text="#{${erreur}(${essaisRestants ?: secondesErreur})}">Code incorrect.</p>
-        <p th:if="${info != null}" class="alerte alerte--succes" role="status" th:text="#{${info}}">Nouveau code envoyé.</p>
+        <p th:if="${info != null}" class="alerte alerte--succes" role="status" data-toast th:text="#{${info}}">Nouveau code envoyé.</p>
 
         <!--/* Sans JavaScript : un seul champ de 6 chiffres. Avec JavaScript ([data-code-otp]) : 6 cases,
                passage automatique à la suivante, collage du code entier, remplissage par le SMS reçu. */-->

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<!--/* Page d'erreur 500 à la marque Seheli (français ou arabe selon la langue choisie). */-->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{erreur.titre-page(500)}">Erreur 500 — Seheli</title>
+</head>
+<body>
+<main th:replace="~{fragments/erreur :: contenu(500, '500')}"></main>
+</body>
+</html>

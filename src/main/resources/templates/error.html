@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<!--/* Page d'erreur de repli (statuts sans gabarit dédié : 400, 405, 413…), à la marque Seheli. */-->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head>
+    <title th:text="#{erreur.titre-page(${status})}">Erreur — Seheli</title>
+</head>
+<body>
+<main th:replace="~{fragments/erreur :: contenu(${status}, 'generique')}"></main>
+</body>
+</html>

@@ -11,7 +11,7 @@
         <h1 id="titre-autorisations" th:text="#{bo.autorisations.titre}">Autorisations de prélèvement</h1>
         <p class="texte-doux" th:text="#{bo.autorisations.texte(${limite})}">Les 100 dernières autorisations émises, de la plus récente à la plus ancienne.</p>
 
-        <form method="get" class="formulaire" th:action="@{/bo/autorisations}">
+        <form method="get" class="formulaire" th:action="@{/bo/autorisations}" data-liste="#liste-autorisations">
             <div class="champ">
                 <label for="statut" th:text="#{bo.autorisations.filtre}">Statut</label>
                 <select id="statut" name="statut">
@@ -23,7 +23,9 @@
             <button type="submit" class="bouton bouton--contour" th:text="#{bo.autorisations.filtrer}">Filtrer</button>
         </form>
 
-        <p th:if="${#lists.isEmpty(autorisations)}" class="texte-doux" th:text="#{bo.autorisations.aucune}">Aucune autorisation.</p>
+        <!--/* Pendant le filtrage, la liste passe en aria-busy : ses lignes deviennent un squelette (app.css). */-->
+        <div id="liste-autorisations" class="zone-chargeable">
+        <th:block th:if="${#lists.isEmpty(autorisations)}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-document', #{bo.autorisations.aucune})}"></div></th:block>
         <div th:unless="${#lists.isEmpty(autorisations)}" class="tableau-defilant">
             <table class="tableau">
                 <thead>
@@ -47,6 +49,7 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
         </div>
     </section>
 </main>

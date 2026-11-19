@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" th:content="#{app.description}">
     <meta name="theme-color" content="#0b6e4f">
-    <!--/* CSP sans style en ligne : htmx n'injecte pas sa feuille d'indicateurs (aucun indicateur utilisé). */-->
+    <!--/* CSP sans style en ligne : htmx n'injecte pas sa feuille d'indicateurs ; app.css porte les états de chargement (.htmx-request, aria-busy). */-->
     <meta name="htmx-config" content='{"includeIndicatorStyles":false}'>
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
@@ -52,12 +52,16 @@
     <script defer th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
     <script defer th:src="@{/js/app.js}"></script>
 </head>
-<body th:classappend="${ongletClient != null} ? 'espace-client'">
+<body th:classappend="${ongletClient != null} ? 'espace-client'"
+      th:attr="data-texte-envoi=#{etat.envoi},data-texte-chargement=#{etat.chargement},data-texte-erreur-reseau=#{etat.erreur.reseau},data-texte-erreur-serveur=#{etat.erreur.serveur},data-texte-fermer=#{etat.toast.fermer}">
 <a class="lien-evitement" href="#contenu" th:text="#{layout.aller-au-contenu}">Aller au contenu</a>
 
 <header th:replace="~{fragments/entete :: entete}"></header>
 
 <main id="contenu" class="contenu" th:replace="${contenu}"></main>
+
+<!--/* Notifications brèves (toasts) : les messages [data-toast] de la page y sont déplacés par app.js. */-->
+<div id="toasts" class="toasts" role="region" aria-live="polite" th:attr="aria-label=#{etat.toast.region}"></div>
 
 <th:block th:if="${ongletClient == null}"><footer th:replace="~{fragments/pied :: pied}"></footer></th:block>
 </body>

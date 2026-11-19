@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  Contenu commun des pages d'erreur (templates/error/*.html, rendues par Spring Boot sur /error).
+  code : statut HTTP affiché ; cle : 403, 404, 500 ou generique (titre, texte et illustration).
+  Les liens de retour suivent l'espace d'origine (path, attribut d'erreur de Spring Boot) ; aucun
+  détail technique n'est affiché (ni message d'exception, ni trace).
+*/-->
+<main th:fragment="contenu(code, cle)" id="contenu" class="contenu"
+      th:with="espaceBo=${path != null and #strings.startsWith(path, '/bo')},
+               espaceClient=${path != null and #strings.startsWith(path, '/client')}">
+    <section class="section conteneur page-erreur" aria-labelledby="titre-erreur">
+        <img class="page-erreur__visuel" th:src="@{/img/etats/erreur-{c}.svg(c=${cle == 'generique' ? '500' : cle})}"
+             alt="" width="160" height="160">
+        <p class="page-erreur__code" dir="ltr" th:text="#{erreur.code(${code})}">Erreur 404</p>
+        <h1 id="titre-erreur" class="page-erreur__titre" th:text="#{'erreur.' + ${cle} + '.titre'}">Page introuvable</h1>
+        <p class="page-erreur__texte texte-doux" th:text="#{'erreur.' + ${cle} + '.texte'}">Cette page n’existe pas ou a été déplacée.</p>
+        <ul class="page-erreur__actions">
+            <li th:if="${cle == '500' or cle == 'generique'}">
+                <a class="bouton bouton--principal" href="" th:text="#{erreur.action.reessayer}">Réessayer</a>
+            </li>
+            <li th:if="${espaceClient}">
+                <a class="bouton" th:classappend="${cle == '500' or cle == 'generique'} ? 'bouton--contour'"
+                   th:href="@{/client}" th:text="#{erreur.action.espace-client}">Mon espace client</a>
+            </li>
+            <li th:if="${espaceBo}">
+                <a class="bouton" th:classappend="${cle == '500' or cle == 'generique'} ? 'bouton--contour'"
+                   th:href="@{/bo/}" th:text="#{erreur.action.back-office}">Back-office</a>
+            </li>
+            <li>
+                <a class="bouton bouton--contour" th:href="@{/}" th:text="#{erreur.action.accueil}">Retour à l’accueil</a>
+            </li>
+        </ul>
+        <p class="page-erreur__aide texte-doux" th:text="#{erreur.aide}">Besoin d’aide ? Contactez l’équipe Seheli.</p>
+    </section>
+</main>
+</body>
+</html>

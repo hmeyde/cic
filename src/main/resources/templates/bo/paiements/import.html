@@ -20,7 +20,7 @@
                th:text="#{bo.import.bilan(${r.lignes()}, ${r.enregistres()}, ${r.conformes()}, ${#lists.size(r.ecarts())}, ${r.dejaEnregistres()}, ${r.invalides()})}">12 lignes lues : 10 paiements enregistrés, dont 8 conformes et 2 en écart ; 1 déjà enregistré, 1 invalide.</p>
 
             <h2 th:text="#{bo.import.ecarts}">Écarts de cet import</h2>
-            <p th:if="${#lists.isEmpty(r.ecarts())}" class="texte-doux" th:text="#{bo.import.ecarts.aucun}">Aucun écart dans ce fichier.</p>
+            <th:block th:if="${#lists.isEmpty(r.ecarts())}"><div th:replace="~{fragments/etat-vide :: etat-vide('vide-ok', #{bo.import.ecarts.aucun})}"></div></th:block>
             <div th:unless="${#lists.isEmpty(r.ecarts())}" class="tableau-defilant">
                 <table class="tableau">
                     <thead>
